@@ -1,0 +1,258 @@
+/* Home Layout */
+.home-layout {
+  height: 100vh;
+  width: 100%;
+}
+
+.sidenav-container {
+  height: 100%;
+  width: 100%;
+}
+
+/* Sidebar Styles */
+.sidenav {
+  width: 280px;
+  padding: 0;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  padding: 24px 20px;
+}
+
+.brand-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  margin-right: 16px;
+}
+
+.brand-name {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.nav-list {
+  padding: 16px 0;
+}
+
+.nav-item {
+  margin: 4px 16px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.sidebar-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+}
+
+.sign-out-btn {
+  width: 100%;
+  height: 40px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* Main Content */
+.toolbar {
+  height: 64px;
+  padding: 0 24px;
+}
+
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.toolbar button {
+  margin-left: 8px;
+}
+
+.content-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Welcome Section */
+.welcome-section {
+  margin-bottom: 32px;
+}
+
+.welcome-card {
+  border-radius: 12px;
+  padding: 0;
+}
+
+.welcome-card mat-card-header {
+  padding: 24px;
+}
+
+.welcome-avatar {
+  font-size: 24px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-card mat-card-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.welcome-card mat-card-subtitle {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Dashboard Section */
+.dashboard-section {
+  margin-bottom: 32px;
+}
+
+.dashboard-grid {
+  margin-bottom: 0;
+}
+
+.dashboard-card {
+  border-radius: 12px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-2px);
+}
+
+.dashboard-card mat-card-header {
+  padding: 20px;
+  flex-grow: 1;
+}
+
+.dashboard-card mat-card-header mat-icon {
+  font-size: 20px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.dashboard-card mat-card-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.dashboard-card mat-card-subtitle {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.dashboard-card mat-card-actions {
+  padding: 20px;
+  padding-top: 0;
+}
+
+.dashboard-card mat-card-actions button {
+  width: 100%;
+  height: 40px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.dashboard-card mat-card-actions button mat-icon {
+  margin-right: 8px;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* Quick Stats Section */
+.quick-stats {
+  margin-bottom: 32px;
+}
+
+.quick-stats h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  border-radius: 12px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-1px);
+}
+
+.stat-content {
+  text-align: center;
+  padding: 16px;
+}
+
+.stat-number {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sidenav {
+    width: 100%;
+    position: fixed;
+    z-index: 1000;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-stats mat-grid-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .content-container {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .quick-stats mat-grid-list {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar-header {
+    padding: 16px;
+  }
+
+  .brand-name {
+    font-size: 20px;
+  }
+}
