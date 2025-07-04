@@ -36,17 +36,22 @@ export class AuthenticationService {
    * @summary
    * This method checks localStorage for authentication data and restores the user's session if valid.
    */
-  private checkStoredAuthentication() {
+  checkStoredAuthentication() {
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
     const username = localStorage.getItem('username');
 
     if (token && userId && username) {
-      this.signedIn.next(true);
-      this.signedInUserId.next(parseInt(userId));
-      this.signedInUsername.next(username);
-      console.log(`Restored authentication for user: ${username}`);
+      // Only update the state if it's not already set
+      if (!this.signedIn.value) {
+        this.signedIn.next(true);
+        this.signedInUserId.next(parseInt(userId));
+        this.signedInUsername.next(username);
+        console.log(`Restored authentication for user: ${username}`);
+      }
+      return true;
     }
+    return false;
   }
 
   get isSignedIn() {

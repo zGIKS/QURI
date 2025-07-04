@@ -40,6 +40,14 @@ export const routes: Routes = [
           ),
         canActivate: [authenticationGuard],
       },
+      {
+        path: 'design-lab',
+        loadComponent: () =>
+          import('./design-lab/pages/design-lab.component').then(
+            (c) => c.DesignLabComponent
+          ),
+        canActivate: [authenticationGuard],
+      },
     ],
   },
   { path: '**', redirectTo: '/sign-in' },
