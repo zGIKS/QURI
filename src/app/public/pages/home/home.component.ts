@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,8 +8,10 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDividerModule } from '@angular/material/divider';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { AuthenticationService } from '../../../iam/services/authentication.service';
+import { Subject, takeUntil } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 interface NavigationLink {
   name: string;
@@ -47,7 +49,8 @@ interface NavigationLink {
           <mat-nav-list class="nav-list">
             <mat-list-item
               *ngFor="let link of navigationLinks"
-              [routerLink]="link.route"
+              [routerLink]="['/home', link.route]"
+              routerLinkActive="active"
               class="nav-item"
               (click)="onNavigate(link)">
               <mat-icon matListItemIcon>{{ link.icon }}</mat-icon>
@@ -69,7 +72,7 @@ interface NavigationLink {
         <!-- Main Content -->
         <mat-sidenav-content class="main-content">
           <mat-toolbar class="toolbar">
-            <span>Dashboard</span>
+            <span>{{ getCurrentPageTitle() }}</span>
             <span class="toolbar-spacer"></span>
             <button mat-icon-button>
               <mat-icon>notifications</mat-icon>
@@ -80,115 +83,7 @@ interface NavigationLink {
           </mat-toolbar>
 
           <div class="content-container">
-            <!-- Welcome Section -->
-            <section class="welcome-section">
-              <mat-card class="welcome-card">
-                <mat-card-header>
-                  <mat-icon mat-card-avatar class="welcome-avatar">dashboard</mat-icon>
-                  <mat-card-title>Welcome to QURI TeeLab</mat-card-title>
-                  <mat-card-subtitle>Your advanced analytics platform is ready to help you make data-driven decisions.</mat-card-subtitle>
-                </mat-card-header>
-              </mat-card>
-            </section>
-
-            <!-- Dashboard Grid -->
-            <section class="dashboard-section">
-              <mat-grid-list cols="3" rowHeight="200px" gutterSize="24px" class="dashboard-grid">
-
-                <mat-grid-tile>
-                  <mat-card class="dashboard-card">
-                    <mat-card-header>
-                      <mat-icon mat-card-avatar>analytics</mat-icon>
-                      <mat-card-title>Analytics</mat-card-title>
-                      <mat-card-subtitle>View your data insights</mat-card-subtitle>
-                    </mat-card-header>
-                    <mat-card-actions>
-                      <button mat-raised-button color="primary">
-                        <mat-icon>trending_up</mat-icon>
-                        View Analytics
-                      </button>
-                    </mat-card-actions>
-                  </mat-card>
-                </mat-grid-tile>
-
-                <mat-grid-tile>
-                  <mat-card class="dashboard-card">
-                    <mat-card-header>
-                      <mat-icon mat-card-avatar>shopping_cart</mat-icon>
-                      <mat-card-title>Product Catalog</mat-card-title>
-                      <mat-card-subtitle>Manage your products</mat-card-subtitle>
-                    </mat-card-header>
-                    <mat-card-actions>
-                      <button mat-raised-button color="primary" (click)="navigateToSection('catalog')">
-                        <mat-icon>storefront</mat-icon>
-                        View Catalog
-                      </button>
-                    </mat-card-actions>
-                  </mat-card>
-                </mat-grid-tile>
-
-                <mat-grid-tile>
-                  <mat-card class="dashboard-card">
-                    <mat-card-header>
-                      <mat-icon mat-card-avatar>design_services</mat-icon>
-                      <mat-card-title>Design Lab</mat-card-title>
-                      <mat-card-subtitle>Create and edit designs</mat-card-subtitle>
-                    </mat-card-header>
-                    <mat-card-actions>
-                      <button mat-raised-button color="primary" (click)="navigateToSection('design-lab')">
-                        <mat-icon>palette</mat-icon>
-                        Open Lab
-                      </button>
-                    </mat-card-actions>
-                  </mat-card>
-                </mat-grid-tile>
-
-              </mat-grid-list>
-            </section>
-
-            <!-- Quick Stats -->
-            <section class="quick-stats">
-              <h2>Quick Statistics</h2>
-              <mat-grid-list cols="4" rowHeight="120px" gutterSize="16px">
-
-                <mat-grid-tile>
-                  <mat-card class="stat-card">
-                    <mat-card-content class="stat-content">
-                      <div class="stat-number">1,234</div>
-                      <div class="stat-label">Total Users</div>
-                    </mat-card-content>
-                  </mat-card>
-                </mat-grid-tile>
-
-                <mat-grid-tile>
-                  <mat-card class="stat-card">
-                    <mat-card-content class="stat-content">
-                      <div class="stat-number">567</div>
-                      <div class="stat-label">Active Projects</div>
-                    </mat-card-content>
-                  </mat-card>
-                </mat-grid-tile>
-
-                <mat-grid-tile>
-                  <mat-card class="stat-card">
-                    <mat-card-content class="stat-content">
-                      <div class="stat-number">89%</div>
-                      <div class="stat-label">Success Rate</div>
-                    </mat-card-content>
-                  </mat-card>
-                </mat-grid-tile>
-
-                <mat-grid-tile>
-                  <mat-card class="stat-card">
-                    <mat-card-content class="stat-content">
-                      <div class="stat-number">24/7</div>
-                      <div class="stat-label">Uptime</div>
-                    </mat-card-content>
-                  </mat-card>
-                </mat-grid-tile>
-
-              </mat-grid-list>
-            </section>
+            <router-outlet></router-outlet>
           </div>
         </mat-sidenav-content>
       </mat-sidenav-container>
@@ -196,27 +91,74 @@ interface NavigationLink {
   `,
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  currentPageTitle = 'Dashboard';
+
   navigationLinks: NavigationLink[] = [
     {
+      name: 'Dashboard',
+      route: '',
+      icon: 'dashboard'
+    },
+    {
       name: 'Catalog',
-      route: '/catalog',
+      route: 'catalog',
       icon: 'storefront'
     },
     {
       name: 'Design Lab',
-      route: '/design-lab',
+      route: 'design-lab',
       icon: 'palette'
     }
   ];
+
+  private readonly routeTitleMap = new Map<string, string>([
+    ['', 'Dashboard'],
+    ['dashboard', 'Dashboard'],
+    ['catalog', 'Product Catalog'],
+    ['design-lab', 'Design Lab']
+  ]);
 
   constructor(
     private authService: AuthenticationService,
     private router: Router
   ) {}
 
+  ngOnInit() {
+    // Listen to router events to update page title
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((event: NavigationEnd) => {
+        this.updatePageTitle(event.urlAfterRedirects);
+      });
+
+    // Set initial title
+    this.updatePageTitle(this.router.url);
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private updatePageTitle(url: string) {
+    // Extract the route after /home/
+    const routeMatch = url.match(/\/home\/?(.*)/);
+    const route = routeMatch ? routeMatch[1] : '';
+
+    this.currentPageTitle = this.routeTitleMap.get(route) || 'Dashboard';
+  }
+
+  getCurrentPageTitle(): string {
+    return this.currentPageTitle;
+  }
+
   onNavigate(link: NavigationLink) {
-    this.router.navigate([link.route]);
+    this.router.navigate(['/home', link.route]);
   }
 
   navigateToSection(section: string) {

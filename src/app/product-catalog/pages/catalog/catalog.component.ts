@@ -35,12 +35,6 @@ import { AuthenticationService } from '../../../iam/services/authentication.serv
         </button>
         <span class="toolbar-title">Product Catalog</span>
         <span class="toolbar-spacer"></span>
-        <button mat-icon-button>
-          <mat-icon>search</mat-icon>
-        </button>
-        <button mat-icon-button>
-          <mat-icon>filter_list</mat-icon>
-        </button>
       </mat-toolbar>
 
       <!-- Content -->
