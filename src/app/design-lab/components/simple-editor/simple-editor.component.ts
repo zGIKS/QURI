@@ -21,6 +21,7 @@ import { LayerResult } from '../../services/design-lab-real.service';
 import { Project } from '../../model/project.entity';
 import { TextLayer } from '../../model/layer.entity';
 import { GARMENT_COLOR } from '../../../const';
+import { ImageUploadComponent, ImageUploadResult } from '../image-upload/image-upload.component';
 
 @Component({
   selector: 'app-simple-editor',
@@ -42,10 +43,11 @@ import { GARMENT_COLOR } from '../../../const';
     MatSelectModule,
     MatSliderModule,
     MatTooltipModule,
-    TranslateModule
+    TranslateModule,
+    ImageUploadComponent
   ],
   templateUrl: './simple-editor.component.html',
-  styleUrl: './simple-editor.component.css'
+  styleUrls: [ './simple-editor.component.css',  './simple-editor.component.extend.css']
 })
 export class SimpleEditorComponent implements OnInit {
   project: Project | null = null;
@@ -516,5 +518,51 @@ export class SimpleEditorComponent implements OnInit {
     console.log('  - Token preview:', localStorage.getItem('token')?.substring(0, 20) + '...');
     console.log('  - User authenticated:', this.designLabService.constructor.name);
     console.log('  - Base URL:', 'http://localhost:8080/api/v1/projects');
+  }
+
+  // Image upload handling
+  onImageUploaded(result: ImageUploadResult): void {
+    if (!this.project || !this.projectId) return;
+
+    console.log('🖼️ Image uploaded, creating image layer:', result);
+
+    this.isSaving = true;
+
+    const imageLayerRequest = {
+      imageUrl: result.imageUrl,
+      width: result.width.toString(),
+      height: result.height.toString()
+    };
+
+    this.designLabService.createImageLayer(this.projectId, imageLayerRequest).subscribe({
+      next: (layerResult: LayerResult) => {
+        if (layerResult.success) {
+          // Reload the project to get the updated layers
+          this.loadProject();
+
+          this.snackBar.open(
+            this.translateService.instant('designLab.messages.imageLayerCreated'),
+            this.translateService.instant('common.close'),
+            { duration: 3000, panelClass: ['success-snackbar'] }
+          );
+        } else {
+          this.snackBar.open(
+            layerResult.error || 'Error creating image layer',
+            this.translateService.instant('common.close'),
+            { duration: 3000, panelClass: ['error-snackbar'] }
+          );
+        }
+        this.isSaving = false;
+      },
+      error: (error: any) => {
+        console.error('❌ Error creating image layer:', error);
+        this.snackBar.open(
+          this.translateService.instant('designLab.errors.imageLayerCreationFailed'),
+          this.translateService.instant('common.close'),
+          { duration: 3000, panelClass: ['error-snackbar'] }
+        );
+        this.isSaving = false;
+      }
+    });
   }
 }

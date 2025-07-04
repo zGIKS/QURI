@@ -206,7 +206,8 @@
       "deleteFailed": "Error al eliminar el proyecto",
       "layerCreationFailed": "Error al crear la capa",
       "layerUpdateFailed": "Error al actualizar la capa",
-      "layerDeleteFailed": "Error al eliminar la capa"
+      "layerDeleteFailed": "Error al eliminar la capa",
+      "imageLayerCreationFailed": "Error al crear la capa de imagen"
     },
     "messages": {
       "projectCreated": "¡Proyecto creado exitosamente!",
@@ -215,7 +216,8 @@
       "layerAdded": "Capa agregada al proyecto",
       "layerUpdated": "Capa actualizada exitosamente",
       "layerRemoved": "Capa eliminada del proyecto",
-      "exportStarted": "Exportación iniciada"
+      "exportStarted": "Exportación iniciada",
+      "imageLayerCreated": "¡Capa de imagen creada exitosamente!"
     },
     "deleteProject": {
       "title": "Eliminar Proyecto",
@@ -322,7 +324,18 @@
       "redo": "Rehacer",
       "actions": "Acciones",
       "save": "Guardar",
-      "export": "Exportar"
+      "export": "Exportar",
+      "addImage": "Agregar Imagen",
+      "uploading": "Subiendo..."
+    },
+    "imageUpload": {
+      "description": "Sube una imagen para agregar a tu diseño",
+      "supportedFormats": "Formatos soportados",
+      "maxSize": "Tamaño máximo",
+      "cloudinaryNote": "Las imágenes se suben a Cloudinary para mejor rendimiento",
+      "invalidFile": "Archivo inválido. Por favor selecciona un archivo de imagen válido (JPEG, PNG, GIF, WebP) menor a 10MB",
+      "success": "¡Imagen subida exitosamente!",
+      "error": "Error al subir la imagen. Por favor intenta de nuevo."
     }
   },
   "errors": {

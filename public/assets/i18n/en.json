@@ -217,7 +217,8 @@
       "deleteFailed": "Failed to delete project",
       "layerCreationFailed": "Failed to create layer",
       "layerUpdateFailed": "Failed to update layer",
-      "layerDeleteFailed": "Failed to delete layer"
+      "layerDeleteFailed": "Failed to delete layer",
+      "imageLayerCreationFailed": "Failed to create image layer"
     },
     "messages": {
       "projectCreated": "Project created successfully!",
@@ -226,7 +227,8 @@
       "layerAdded": "Layer added to project",
       "layerUpdated": "Layer updated successfully",
       "layerRemoved": "Layer removed from project",
-      "exportStarted": "Export started"
+      "exportStarted": "Export started",
+      "imageLayerCreated": "Image layer created successfully!"
     },
     "deleteProject": {
       "title": "Delete Project",
@@ -333,7 +335,18 @@
       "redo": "Redo",
       "actions": "Actions",
       "save": "Save",
-      "export": "Export"
+      "export": "Export",
+      "addImage": "Add Image",
+      "uploading": "Uploading..."
+    },
+    "imageUpload": {
+      "description": "Upload an image to add to your design",
+      "supportedFormats": "Supported formats",
+      "maxSize": "Maximum size",
+      "cloudinaryNote": "Images are uploaded to Cloudinary for better performance",
+      "invalidFile": "Invalid file. Please select a valid image file (JPEG, PNG, GIF, WebP) under 10MB",
+      "success": "Image uploaded successfully!",
+      "error": "Failed to upload image. Please try again."
     }
   },
   "errors": {

@@ -4,3 +4,6 @@ export * from './design-lab.assemblers';
 
 // Real backend interfaces
 export * from './project.response';
+
+// Cloudinary service
+export * from './cloudinary.service';
