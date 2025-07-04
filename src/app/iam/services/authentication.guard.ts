@@ -17,7 +17,7 @@ export const authenticationGuard: CanActivateFn = (_route, _state) => {
 
   // Check and restore authentication state from localStorage if needed
   const hasStoredAuth = authenticationService.checkStoredAuthentication();
-  
+
   return authenticationService.isSignedIn.pipe(
     take(1),
     map((isSignedIn) => {

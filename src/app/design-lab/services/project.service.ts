@@ -9,27 +9,27 @@ import { Project } from '../model/project.entity';
 import { environment } from '../../../environments/environment';
 
 // API Endpoints
-const GET_ALL_USER_PROJECTS_URL = `${environment.serverBaseUrl}/projects`;
+const GET_ALL_USER_PROJECTS_URL = `${environment.serverBaseUrl}/api/v1/projects`;
 
 const GET_PROJECT_BY_ID = (id: string) =>
-  `${environment.serverBaseUrl}/projects/${id}`;
+  `${environment.serverBaseUrl}/api/v1/projects/${id}`;
 
-const CREATE_PROJECT_URL = `${environment.serverBaseUrl}/projects`;
+const CREATE_PROJECT_URL = `${environment.serverBaseUrl}/api/v1/projects`;
 
 // New endpoints for layers
-const CREATE_TEXT_LAYER_URL = `${environment.serverBaseUrl}/projects/layers/texts`;
-const CREATE_IMAGE_LAYER_URL = (projectId: string) => 
-  `${environment.serverBaseUrl}/projects/${projectId}/images`;
+const CREATE_TEXT_LAYER_URL = `${environment.serverBaseUrl}/api/v1/projects/layers/texts`;
+const CREATE_IMAGE_LAYER_URL = (projectId: string) =>
+  `${environment.serverBaseUrl}/api/v1/projects/${projectId}/images`;
 
 // Update endpoints for layers
-const UPDATE_TEXT_LAYER_URL = (projectId: string, layerId: string) => 
-  `${environment.serverBaseUrl}/projects/${projectId}/layers/${layerId}/text-details`;
-const UPDATE_IMAGE_LAYER_URL = (projectId: string, layerId: string) => 
-  `${environment.serverBaseUrl}/projects/${projectId}/layers/${layerId}/image-details`;
+const UPDATE_TEXT_LAYER_URL = (projectId: string, layerId: string) =>
+  `${environment.serverBaseUrl}/api/v1/projects/${projectId}/layers/${layerId}/text-details`;
+const UPDATE_IMAGE_LAYER_URL = (projectId: string, layerId: string) =>
+  `${environment.serverBaseUrl}/api/v1/projects/${projectId}/layers/${layerId}/image-details`;
 
 // Update project details endpoint
-const UPDATE_PROJECT_DETAILS_URL = (projectId: string) => 
-  `${environment.serverBaseUrl}/projects/${projectId}/details`;
+const UPDATE_PROJECT_DETAILS_URL = (projectId: string) =>
+  `${environment.serverBaseUrl}/api/v1/projects/${projectId}/details`;
 
 // Layer request interfaces
 interface CreateTextLayerRequest {
@@ -105,7 +105,7 @@ export class ProjectService {
 
     const params = new HttpParams().set('userId', userId);
     console.log('📡 Fetching all public projects for user:', userId);
-    
+
     return this.http
       .get<ProjectResponse[]>(GET_ALL_USER_PROJECTS_URL, { params })
       .pipe(
@@ -125,7 +125,7 @@ export class ProjectService {
     const params = new HttpParams().set('userId', userId);
     console.log('📡 Fetching user blueprints for user:', userId);
     console.log('🌐 GET URL:', GET_ALL_USER_PROJECTS_URL + '?userId=' + userId);
-    
+
     return this.http
       .get<ProjectResponse[]>(GET_ALL_USER_PROJECTS_URL, { params })
       .pipe(
@@ -177,7 +177,7 @@ export class ProjectService {
 
     console.log('📡 Creating project for user:', userId, 'with payload:', projectPayload);
     console.log('🌐 POST URL:', CREATE_PROJECT_URL);
-    
+
     return this.http
       .post<ProjectResponse>(CREATE_PROJECT_URL, projectPayload)
       .pipe(
@@ -197,7 +197,7 @@ export class ProjectService {
     const params = new HttpParams().set('userId', userId);
     console.log('📡 Fetching all public projects for authenticated user:', userId);
     console.log('🌐 GET URL:', GET_ALL_USER_PROJECTS_URL + '?userId=' + userId);
-    
+
     return this.http
       .get<ProjectResponse[]>(GET_ALL_USER_PROJECTS_URL, { params })
       .pipe(
@@ -211,7 +211,7 @@ export class ProjectService {
   updateProject(id: string, projectData: ProjectResponse): Observable<Project> {
     const userId = this.getCurrentUserId();
     const token = localStorage.getItem('token');
-    
+
     if (!userId) {
       console.error('❌ No authenticated user found for project update');
       throw new Error('No authenticated user found');
@@ -222,7 +222,7 @@ export class ProjectService {
       throw new Error('User not authenticated - no token');
     }
 
-    const url = `${environment.serverBaseUrl}/projects/${id}`;
+    const url = `${environment.serverBaseUrl}/api/v1/projects/${id}`;
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
@@ -301,7 +301,7 @@ export class ProjectService {
 
   // Update project preview URL
   updateProjectPreview(projectId: string, previewUrl: string): Observable<any> {
-    const endpoint = `${environment.serverBaseUrl}/projects/${projectId}/preview`;
+    const endpoint = `${environment.serverBaseUrl}/api/v1/projects/${projectId}/preview`;
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('User not authenticated');
