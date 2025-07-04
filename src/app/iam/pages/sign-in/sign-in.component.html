@@ -1,17 +1,17 @@
-<div class="sign-in-container">
-  <mat-card class="sign-in-card">
-    <mat-card-header class="card-header">
-      <div mat-card-avatar class="header-icon">
+<div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 16px;">
+  <mat-card style="width: 100%; max-width: 400px;">
+    <mat-card-header>
+      <div mat-card-avatar>
         <mat-icon>login</mat-icon>
       </div>
       <mat-card-title>Welcome Back</mat-card-title>
       <mat-card-subtitle>Sign in to your account</mat-card-subtitle>
     </mat-card-header>
     
-    <mat-card-content class="card-content">
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="sign-in-form">
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" style="display: flex; flex-direction: column; gap: 16px;">
         
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline">
           <mat-label>Username</mat-label>
           <input matInput 
                  formControlName="username"
@@ -23,7 +23,7 @@
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline">
           <mat-label>Password</mat-label>
           <input matInput 
                  [type]="hidePassword ? 'password' : 'text'"
@@ -44,21 +44,17 @@
           }
         </mat-form-field>
 
-        <div class="form-actions">
-          <button mat-raised-button 
-                  color="primary" 
-                  type="submit"
-                  class="submit-button"
-                  [disabled]="form.invalid || submitted">
-            <mat-icon>login</mat-icon>
-            {{ submitted ? 'Signing In...' : 'Sign In' }}
-          </button>
-        </div>
+        <button mat-raised-button 
+                color="primary" 
+                type="submit"
+                [disabled]="form.invalid || submitted">
+          <mat-icon>login</mat-icon>
+          {{ submitted ? 'Signing In...' : 'Sign In' }}
+        </button>
 
-        <div class="form-footer">
-          <p>Don't have an account? 
-            <a routerLink="/sign-up" mat-button color="accent">Sign Up</a>
-          </p>
+        <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
+          <span>Don't have an account?</span>
+          <a routerLink="/sign-up" mat-button color="accent">Sign Up</a>
         </div>
       </form>
     </mat-card-content>

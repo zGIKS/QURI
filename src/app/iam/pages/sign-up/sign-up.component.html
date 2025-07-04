@@ -1,17 +1,17 @@
-<div class="sign-up-container">
-  <mat-card class="sign-up-card">
-    <mat-card-header class="card-header">
-      <div mat-card-avatar class="header-icon">
+<div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 16px;">
+  <mat-card style="width: 100%; max-width: 400px;">
+    <mat-card-header>
+      <div mat-card-avatar>
         <mat-icon>person_add</mat-icon>
       </div>
       <mat-card-title>Create Account</mat-card-title>
       <mat-card-subtitle>Join us today</mat-card-subtitle>
     </mat-card-header>
     
-    <mat-card-content class="card-content">
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="sign-up-form">
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" style="display: flex; flex-direction: column; gap: 16px;">
         
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline">
           <mat-label>Username</mat-label>
           <input matInput 
                  formControlName="username"
@@ -23,7 +23,7 @@
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline">
           <mat-label>Password</mat-label>
           <input matInput 
                  [type]="hidePassword ? 'password' : 'text'"
@@ -44,7 +44,7 @@
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline">
           <mat-label>Confirm Password</mat-label>
           <input matInput 
                  [type]="hideConfirmPassword ? 'password' : 'text'"
@@ -65,21 +65,17 @@
           }
         </mat-form-field>
 
-        <div class="form-actions">
-          <button mat-raised-button 
-                  color="primary" 
-                  type="submit"
-                  class="submit-button"
-                  [disabled]="form.invalid || submitted">
-            <mat-icon>person_add</mat-icon>
-            {{ submitted ? 'Creating Account...' : 'Create Account' }}
-          </button>
-        </div>
+        <button mat-raised-button 
+                color="primary" 
+                type="submit"
+                [disabled]="form.invalid || submitted">
+          <mat-icon>person_add</mat-icon>
+          {{ submitted ? 'Creating Account...' : 'Create Account' }}
+        </button>
 
-        <div class="form-footer">
-          <p>Already have an account? 
-            <a routerLink="/sign-in" mat-button color="accent">Sign In</a>
-          </p>
+        <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
+          <span>Already have an account?</span>
+          <a routerLink="/sign-in" mat-button color="accent">Sign In</a>
         </div>
       </form>
     </mat-card-content>

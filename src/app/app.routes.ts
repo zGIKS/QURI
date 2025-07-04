@@ -7,7 +7,7 @@ export const routes: Routes = [
   { path: 'sign-up', loadComponent: () => import('./iam/pages/sign-up/sign-up.component').then(c => c.SignUpComponent) },
   {
     path: 'home',
-    loadComponent: () => import('./home/home.component').then(c => c.HomeComponent),
+    loadComponent: () => import('./public/pages/home/home.component').then(c => c.HomeComponent),
     canActivate: [authenticationGuard]
   },
   { path: '**', redirectTo: '/sign-in' }
