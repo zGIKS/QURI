@@ -355,7 +355,11 @@ export class DesignLabService {
    * Obtener headers HTTP con autenticación
    */
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
+    if (!this.isAuthenticated()) {
+      console.warn('⚠️ DesignLabService - No valid authentication token found');
+    }
+
+    const token = this.authService.getToken();
     console.log('🔧 DesignLabService - Token exists:', !!token);
     console.log('🔧 DesignLabService - Token preview:', token?.substring(0, 20) + '...');
 
@@ -385,5 +389,12 @@ export class DesignLabService {
     } else {
       return 'Error desconocido. Intenta nuevamente.';
     }
+  }
+
+  /**
+   * Verificar si el usuario está autenticado
+   */
+  private isAuthenticated(): boolean {
+    return this.authService.hasValidToken();
   }
 }
