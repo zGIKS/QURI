@@ -8,6 +8,18 @@ export const routes: Routes = [
   {
     path: 'home',
     loadComponent: () => import('./public/pages/home/home.component').then(c => c.HomeComponent),
+    canActivate: [authenticationGuard],
+    children: [
+      {
+        path: 'catalog',
+        loadComponent: () => import('./product-catalog/pages/catalog/catalog.component').then(c => c.CatalogComponent),
+        canActivate: [authenticationGuard]
+      }
+    ]
+  },
+  {
+    path: 'catalog',
+    loadComponent: () => import('./product-catalog/pages/catalog/catalog.component').then(c => c.CatalogComponent),
     canActivate: [authenticationGuard]
   },
   { path: '**', redirectTo: '/sign-in' }
