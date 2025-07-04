@@ -1,11 +1,13 @@
 import {Component, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl} from "@angular/forms";
 import {AuthenticationService} from '../../services/authentication.service';
 import {SignUpRequest} from "../../model/sign-up.request";
-import {MatCard, MatCardContent, MatCardHeader, MatCardTitle} from "@angular/material/card";
-import {MatError, MatFormField} from "@angular/material/form-field";
+import {MatCard, MatCardContent, MatCardHeader, MatCardSubtitle, MatCardTitle} from "@angular/material/card";
+import {MatError, MatFormField, MatLabel, MatPrefix, MatSuffix} from "@angular/material/form-field";
 import {MatInput} from "@angular/material/input";
-import {MatButton} from "@angular/material/button";
+import {MatButton, MatIconButton} from "@angular/material/button";
+import {MatIcon} from "@angular/material/icon";
+import {RouterLink} from "@angular/router";
 
 @Component({
   selector: 'app-sign-up',
@@ -14,12 +16,19 @@ import {MatButton} from "@angular/material/button";
     MatCardHeader,
     MatCard,
     MatCardTitle,
+    MatCardSubtitle,
     MatCardContent,
     ReactiveFormsModule,
     MatFormField,
+    MatLabel,
     MatError,
     MatInput,
-    MatButton
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    MatPrefix,
+    MatSuffix,
+    RouterLink
   ],
   templateUrl: './sign-up.component.html',
   styleUrl: './sign-up.component.css'
@@ -27,14 +36,17 @@ import {MatButton} from "@angular/material/button";
 export class SignUpComponent implements OnInit {
   form!: FormGroup;
   submitted: boolean = false;
+  hidePassword = true;
+  hideConfirmPassword = true;
 
   constructor(private builder: FormBuilder, private authenticationService: AuthenticationService) {}
 
   ngOnInit(): void {
     this.form = this.builder.group({
-      username: ['', Validators.required],
-      password: ['', Validators.required],
-    });
+      username: ['', [Validators.required, Validators.minLength(3)]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', [Validators.required]]
+    }, { validators: this.passwordMatchValidator });
   }
 
   onSubmit() {
@@ -44,6 +56,17 @@ export class SignUpComponent implements OnInit {
     const signUpRequest = new SignUpRequest(username, password, ['ROLE_USER']);
     this.authenticationService.signUp(signUpRequest);
     this.submitted = true;
+  }
+
+  passwordMatchValidator(control: AbstractControl): {[key: string]: any} | null {
+    const password = control.get('password');
+    const confirmPassword = control.get('confirmPassword');
+    
+    if (!password || !confirmPassword) {
+      return null;
+    }
+    
+    return password.value === confirmPassword.value ? null : { passwordMismatch: true };
   }
 
   isInvalidControl(form: FormGroup, controlName: string): boolean {
@@ -56,10 +79,28 @@ export class SignUpComponent implements OnInit {
     if (!control || !control.errors) return '';
     
     if (control.errors['required']) {
-      return `${controlName} is required`;
+      return `${this.getFieldName(controlName)} is required`;
+    }
+    
+    if (control.errors['minlength']) {
+      const requiredLength = control.errors['minlength'].requiredLength;
+      return `${this.getFieldName(controlName)} must be at least ${requiredLength} characters`;
+    }
+    
+    if (controlName === 'confirmPassword' && form.errors?.['passwordMismatch']) {
+      return 'Passwords do not match';
     }
     
     return '';
+  }
+
+  private getFieldName(controlName: string): string {
+    const fieldNames: { [key: string]: string } = {
+      'username': 'Username',
+      'password': 'Password',
+      'confirmPassword': 'Confirm Password'
+    };
+    return fieldNames[controlName] || controlName;
   }
 
 

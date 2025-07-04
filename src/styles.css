@@ -96,3 +96,53 @@ html, body {
 ::-webkit-scrollbar-thumb:hover {
   background: #71767b;
 }
+
+/* Custom styles for authentication forms */
+.mat-mdc-raised-button.mat-primary {
+  --mdc-protected-button-container-color: #1d9bf0;
+  --mdc-protected-button-label-text-color: #ffffff;
+}
+
+.mat-mdc-raised-button.mat-primary:hover {
+  --mdc-protected-button-container-color: #1a8cd8;
+}
+
+.mat-mdc-raised-button:disabled {
+  --mdc-protected-button-container-color: #333639 !important;
+  --mdc-protected-button-label-text-color: #71767b !important;
+}
+
+/* Card styles for authentication */
+.mat-mdc-card {
+  --mdc-elevated-card-container-color: #000;
+  --mdc-elevated-card-container-elevation: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.mat-mdc-card-title {
+  color: #e7e9ea;
+}
+
+.mat-mdc-card-subtitle {
+  color: #71767b;
+}
+
+/* Form field improvements */
+.mat-mdc-form-field .mdc-text-field--outlined .mdc-notched-outline__leading,
+.mat-mdc-form-field .mdc-text-field--outlined .mdc-notched-outline__notch,
+.mat-mdc-form-field .mdc-text-field--outlined .mdc-notched-outline__trailing {
+  border-color: #333639;
+  border-width: 1px;
+}
+
+.mat-mdc-form-field .mdc-text-field--outlined:hover .mdc-notched-outline__leading,
+.mat-mdc-form-field .mdc-text-field--outlined:hover .mdc-notched-outline__notch,
+.mat-mdc-form-field .mdc-text-field--outlined:hover .mdc-notched-outline__trailing {
+  border-color: #1d9bf0;
+}
+
+.mat-mdc-form-field .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__leading,
+.mat-mdc-form-field .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__notch,
+.mat-mdc-form-field .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__trailing {
+  border-color: #1d9bf0;
+  border-width: 2px;
+}

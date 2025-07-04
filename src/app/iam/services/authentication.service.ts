@@ -56,11 +56,22 @@ export class AuthenticationService {
       .subscribe({
         next: (response) => {
           console.log(`Signed up as ${response.username} with id ${response.id}`);
+          alert(`Account created successfully! Welcome ${response.username}. Please sign in with your new account.`);
           this.router.navigate(['/sign-in']).then();
         },
         error: (error) => {
           console.error(`Error while signing up:`, error);
           console.error(`Error details:`, error.error);
+          
+          // Show more specific error messages
+          if (error.status === 409) {
+            alert('Username already exists. Please choose a different username.');
+          } else if (error.status === 400) {
+            alert('Invalid data. Please check your information and try again.');
+          } else {
+            alert('Sign up failed. Please try again.');
+          }
+          
           this.router.navigate(['/sign-up']).then();
         }
       });
@@ -95,7 +106,17 @@ export class AuthenticationService {
           this.signedIn.next(false);
           this.signedInUserId.next(0);
           this.signedInUsername.next('');
-          console.error(`Error while signing in: ${error}`);
+          console.error(`Error while signing in:`, error);
+          
+          // Show more specific error messages
+          if (error.status === 401) {
+            alert('Invalid username or password. Please check your credentials.');
+          } else if (error.status === 403) {
+            alert('Access forbidden. Please contact support.');
+          } else {
+            alert('Sign in failed. Please try again.');
+          }
+          
           this.router.navigate(['/sign-in']).then();
         }
       });

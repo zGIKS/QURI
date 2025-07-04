@@ -1,23 +1,86 @@
-<div class="sign-up-content">
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title>Sign Up</mat-card-title>
+<div class="sign-up-container">
+  <mat-card class="sign-up-card">
+    <mat-card-header class="card-header">
+      <div mat-card-avatar class="header-icon">
+        <mat-icon>person_add</mat-icon>
+      </div>
+      <mat-card-title>Create Account</mat-card-title>
+      <mat-card-subtitle>Join us today</mat-card-subtitle>
     </mat-card-header>
-    <mat-card-content>
-      <form [formGroup]="form" (submit)="onSubmit()">
-        <mat-form-field>
-          <input matInput placeholder="Username" id="username" name="username" required formControlName="username">
+    
+    <mat-card-content class="card-content">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="sign-up-form">
+        
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Username</mat-label>
+          <input matInput 
+                 formControlName="username"
+                 placeholder="Choose a username"
+                 autocomplete="username">
+          <mat-icon matPrefix>person</mat-icon>
           @if (isInvalidControl(form,'username')) {
             <mat-error>{{ errorMessagesForControl(form,'username')}}</mat-error>
           }
         </mat-form-field>
-        <mat-form-field>
-          <input matInput type="password" placeholder="Password" id="password" name="password" formControlName="password">
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput 
+                 [type]="hidePassword ? 'password' : 'text'"
+                 formControlName="password"
+                 placeholder="Create a password"
+                 autocomplete="new-password">
+          <mat-icon matPrefix>lock</mat-icon>
+          <button mat-icon-button 
+                  matSuffix 
+                  (click)="hidePassword = !hidePassword"
+                  [attr.aria-label]="'Hide password'"
+                  [attr.aria-pressed]="hidePassword"
+                  type="button">
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
           @if (isInvalidControl(form,'password')) {
             <mat-error>{{ errorMessagesForControl(form,'password')}}</mat-error>
           }
         </mat-form-field>
-        <button mat-raised-button color="primary">Sign Up</button>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Confirm Password</mat-label>
+          <input matInput 
+                 [type]="hideConfirmPassword ? 'password' : 'text'"
+                 formControlName="confirmPassword"
+                 placeholder="Confirm your password"
+                 autocomplete="new-password">
+          <mat-icon matPrefix>lock_outline</mat-icon>
+          <button mat-icon-button 
+                  matSuffix 
+                  (click)="hideConfirmPassword = !hideConfirmPassword"
+                  [attr.aria-label]="'Hide confirm password'"
+                  [attr.aria-pressed]="hideConfirmPassword"
+                  type="button">
+            <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (isInvalidControl(form,'confirmPassword')) {
+            <mat-error>{{ errorMessagesForControl(form,'confirmPassword')}}</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-raised-button 
+                  color="primary" 
+                  type="submit"
+                  class="submit-button"
+                  [disabled]="form.invalid || submitted">
+            <mat-icon>person_add</mat-icon>
+            {{ submitted ? 'Creating Account...' : 'Create Account' }}
+          </button>
+        </div>
+
+        <div class="form-footer">
+          <p>Already have an account? 
+            <a routerLink="/sign-in" mat-button color="accent">Sign In</a>
+          </p>
+        </div>
       </form>
     </mat-card-content>
   </mat-card>
