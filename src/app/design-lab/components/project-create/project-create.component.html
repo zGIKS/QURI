@@ -1,0 +1,94 @@
+
+    <div class="create-project-container">
+      <mat-toolbar color="primary" class="create-project-toolbar">
+        <button mat-icon-button routerLink="/home/design-lab">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <span class="toolbar-title">{{ 'designLab.createProject' | translate }}</span>
+      </mat-toolbar>
+
+      <div class="create-project-content">
+        <mat-card class="project-form-card">
+          <mat-card-header>
+            <mat-card-title>{{ 'designLab.newProject' | translate }}</mat-card-title>
+            <mat-card-subtitle>{{ 'designLab.configureProject' | translate }}</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <form [formGroup]="projectForm" (ngSubmit)="onSubmit()">
+              <!-- Nombre del Proyecto -->
+              <mat-form-field class="full-width">
+                <mat-label>{{ 'designLab.projectName' | translate }}</mat-label>
+                <input matInput
+                       formControlName="title"
+                       [placeholder]="'designLab.projectNamePlaceholder' | translate">
+                <mat-error *ngIf="projectForm.get('title')?.hasError('required')">
+                  {{ 'designLab.validation.nameRequired' | translate }}
+                </mat-error>
+                <mat-error *ngIf="projectForm.get('title')?.hasError('minlength')">
+                  {{ 'designLab.validation.nameMinLength' | translate }}
+                </mat-error>
+              </mat-form-field>
+
+              <!-- Género -->
+              <mat-form-field class="full-width">
+                <mat-label>{{ 'designLab.gender' | translate }}</mat-label>
+                <mat-select formControlName="garmentGender">
+                  <mat-option [value]="PROJECT_GENDER.MEN">{{ 'designLab.genders.men' | translate }}</mat-option>
+                  <mat-option [value]="PROJECT_GENDER.WOMEN">{{ 'designLab.genders.women' | translate }}</mat-option>
+                  <mat-option [value]="PROJECT_GENDER.UNISEX">{{ 'designLab.genders.unisex' | translate }}</mat-option>
+                  <mat-option [value]="PROJECT_GENDER.KIDS">{{ 'designLab.genders.kids' | translate }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <!-- Talla -->
+              <mat-form-field class="full-width">
+                <mat-label>{{ 'designLab.size' | translate }}</mat-label>
+                <mat-select formControlName="garmentSize">
+                  <mat-option [value]="GARMENT_SIZE.XS">XS</mat-option>
+                  <mat-option [value]="GARMENT_SIZE.S">S</mat-option>
+                  <mat-option [value]="GARMENT_SIZE.M">M</mat-option>
+                  <mat-option [value]="GARMENT_SIZE.L">L</mat-option>
+                  <mat-option [value]="GARMENT_SIZE.XL">XL</mat-option>
+                  <mat-option [value]="GARMENT_SIZE.XXL">XXL</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <!-- Selector de Color -->
+              <div class="color-selector-section">
+                <h3>{{ 'designLab.selectBaseColor' | translate }}</h3>
+                <div class="color-options">
+                  <div *ngFor="let color of availableColors"
+                       class="color-option"
+                       [class.selected]="projectForm.get('garmentColor')?.value === color.value"
+                       (click)="selectColor(color.value)"
+                       [style.background-color]="color.hex"
+                       [title]="color.name">
+                    <div class="color-name">{{ color.name }}</div>
+                    <mat-icon *ngIf="projectForm.get('garmentColor')?.value === color.value"
+                              class="selected-icon">check</mat-icon>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Botones de Acción -->
+              <div class="form-actions">
+                <button mat-button
+                        type="button"
+                        routerLink="/home/design-lab">
+                  {{ 'common.cancel' | translate }}
+                </button>
+                <button mat-raised-button
+                        color="primary"
+                        type="submit"
+                        [disabled]="projectForm.invalid || isCreating">
+                  <mat-icon *ngIf="isCreating">hourglass_empty</mat-icon>
+                  <mat-icon *ngIf="!isCreating">add</mat-icon>
+                  {{ isCreating ? ('designLab.creating' | translate) : ('designLab.createProject' | translate) }}
+                </button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>

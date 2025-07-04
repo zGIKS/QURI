@@ -1,0 +1,99 @@
+<div class="project-edit-container">
+  <mat-toolbar color="primary" class="project-edit-toolbar">
+    <button mat-icon-button routerLink="/home/design-lab">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="toolbar-title" *ngIf="project">
+      {{ project.title }} - {{ project.garmentColor }} {{ project.garmentSize }}
+    </span>
+    <span class="toolbar-spacer"></span>
+    <button mat-icon-button (click)="saveProject()" [disabled]="isSaving">
+      <mat-icon>save</mat-icon>
+    </button>
+    <button mat-icon-button>
+      <mat-icon>more_vert</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <div class="project-edit-content">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>{{ 'designLab.loadingProject' | translate }}</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error" class="error-container">
+      <mat-icon color="warn">error</mat-icon>
+      <p>{{ error }}</p>
+      <button mat-raised-button color="primary" (click)="loadProject()">
+        <mat-icon>refresh</mat-icon>
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+
+    <!-- Project Editor -->
+    <div *ngIf="project && !isLoading && !error" class="project-editor">
+      <!-- Layer Toolbar -->
+      <app-layer-toolbar
+        [canSave]="true"
+        [canExport]="true"
+        (layerToolEvent)="onLayerToolEvent($event)">
+      </app-layer-toolbar>
+
+      <!-- Design Canvas -->
+      <div class="canvas-container">
+        <app-design-canvas
+          [layers]="project.layers"
+          [garmentColor]="getGarmentColorHex(project.garmentColor)"
+          [canvasWidth]="800"
+          [canvasHeight]="600"
+          [readOnly]="false"
+          (layerEvent)="onLayerEvent($event)"
+          (layersChange)="onLayersChange($event)">
+        </app-design-canvas>
+      </div>
+
+      <!-- Project Info Panel -->
+      <div class="project-info-panel">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>{{ 'designLab.projectInfo' | translate }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">{{ 'designLab.projectTitle' | translate }}:</span>
+                <span class="info-value">{{ project.title }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">{{ 'designLab.color' | translate }}:</span>
+                <span class="info-value">{{ project.garmentColor }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">{{ 'designLab.size' | translate }}:</span>
+                <span class="info-value">{{ project.garmentSize }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">{{ 'designLab.gender' | translate }}:</span>
+                <span class="info-value">{{ project.garmentGender }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">{{ 'designLab.status' | translate }}:</span>
+                <span class="info-value">{{ project.status }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">{{ 'designLab.layers' | translate }}:</span>
+                <span class="info-value">{{ project.layers.length }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">{{ 'designLab.lastModified' | translate }}:</span>
+                <span class="info-value">{{ project.updatedAt | date:'short' }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>

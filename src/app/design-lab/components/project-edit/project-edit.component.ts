@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -19,6 +19,7 @@ import { LayerToolbarComponent, LayerToolEvent } from '../layer-toolbar/layer-to
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,
@@ -29,217 +30,8 @@ import { LayerToolbarComponent, LayerToolEvent } from '../layer-toolbar/layer-to
     DesignCanvasComponent,
     LayerToolbarComponent
   ],
-  template: `
-    <div class="project-edit-container">
-      <mat-toolbar color="primary" class="project-edit-toolbar">
-        <button mat-icon-button routerLink="/home/design-lab">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
-        <span class="toolbar-title" *ngIf="project">
-          {{ project.title }} - {{ project.garmentColor }} {{ project.garmentSize }}
-        </span>
-        <span class="toolbar-spacer"></span>
-        <button mat-icon-button (click)="saveProject()" [disabled]="isSaving">
-          <mat-icon>save</mat-icon>
-        </button>
-        <button mat-icon-button>
-          <mat-icon>more_vert</mat-icon>
-        </button>
-      </mat-toolbar>
-
-      <div class="project-edit-content">
-        <!-- Loading State -->
-        <div *ngIf="isLoading" class="loading-container">
-          <mat-spinner></mat-spinner>
-          <p>{{ 'designLab.loadingProject' | translate }}</p>
-        </div>
-
-        <!-- Error State -->
-        <div *ngIf="error" class="error-container">
-          <mat-icon color="warn">error</mat-icon>
-          <p>{{ error }}</p>
-          <button mat-raised-button color="primary" (click)="loadProject()">
-            <mat-icon>refresh</mat-icon>
-            {{ 'common.retry' | translate }}
-          </button>
-        </div>
-
-        <!-- Project Editor -->
-        <div *ngIf="project && !isLoading && !error" class="project-editor">
-          <!-- Layer Toolbar -->
-          <app-layer-toolbar
-            [canSave]="true"
-            [canExport]="true"
-            (layerToolEvent)="onLayerToolEvent($event)">
-          </app-layer-toolbar>
-
-          <!-- Design Canvas -->
-          <div class="canvas-container">
-            <app-design-canvas
-              [layers]="project.layers"
-              [garmentColor]="getGarmentColorHex(project.garmentColor)"
-              [canvasWidth]="800"
-              [canvasHeight]="600"
-              [readOnly]="false"
-              (layerEvent)="onLayerEvent($event)"
-              (layersChange)="onLayersChange($event)">
-            </app-design-canvas>
-          </div>
-
-          <!-- Project Info Panel -->
-          <div class="project-info-panel">
-            <mat-card>
-              <mat-card-header>
-                <mat-card-title>{{ 'designLab.projectInfo' | translate }}</mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
-                <div class="info-grid">
-                  <div class="info-item">
-                    <span class="info-label">{{ 'designLab.projectTitle' | translate }}:</span>
-                    <span class="info-value">{{ project.title }}</span>
-                  </div>
-                  <div class="info-item">
-                    <span class="info-label">{{ 'designLab.color' | translate }}:</span>
-                    <span class="info-value">{{ project.garmentColor }}</span>
-                  </div>
-                  <div class="info-item">
-                    <span class="info-label">{{ 'designLab.size' | translate }}:</span>
-                    <span class="info-value">{{ project.garmentSize }}</span>
-                  </div>
-                  <div class="info-item">
-                    <span class="info-label">{{ 'designLab.gender' | translate }}:</span>
-                    <span class="info-value">{{ project.garmentGender }}</span>
-                  </div>
-                  <div class="info-item">
-                    <span class="info-label">{{ 'designLab.status' | translate }}:</span>
-                    <span class="info-value">{{ project.status }}</span>
-                  </div>
-                  <div class="info-item">
-                    <span class="info-label">{{ 'designLab.layers' | translate }}:</span>
-                    <span class="info-value">{{ project.layers.length }}</span>
-                  </div>
-                  <div class="info-item">
-                    <span class="info-label">{{ 'designLab.lastModified' | translate }}:</span>
-                    <span class="info-value">{{ project.updatedAt | date:'short' }}</span>
-                  </div>
-                </div>
-              </mat-card-content>
-            </mat-card>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .project-edit-container {
-      min-height: 100vh;
-      background-color: #f5f5f5;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .project-edit-toolbar {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .toolbar-title {
-      font-size: 18px;
-      font-weight: 500;
-      margin-left: 16px;
-    }
-
-    .toolbar-spacer {
-      flex: 1 1 auto;
-    }
-
-    .project-edit-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .loading-container,
-    .error-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 400px;
-      text-align: center;
-    }
-
-    .loading-container mat-spinner {
-      margin-bottom: 16px;
-    }
-
-    .error-container mat-icon {
-      font-size: 48px;
-      width: 48px;
-      height: 48px;
-      margin-bottom: 16px;
-      color: #f44336;
-    }
-
-    .project-editor {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .canvas-container {
-      flex: 1;
-      display: flex;
-      min-height: 600px;
-    }
-
-    .project-info-panel {
-      padding: 16px;
-      background: white;
-      border-top: 1px solid #e0e0e0;
-    }
-
-    .info-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-    }
-
-    .info-item {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .info-label {
-      font-weight: 500;
-      color: #666;
-      font-size: 14px;
-    }
-
-    .info-value {
-      font-size: 16px;
-    }
-
-    @media (max-width: 768px) {
-      .project-edit-content {
-        padding: 8px;
-      }
-
-      .canvas-container {
-        min-height: 400px;
-      }
-
-      .project-info-panel {
-        padding: 12px;
-      }
-
-      .info-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  `]
+  templateUrl: './project-edit.component.html',
+  styleUrl: './project-edit.component.css'
 })
 export class ProjectEditComponent implements OnInit {
   project: Project | null = null;
