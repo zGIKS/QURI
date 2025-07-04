@@ -8,7 +8,7 @@ import {TranslateLoader, TranslateModule} from '@ngx-translate/core';
 import {authenticationInterceptor} from './iam/services/authentication.interceptor';
 
 export const HttpLoaderFactory = (http: HttpClient) =>
-  new TranslateHttpLoader(http);
+  new TranslateHttpLoader(http, './assets/i18n/', '.json');
 
 export const appConfig: ApplicationConfig = {
   providers: [
