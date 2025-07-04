@@ -48,6 +48,22 @@ export const routes: Routes = [
           ),
         canActivate: [authenticationGuard],
       },
+      {
+        path: 'design-lab/create',
+        loadComponent: () =>
+          import('./design-lab/components/project-create/project-create.component').then(
+            (c) => c.ProjectCreateComponent
+          ),
+        canActivate: [authenticationGuard],
+      },
+      {
+        path: 'design-lab/edit/:id',
+        loadComponent: () =>
+          import('./design-lab/components/project-edit/project-edit.component').then(
+            (c) => c.ProjectEditComponent
+          ),
+        canActivate: [authenticationGuard],
+      },
     ],
   },
   { path: '**', redirectTo: '/sign-in' },

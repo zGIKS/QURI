@@ -7,9 +7,9 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { ProjectService } from '../services/project.service';
+import { DesignLabApplicationService } from '../services/design-lab-application.service';
 import { Project } from '../model/project.entity';
 
 @Component({
@@ -341,8 +341,9 @@ export class DesignLabComponent implements OnInit {
   error: string | null = null;
 
   constructor(
-    private projectService: ProjectService,
-    private translateService: TranslateService
+    private designLabService: DesignLabApplicationService,
+    private translateService: TranslateService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -358,13 +359,20 @@ export class DesignLabComponent implements OnInit {
     console.log('👤 Current user ID:', localStorage.getItem('userId'));
     console.log('📝 Current username:', localStorage.getItem('username'));
 
-    this.projectService.getUserBlueprints().subscribe({
-      next: (projects) => {
+    const userId = this.designLabService.getCurrentUserId();
+    if (!userId) {
+      this.error = this.translateService.instant('designLab.tokenExpired');
+      this.isLoading = false;
+      return;
+    }
+
+    this.designLabService.getProjectsByUser(userId).subscribe({
+      next: (projects: Project[]) => {
         this.projects = projects;
         this.isLoading = false;
         console.log('✅ Projects loaded successfully:', projects);
       },
-      error: (error) => {
+      error: (error: any) => {
         this.error = error.message || this.translateService.instant('designLab.errorLoadingProjects');
         this.isLoading = false;
 
@@ -384,16 +392,13 @@ export class DesignLabComponent implements OnInit {
   }
 
   createNewProject(): void {
-    // TODO: Implementar navegación a la creación de proyecto
     console.log('Creating new project...');
-    // Por ahora, mostrar un mensaje
-    alert(this.translateService.instant('designLab.functionalityInDevelopment'));
+    this.router.navigate(['/home/design-lab/create']);
   }
 
   editProject(projectId: string): void {
-    // TODO: Implementar navegación al editor de proyecto
     console.log('Editing project:', projectId);
-    alert(`${this.translateService.instant('designLab.edit')}: ${projectId}`);
+    this.router.navigate(['/home/design-lab/edit', projectId]);
   }
 
   duplicateProject(projectId: string): void {
