@@ -1,0 +1,7 @@
+<button *ngFor="let lang of languages"
+        mat-button
+        [color]="lang.code === currentLang ? 'primary' : undefined"
+        (click)="switchLang(lang.code)"
+        [disabled]="lang.code === currentLang">
+  {{ lang.label }}
+</button>

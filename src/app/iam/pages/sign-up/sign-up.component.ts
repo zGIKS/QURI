@@ -8,6 +8,7 @@ import {MatInput} from "@angular/material/input";
 import {MatButton, MatIconButton} from "@angular/material/button";
 import {MatIcon} from "@angular/material/icon";
 import {RouterLink} from "@angular/router";
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-sign-up',
@@ -28,7 +29,8 @@ import {RouterLink} from "@angular/router";
     MatIcon,
     MatPrefix,
     MatSuffix,
-    RouterLink
+    RouterLink,
+    TranslateModule
   ],
   templateUrl: './sign-up.component.html',
   styleUrl: './sign-up.component.css'

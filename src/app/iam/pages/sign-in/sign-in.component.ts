@@ -8,6 +8,8 @@ import {MatError, MatFormField, MatLabel, MatPrefix, MatSuffix} from "@angular/m
 import {MatInput} from "@angular/material/input";
 import {MatIcon} from "@angular/material/icon";
 import {RouterLink} from "@angular/router";
+import { LanguageSwitcher } from '../../../public/components/language-switcher/language-switcher';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-sign-in',
@@ -28,7 +30,9 @@ import {RouterLink} from "@angular/router";
     MatPrefix,
     MatSuffix,
     ReactiveFormsModule,
-    RouterLink
+    RouterLink,
+    LanguageSwitcher,
+    TranslateModule
   ],
   templateUrl: './sign-in.component.html',
   styleUrl: './sign-in.component.css'

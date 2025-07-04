@@ -1,0 +1,46 @@
+{
+  "signin": {
+    "title": "Bienvenido de nuevo",
+    "subtitle": "Inicia sesión en tu cuenta",
+    "username": {
+      "label": "Nombre de usuario",
+      "placeholder": "Ingresa tu nombre de usuario"
+    },
+    "password": {
+      "label": "Contraseña",
+      "placeholder": "Ingresa tu contraseña"
+    },
+    "button": {
+      "signingIn": "Iniciar sesión"
+    },
+    "noAccount": "¿No tienes una cuenta?"
+  },
+  "signup": {
+    "title": "Crear cuenta",
+    "subtitle": "Únete hoy",
+    "username": {
+      "label": "Nombre de usuario",
+      "placeholder": "Elige un nombre de usuario"
+    },
+    "password": {
+      "label": "Contraseña",
+      "placeholder": "Crea una contraseña"
+    },
+    "confirmPassword": {
+      "label": "Confirmar contraseña",
+      "placeholder": "Confirma tu contraseña"
+    },
+    "button": {
+      "creating": "Crear cuenta"
+    },
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?"
+  },
+  "common": {
+    "signUp": "Registrarse",
+    "signIn": "Iniciar sesión",
+    "hide": {
+      "password": "Ocultar contraseña",
+      "confirmPassword": "Ocultar confirmar contraseña"
+    }
+  }
+}

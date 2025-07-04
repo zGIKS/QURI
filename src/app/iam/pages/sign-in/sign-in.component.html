@@ -1,21 +1,22 @@
-<div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 16px;">
+<div style="display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 16px;">
+  <app-language-switcher style="align-self: flex-end; margin-bottom: 8px;"></app-language-switcher>
   <mat-card style="width: 100%; max-width: 400px;">
     <mat-card-header>
       <div mat-card-avatar>
         <mat-icon>login</mat-icon>
       </div>
-      <mat-card-title>Welcome Back</mat-card-title>
-      <mat-card-subtitle>Sign in to your account</mat-card-subtitle>
+      <mat-card-title>{{ 'signin.title' | translate }}</mat-card-title>
+      <mat-card-subtitle>{{ 'signin.subtitle' | translate }}</mat-card-subtitle>
     </mat-card-header>
     
     <mat-card-content>
       <form [formGroup]="form" (ngSubmit)="onSubmit()" style="display: flex; flex-direction: column; gap: 16px;">
         
         <mat-form-field appearance="outline">
-          <mat-label>Username</mat-label>
+          <mat-label>{{ 'signin.username.label' | translate }}</mat-label>
           <input matInput 
                  formControlName="username"
-                 placeholder="Enter your username"
+                 [placeholder]="'signin.username.placeholder' | translate"
                  autocomplete="username">
           <mat-icon matPrefix>person</mat-icon>
           @if (isInvalidControl(form,'username')) {
@@ -24,17 +25,17 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Password</mat-label>
+          <mat-label>{{ 'signin.password.label' | translate }}</mat-label>
           <input matInput 
                  [type]="hidePassword ? 'password' : 'text'"
                  formControlName="password"
-                 placeholder="Enter your password"
+                 [placeholder]="'signin.password.placeholder' | translate"
                  autocomplete="current-password">
           <mat-icon matPrefix>lock</mat-icon>
           <button mat-icon-button 
                   matSuffix 
                   (click)="hidePassword = !hidePassword"
-                  [attr.aria-label]="'Hide password'"
+                  [attr.aria-label]="('common.hide.password' | translate)"
                   [attr.aria-pressed]="hidePassword"
                   type="button">
             <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
@@ -49,12 +50,12 @@
                 type="submit"
                 [disabled]="form.invalid || submitted">
           <mat-icon>login</mat-icon>
-          {{ submitted ? 'Signing In...' : 'Sign In' }}
+          {{ 'signin.button.signingIn' | translate }}
         </button>
 
         <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
-          <span>Don't have an account?</span>
-          <a routerLink="/sign-up" mat-button color="accent">Sign Up</a>
+          <span>{{ 'signin.noAccount' | translate }}</span>
+          <a routerLink="/sign-up" mat-button color="accent">{{ 'common.signUp' | translate }}</a>
         </div>
       </form>
     </mat-card-content>
