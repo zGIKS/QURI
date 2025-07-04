@@ -10,8 +10,8 @@ import {
   ProductLikeStatusResponse,
   CreateProductResponse,
   UpdateProductResponse
-} from '../model/product.response';
-import { CreateProductRequest, UpdateProductRequest, GetProductsRequest } from '../model/product.request';
+} from './product.response';
+import { CreateProductRequest, UpdateProductRequest, GetProductsRequest } from './product.request';
 
 /**
  * Service for handling product catalog operations

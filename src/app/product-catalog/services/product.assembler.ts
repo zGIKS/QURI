@@ -1,5 +1,5 @@
-import { Product, ProductStatus } from './product.entity';
-import { ProductLike } from './product-like.entity';
+import { Product, ProductStatus } from '../model/product.entity';
+import { ProductLike } from '../model/product-like.entity';
 import {
   ProductResponse,
   ProductLikeResponse,

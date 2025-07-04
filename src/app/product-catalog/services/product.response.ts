@@ -1,4 +1,4 @@
-import { ProductStatus } from './product.entity';
+import { ProductStatus } from '../model/product.entity';
 
 /**
  * Response DTO for product data

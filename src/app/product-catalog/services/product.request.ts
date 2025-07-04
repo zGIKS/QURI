@@ -1,4 +1,4 @@
-import { ProductStatus } from './product.entity';
+import { ProductStatus } from '../model/product.entity';
 
 /**
  * Request DTO for creating a new product
