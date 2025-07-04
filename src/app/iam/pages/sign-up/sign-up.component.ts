@@ -42,7 +42,7 @@ export class SignUpComponent implements OnInit {
   hideConfirmPassword = true;
 
   constructor(
-    private builder: FormBuilder, 
+    private builder: FormBuilder,
     private authenticationService: AuthenticationService,
     private translateService: TranslateService
   ) {}
@@ -67,11 +67,11 @@ export class SignUpComponent implements OnInit {
   passwordMatchValidator(control: AbstractControl): {[key: string]: any} | null {
     const password = control.get('password');
     const confirmPassword = control.get('confirmPassword');
-    
+
     if (!password || !confirmPassword) {
       return null;
     }
-    
+
     return password.value === confirmPassword.value ? null : { passwordMismatch: true };
   }
 
@@ -83,33 +83,33 @@ export class SignUpComponent implements OnInit {
   errorMessagesForControl(form: FormGroup, controlName: string): string {
     const control = form.get(controlName);
     if (!control || !control.errors) return '';
-    
+
     if (control.errors['required']) {
       return this.translateService.instant('signup.validation.required', { field: this.getFieldName(controlName) });
     }
-    
+
     if (control.errors['minlength']) {
       const requiredLength = control.errors['minlength'].requiredLength;
-      return this.translateService.instant('signup.validation.minlength', { 
-        field: this.getFieldName(controlName), 
-        length: requiredLength 
+      return this.translateService.instant('signup.validation.minlength', {
+        field: this.getFieldName(controlName),
+        length: requiredLength
       });
     }
-    
+
     if (controlName === 'confirmPassword' && form.errors?.['passwordMismatch']) {
       return this.translateService.instant('signup.validation.passwordMismatch');
     }
-    
+
     return '';
   }
 
   private getFieldName(controlName: string): string {
     const fieldNames: { [key: string]: string } = {
-      'username': this.translateService.instant('signup.username'),
-      'password': this.translateService.instant('signup.password'),
-      'confirmPassword': this.translateService.instant('signup.confirmPassword')
+      'username': 'signup.username',
+      'password': 'signup.password',
+      'confirmPassword': 'signup.confirmPassword'
     };
-    return fieldNames[controlName] || controlName;
+    return this.translateService.instant(fieldNames[controlName]) || controlName;
   }
 
 

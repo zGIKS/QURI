@@ -1,0 +1,161 @@
+{
+  "signin": {
+    "title": "Bienvenido de vuelta",
+    "subtitle": "Inicia sesión en tu cuenta",
+    "username": "Nombre de usuario",
+    "password": "Contraseña",
+    "usernameField": {
+      "label": "Nombre de usuario",
+      "placeholder": "Ingresa tu nombre de usuario"
+    },
+    "passwordField": {
+      "label": "Contraseña",
+      "placeholder": "Ingresa tu contraseña"
+    },
+    "button": {
+      "signingIn": "Iniciar Sesión"
+    },
+    "noAccount": "¿No tienes una cuenta?",
+    "validation": {
+      "required": "{{field}} es requerido",
+      "minlength": "{{field}} debe tener al menos {{length}} caracteres"
+    }
+  },
+  "signup": {
+    "title": "Crear Cuenta",
+    "subtitle": "Únete a nosotros hoy",
+    "username": "Nombre de usuario",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "usernameField": {
+      "label": "Nombre de usuario",
+      "placeholder": "Elige un nombre de usuario"
+    },
+    "passwordField": {
+      "label": "Contraseña",
+      "placeholder": "Crea una contraseña"
+    },
+    "confirmPasswordField": {
+      "label": "Confirmar Contraseña",
+      "placeholder": "Confirma tu contraseña"
+    },
+    "button": {
+      "creating": "Crear Cuenta"
+    },
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "validation": {
+      "required": "{{field}} es requerido",
+      "minlength": "{{field}} debe tener al menos {{length}} caracteres",
+      "passwordMismatch": "Las contraseñas no coinciden"
+    }
+  },
+  "common": {
+    "signUp": "Registrarse",
+    "signIn": "Iniciar Sesión",
+    "signOut": "Cerrar Sesión",
+    "loading": "Cargando...",
+    "error": "Error",
+    "retry": "Reintentar",
+    "hide": {
+      "password": "Ocultar contraseña"
+    },
+    "show": {
+      "password": "Mostrar contraseña"
+    }
+  },
+  "home": {
+    "title": "Bienvenido a QURI",
+    "subtitle": "Tu plataforma de gestión integral",
+    "description": "Gestiona tus productos, usuarios y más con nuestra plataforma completa.",
+    "navigation": {
+      "home": "Inicio",
+      "dashboard": "Panel de Control",
+      "catalog": "Catálogo",
+      "signIn": "Iniciar Sesión",
+      "signUp": "Registrarse",
+      "signOut": "Cerrar Sesión"
+    },
+    "features": {
+      "title": "Características",
+      "userManagement": {
+        "title": "Gestión de Usuarios",
+        "description": "Sistema completo de autenticación y autorización"
+      },
+      "productCatalog": {
+        "title": "Catálogo de Productos",
+        "description": "Gestiona tu inventario de productos fácilmente"
+      },
+      "dashboard": {
+        "title": "Panel de Control",
+        "description": "Visualiza métricas y estadísticas importantes"
+      }
+    },
+    "getStarted": "Comenzar",
+    "learnMore": "Saber Más"
+  },
+  "dashboard": {
+    "title": "Panel de Control",
+    "subtitle": "Resumen de tu cuenta",
+    "welcome": "Bienvenido de vuelta",
+    "stats": {
+      "totalUsers": "Total de Usuarios",
+      "totalProducts": "Total de Productos",
+      "totalSales": "Total de Ventas",
+      "revenue": "Ingresos"
+    },
+    "quickActions": {
+      "title": "Acciones Rápidas",
+      "addUser": "Agregar Usuario",
+      "addProduct": "Agregar Producto",
+      "viewReports": "Ver Reportes",
+      "settings": "Configuraciones"
+    },
+    "recentActivity": {
+      "title": "Actividad Reciente",
+      "noActivity": "No hay actividad reciente"
+    }
+  },
+  "catalog": {
+    "title": "Catálogo de Productos",
+    "subtitle": "Gestiona tu inventario",
+    "search": {
+      "placeholder": "Buscar productos..."
+    },
+    "filters": {
+      "title": "Filtros",
+      "category": "Categoría",
+      "price": "Precio",
+      "availability": "Disponibilidad"
+    },
+    "product": {
+      "name": "Nombre",
+      "description": "Descripción",
+      "price": "Precio",
+      "category": "Categoría",
+      "stock": "Stock",
+      "actions": "Acciones"
+    },
+    "actions": {
+      "add": "Agregar Producto",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "view": "Ver Detalles"
+    },
+    "empty": {
+      "title": "No hay productos",
+      "description": "Comienza agregando tu primer producto al catálogo"
+    }
+  },
+  "navigation": {
+    "home": "Inicio",
+    "dashboard": "Panel de Control",
+    "catalog": "Catálogo",
+    "profile": "Perfil",
+    "settings": "Configuraciones"
+  },
+  "language": {
+    "switch": "Cambiar idioma",
+    "english": "Inglés",
+    "spanish": "Español"
+  }
+}

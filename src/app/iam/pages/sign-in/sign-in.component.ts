@@ -43,7 +43,7 @@ export class SignInComponent implements OnInit {
   hidePassword = true;
 
   constructor(
-    private builder: FormBuilder, 
+    private builder: FormBuilder,
     private authenticationService: AuthenticationService,
     private translateService: TranslateService
   ) {}
@@ -72,27 +72,27 @@ export class SignInComponent implements OnInit {
   errorMessagesForControl(form: FormGroup, controlName: string): string {
     const control = form.get(controlName);
     if (!control || !control.errors) return '';
-    
+
     if (control.errors['required']) {
       return this.translateService.instant('signin.validation.required', { field: this.getFieldName(controlName) });
     }
-    
+
     if (control.errors['minlength']) {
       const requiredLength = control.errors['minlength'].requiredLength;
-      return this.translateService.instant('signin.validation.minlength', { 
-        field: this.getFieldName(controlName), 
-        length: requiredLength 
+      return this.translateService.instant('signin.validation.minlength', {
+        field: this.getFieldName(controlName),
+        length: requiredLength
       });
     }
-    
+
     return '';
   }
 
   private getFieldName(controlName: string): string {
     const fieldNames: { [key: string]: string } = {
-      'username': this.translateService.instant('signin.username'),
-      'password': this.translateService.instant('signin.password')
+      'username': 'signin.username',
+      'password': 'signin.password'
     };
-    return fieldNames[controlName] || controlName;
+    return this.translateService.instant(fieldNames[controlName]) || controlName;
   }
 }

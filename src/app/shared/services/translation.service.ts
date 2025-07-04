@@ -16,6 +16,9 @@ export class TranslationService {
     // Set available languages
     this.translate.addLangs(['en', 'es']);
 
+    // Set the default language first
+    this.translate.setDefaultLang('en');
+
     // Get stored language or default to 'en'
     const storedLanguage = localStorage.getItem('language');
     const browserLanguage = this.translate.getBrowserLang();
@@ -28,15 +31,36 @@ export class TranslationService {
       defaultLanguage = browserLanguage;
     }
 
-    this.setLanguage(defaultLanguage);
+    // Use the language (this will load the translation files)
+    this.translate.use(defaultLanguage).subscribe({
+      next: () => {
+        localStorage.setItem('language', defaultLanguage);
+        this.currentLanguage.next(defaultLanguage);
+        console.log('Language initialized:', defaultLanguage);
+      },
+      error: (error) => {
+        console.error('Error loading translation files:', error);
+        // Fallback to English if there's an error
+        this.translate.use('en').subscribe(() => {
+          this.currentLanguage.next('en');
+        });
+      }
+    });
   }
 
   setLanguage(language: string): void {
     if (['en', 'es'].includes(language)) {
-      this.translate.setDefaultLang(language);
-      this.translate.use(language);
-      localStorage.setItem('language', language);
-      this.currentLanguage.next(language);
+      this.translate.use(language).subscribe({
+        next: () => {
+          this.translate.setDefaultLang(language);
+          localStorage.setItem('language', language);
+          this.currentLanguage.next(language);
+          console.log('Language changed to:', language);
+        },
+        error: (error) => {
+          console.error('Error changing language:', error);
+        }
+      });
     }
   }
 

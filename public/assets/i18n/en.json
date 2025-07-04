@@ -24,22 +24,30 @@
   "signup": {
     "title": "Create Account",
     "subtitle": "Join us today",
-    "username": {
+    "username": "Username",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "usernameField": {
       "label": "Username",
       "placeholder": "Choose a username"
     },
-    "password": {
+    "passwordField": {
       "label": "Password",
       "placeholder": "Create a password"
     },
-    "confirmPassword": {
+    "confirmPasswordField": {
       "label": "Confirm Password",
       "placeholder": "Confirm your password"
     },
     "button": {
       "creating": "Create Account"
     },
-    "alreadyHaveAccount": "Already have an account?"
+    "alreadyHaveAccount": "Already have an account?",
+    "validation": {
+      "required": "{{field}} is required",
+      "minlength": "{{field}} must be at least {{length}} characters",
+      "passwordMismatch": "Passwords do not match"
+    }
   },
   "common": {
     "signUp": "Sign Up",
