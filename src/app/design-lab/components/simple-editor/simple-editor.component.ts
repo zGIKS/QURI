@@ -16,13 +16,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { DesignLabService } from '../../services/design-lab.service';
-import {
-  CreateTextLayerRequest,
-  UpdateTextLayerRequest,
-  UpdateLayerCoordinatesRequest
-} from '../../services/design-lab.requests';
-import { LayerResult } from '../../services/design-lab.responses';
+import { DesignLabService } from '../../services/design-lab-real.service';
+import { LayerResult } from '../../services/design-lab-real.service';
 import { Project } from '../../model/project.entity';
 import { TextLayer } from '../../model/layer.entity';
 import { GARMENT_COLOR } from '../../../const';
@@ -212,8 +207,8 @@ export class SimpleEditorComponent implements OnInit {
     this.isSaving = true;
 
     if (this.selectedTextLayer) {
-      // Update existing layer
-      const updateRequest: UpdateTextLayerRequest = {
+      // Update existing layer using text-details endpoint
+      const updateRequest = {
         text: this.textContent,
         fontColor: this.fontColor,
         fontFamily: this.fontFamily,
@@ -223,7 +218,7 @@ export class SimpleEditorComponent implements OnInit {
         isUnderlined: this.isUnderlined
       };
 
-      this.designLabService.updateTextLayer(this.projectId, this.selectedTextLayer.id, updateRequest).subscribe({
+      this.designLabService.updateTextLayerDetails(this.projectId, this.selectedTextLayer.id, updateRequest).subscribe({
         next: (result: LayerResult) => {
           if (result.success) {
             // Update local layer
@@ -265,12 +260,8 @@ export class SimpleEditorComponent implements OnInit {
         }
       });
     } else {
-      // Create new layer
-      const createRequest: CreateTextLayerRequest = {
-        projectId: this.projectId,
-        x: 100,
-        y: 100,
-        z: this.project.layers.length + 1,
+      // Create new layer using layers/texts endpoint
+      const createRequest = {
         text: this.textContent,
         fontColor: this.fontColor,
         fontFamily: this.fontFamily,
@@ -280,7 +271,7 @@ export class SimpleEditorComponent implements OnInit {
         isUnderlined: this.isUnderlined
       };
 
-      this.designLabService.createTextLayer(createRequest).subscribe({
+      this.designLabService.createTextLayer(this.projectId, createRequest).subscribe({
         next: (result: LayerResult) => {
           if (result.success && result.layerId) {
             // Create local layer representation
@@ -302,7 +293,7 @@ export class SimpleEditorComponent implements OnInit {
                 isItalic: this.isItalic,
                 isUnderlined: this.isUnderlined
               }
-            );            
+            );
             this.project!.layers.push(newLayer);
             this.project!.updatedAt = new Date();
 
@@ -467,7 +458,7 @@ export class SimpleEditorComponent implements OnInit {
   updateLayerCoordinates(layer: TextLayer): void {
     if (!this.projectId) return;
 
-    const updateRequest: UpdateLayerCoordinatesRequest = {
+    const updateRequest = {
       x: layer.x,
       y: layer.y,
       z: layer.z
