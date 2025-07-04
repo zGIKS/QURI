@@ -8,7 +8,7 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { RouterModule } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ProjectService } from '../services/project.service';
 import { Project } from '../model/project.entity';
 
@@ -44,26 +44,26 @@ import { Project } from '../model/project.entity';
         <!-- Projects Section -->
         <section class="projects-section">
           <div class="section-header">
-            <h2>Mis Proyectos</h2>
+            <h2>{{ 'designLab.myProjects' | translate }}</h2>
             <button mat-raised-button color="primary" (click)="createNewProject()">
               <mat-icon>add</mat-icon>
-              Nuevo Proyecto
+              {{ 'designLab.newProject' | translate }}
             </button>
           </div>
 
           <!-- Loading State -->
           <div *ngIf="isLoading" class="loading-container">
             <mat-spinner></mat-spinner>
-            <p>Cargando proyectos...</p>
+            <p>{{ 'designLab.loadingProjects' | translate }}</p>
           </div>
 
           <!-- Error State -->
           <div *ngIf="error" class="error-container">
             <mat-icon color="warn">error</mat-icon>
-            <p>Error al cargar los proyectos: {{ error }}</p>
+            <p>{{ 'designLab.errorLoadingProjects' | translate }}: {{ error }}</p>
             <button mat-raised-button color="primary" (click)="loadProjects()">
               <mat-icon>refresh</mat-icon>
-              Reintentar
+              {{ 'common.retry' | translate }}
             </button>
           </div>
 
@@ -71,10 +71,10 @@ import { Project } from '../model/project.entity';
           <div *ngIf="!isLoading && !error" class="projects-grid">
             <div *ngIf="projects.length === 0" class="empty-state">
               <mat-icon>folder_open</mat-icon>
-              <h3>No hay proyectos</h3>
-              <p>Crea tu primer proyecto para comenzar a diseñar</p>
+              <h3>{{ 'designLab.noProjects' | translate }}</h3>
+              <p>{{ 'designLab.noProjectsDescription' | translate }}</p>
               <button mat-raised-button color="primary" (click)="createNewProject()">
-                Crear Proyecto
+                {{ 'designLab.createProject' | translate }}
               </button>
             </div>
 
@@ -87,14 +87,14 @@ import { Project } from '../model/project.entity';
                   class="preview-image">
                 <div *ngIf="!project.previewUrl" class="no-preview">
                   <mat-icon>image</mat-icon>
-                  <span>Sin vista previa</span>
+                  <span>{{ 'designLab.noPreview' | translate }}</span>
                 </div>
               </div>
 
               <mat-card-header>
                 <mat-card-title>{{ project.title }}</mat-card-title>
                 <mat-card-subtitle>
-                  Creado: {{ project.createdAt | date:'short' }}
+                  {{ 'designLab.projectCreated' | translate }}: {{ project.createdAt | date:'short' }}
                 </mat-card-subtitle>
               </mat-card-header>
 
@@ -105,22 +105,22 @@ import { Project } from '../model/project.entity';
                     <mat-chip>{{ project.garmentColor }}</mat-chip>
                     <mat-chip>{{ project.garmentSize }}</mat-chip>
                   </mat-chip-set>
-                  <p class="layers-count">{{ project.layers.length }} capas</p>
+                  <p class="layers-count">{{ project.layers.length }} {{ project.layers.length === 1 ? ('designLab.layer' | translate) : ('designLab.layers' | translate) }}</p>
                 </div>
               </mat-card-content>
 
               <mat-card-actions>
                 <button mat-button color="primary" (click)="editProject(project.id)">
                   <mat-icon>edit</mat-icon>
-                  Editar
+                  {{ 'designLab.edit' | translate }}
                 </button>
                 <button mat-button (click)="duplicateProject(project.id)">
                   <mat-icon>content_copy</mat-icon>
-                  Duplicar
+                  {{ 'designLab.duplicate' | translate }}
                 </button>
                 <button mat-button color="warn" (click)="deleteProject(project.id)">
                   <mat-icon>delete</mat-icon>
-                  Eliminar
+                  {{ 'designLab.delete' | translate }}
                 </button>
               </mat-card-actions>
             </mat-card>
@@ -340,7 +340,10 @@ export class DesignLabComponent implements OnInit {
   isLoading = false;
   error: string | null = null;
 
-  constructor(private projectService: ProjectService) {}
+  constructor(
+    private projectService: ProjectService,
+    private translateService: TranslateService
+  ) {}
 
   ngOnInit(): void {
     this.loadProjects();
@@ -362,19 +365,19 @@ export class DesignLabComponent implements OnInit {
         console.log('✅ Projects loaded successfully:', projects);
       },
       error: (error) => {
-        this.error = error.message || 'Error al cargar los proyectos';
+        this.error = error.message || this.translateService.instant('designLab.errorLoadingProjects');
         this.isLoading = false;
 
         // Agregar más información sobre el error
         if (error.status === 401) {
           console.error('🔒 Unauthorized - Token might be invalid or expired');
-          this.error = 'Token expirado o inválido. Por favor, inicia sesión nuevamente.';
+          this.error = this.translateService.instant('designLab.tokenExpired');
         } else if (error.status === 403) {
           console.error('🚫 Forbidden - User might not have required permissions');
-          this.error = 'No tienes permisos para acceder a esta funcionalidad.';
+          this.error = this.translateService.instant('designLab.noPermissions');
         } else if (error.status === 500) {
           console.error('🔥 Server error');
-          this.error = 'Error interno del servidor. Intenta nuevamente más tarde.';
+          this.error = this.translateService.instant('designLab.serverError');
         }
       }
     });
@@ -384,26 +387,26 @@ export class DesignLabComponent implements OnInit {
     // TODO: Implementar navegación a la creación de proyecto
     console.log('Creating new project...');
     // Por ahora, mostrar un mensaje
-    alert('Funcionalidad de crear proyecto en desarrollo');
+    alert(this.translateService.instant('designLab.functionalityInDevelopment'));
   }
 
   editProject(projectId: string): void {
     // TODO: Implementar navegación al editor de proyecto
     console.log('Editing project:', projectId);
-    alert(`Editando proyecto: ${projectId}`);
+    alert(`${this.translateService.instant('designLab.edit')}: ${projectId}`);
   }
 
   duplicateProject(projectId: string): void {
     // TODO: Implementar duplicación de proyecto
     console.log('Duplicating project:', projectId);
-    alert(`Duplicando proyecto: ${projectId}`);
+    alert(`${this.translateService.instant('designLab.duplicate')}: ${projectId}`);
   }
 
   deleteProject(projectId: string): void {
-    if (confirm('¿Estás seguro de que deseas eliminar este proyecto?')) {
+    if (confirm(this.translateService.instant('designLab.confirmDeleteProject'))) {
       // TODO: Implementar eliminación de proyecto
       console.log('Deleting project:', projectId);
-      alert(`Eliminando proyecto: ${projectId}`);
+      alert(`${this.translateService.instant('designLab.delete')}: ${projectId}`);
     }
   }
 }
