@@ -35,6 +35,12 @@ export interface CreateProjectResponse {
   error?: string;
 }
 
+export interface DeleteProjectResponse {
+  message: string;
+  error?: string;
+  status?: number;
+}
+
 export interface LayerOperationResponse {
   success: boolean;
   layerId?: string;

@@ -1,0 +1,42 @@
+<div class="canvas-tools-container">
+  <!-- Main Tools Section -->
+  <div class="tools-section">
+    <div class="section-label">{{ 'designLab.tools.title' | translate }}</div>
+
+    <!-- Tool Selection -->
+    <mat-button-toggle-group
+      [value]="currentTool"
+      (change)="selectTool($event.value)"
+      class="tool-toggle-group">
+      <mat-button-toggle
+        value="select"
+        matTooltip="{{ getToolLabel('select') | translate }}">
+        <mat-icon>{{ getToolIcon('select') }}</mat-icon>
+      </mat-button-toggle>
+      <mat-button-toggle
+        value="hand"
+        matTooltip="{{ getToolLabel('hand') | translate }}">
+        <mat-icon>{{ getToolIcon('hand') }}</mat-icon>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Save Section -->
+  <div class="tools-section">
+    <div class="section-label">{{ 'designLab.tools.project' | translate }}</div>
+
+    <div class="project-controls">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="save()"
+        [disabled]="!isModified"
+        matTooltip="{{ 'designLab.tools.save' | translate }}">
+        <mat-icon>save</mat-icon>
+        {{ 'designLab.tools.save' | translate }}
+      </button>
+    </div>
+  </div>
+</div>

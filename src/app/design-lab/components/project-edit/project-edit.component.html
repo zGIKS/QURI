@@ -10,9 +10,15 @@
     <button mat-icon-button (click)="saveProject()" [disabled]="isSaving">
       <mat-icon>save</mat-icon>
     </button>
-    <button mat-icon-button>
+    <button mat-icon-button [matMenuTriggerFor]="menu">
       <mat-icon>more_vert</mat-icon>
     </button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item (click)="openDeleteDialog()">
+        <mat-icon color="warn">delete</mat-icon>
+        <span>{{ 'designLab.deleteProject.menuItem' | translate }}</span>
+      </button>
+    </mat-menu>
   </mat-toolbar>
 
   <div class="project-edit-content">
@@ -34,65 +40,66 @@
 
     <!-- Project Editor -->
     <div *ngIf="project && !isLoading && !error" class="project-editor">
-      <!-- Layer Toolbar -->
-      <app-layer-toolbar
-        [canSave]="true"
-        [canExport]="true"
-        (layerToolEvent)="onLayerToolEvent($event)">
-      </app-layer-toolbar>
-
-      <!-- Design Canvas -->
-      <div class="canvas-container">
-        <app-design-canvas
-          [layers]="project.layers"
-          [garmentColor]="getGarmentColorHex(project.garmentColor)"
-          [canvasWidth]="800"
-          [canvasHeight]="600"
-          [readOnly]="false"
-          (layerEvent)="onLayerEvent($event)"
-          (layersChange)="onLayersChange($event)">
-        </app-design-canvas>
+      <!-- Top Tools Bar -->
+      <div class="top-tools-bar">
+        <app-layer-toolbar
+          [canSave]="true"
+          [canExport]="true"
+          (layerToolEvent)="onLayerToolEvent($event)">
+        </app-layer-toolbar>
       </div>
 
-      <!-- Project Info Panel -->
-      <div class="project-info-panel">
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>{{ 'designLab.projectInfo' | translate }}</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="info-grid">
-              <div class="info-item">
-                <span class="info-label">{{ 'designLab.projectTitle' | translate }}:</span>
-                <span class="info-value">{{ project.title }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">{{ 'designLab.color' | translate }}:</span>
-                <span class="info-value">{{ project.garmentColor }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">{{ 'designLab.size' | translate }}:</span>
-                <span class="info-value">{{ project.garmentSize }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">{{ 'designLab.gender' | translate }}:</span>
-                <span class="info-value">{{ project.garmentGender }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">{{ 'designLab.status' | translate }}:</span>
-                <span class="info-value">{{ project.status }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">{{ 'designLab.layers' | translate }}:</span>
-                <span class="info-value">{{ project.layers.length }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">{{ 'designLab.lastModified' | translate }}:</span>
-                <span class="info-value">{{ project.updatedAt | date:'short' }}</span>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
+      <!-- Main Editor Layout -->
+      <div class="editor-layout">
+        <!-- Left Panel - Canvas Tools -->
+        <div class="left-panel">
+          <app-canvas-tools
+            [currentTool]="currentTool"
+            [isModified]="isModified"
+            (toolEvent)="onCanvasToolEvent($event)">
+          </app-canvas-tools>
+        </div>
+
+        <!-- Center Panel - Design Canvas -->
+        <div class="center-panel">
+          <div class="canvas-container">
+            <app-garment-background
+              [project]="project"
+              [width]="canvasWidth"
+              [height]="canvasHeight">
+            </app-garment-background>
+
+            <app-design-canvas
+              [layers]="project.layers"
+              [garmentColor]="getGarmentColorHex(project.garmentColor)"
+              [canvasWidth]="canvasWidth"
+              [canvasHeight]="canvasHeight"
+              [readOnly]="false"
+              (layerEvent)="onLayerEvent($event)"
+              (layersChange)="onLayersChange($event)">
+            </app-design-canvas>
+          </div>
+        </div>
+
+        <!-- Right Panel - Layer Management & Properties -->
+        <div class="right-panel">
+          <!-- Layer Management -->
+          <div class="panel-section">
+            <app-layer-management-panel
+              [layers]="project.layers"
+              [selectedLayerId]="selectedLayerId"
+              (layerEvent)="onLayerManagementEvent($event)">
+            </app-layer-management-panel>
+          </div>
+
+          <!-- Layer Properties -->
+          <div class="panel-section">
+            <app-layer-properties-panel
+              [selectedLayer]="selectedLayer"
+              (propertyEvent)="onLayerPropertyEvent($event)">
+            </app-layer-properties-panel>
+          </div>
+        </div>
       </div>
     </div>
   </div>

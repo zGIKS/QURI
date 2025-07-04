@@ -1,0 +1,258 @@
+<div class="simple-editor-container">
+  <!-- Toolbar -->
+  <mat-toolbar color="primary" class="editor-toolbar">
+    <button mat-icon-button routerLink="/home/design-lab">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="toolbar-title" *ngIf="project">
+      {{ project.title }}
+    </span>
+    <span class="toolbar-spacer"></span>
+    <button
+      mat-raised-button
+      color="accent"
+      (click)="saveProject()"
+      [disabled]="isSaving">
+      <mat-icon>save</mat-icon>
+      {{ 'designLab.tools.save' | translate }}
+    </button>
+  </mat-toolbar>
+
+  <!-- Main Content -->
+  <div class="editor-content">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>{{ 'designLab.loadingProject' | translate }}</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error" class="error-container">
+      <mat-icon color="warn">error</mat-icon>
+      <p>{{ error }}</p>
+      <button mat-raised-button color="primary" (click)="loadProject()">
+        <mat-icon>refresh</mat-icon>
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+
+    <!-- Editor Layout -->
+    <div *ngIf="project && !isLoading && !error" class="editor-layout">
+      <!-- Left Panel - T-Shirt Preview -->
+      <div class="preview-panel">
+        <div class="preview-header">
+          <h3>{{ 'designLab.preview' | translate }}</h3>
+        </div>
+
+        <div class="tshirt-container">
+          <div class="tshirt-preview">
+            <!-- Real T-shirt image from Cloudinary -->
+            <img
+              [src]="getTshirtImageUrl()"
+              [alt]="'T-shirt ' + project.garmentColor"
+              class="tshirt-image"
+              *ngIf="getTshirtImageUrl()"
+              loading="lazy">
+
+            <!-- Fallback if image doesn't load -->
+            <div *ngIf="!getTshirtImageUrl()" class="tshirt-fallback">
+              <mat-icon>checkroom</mat-icon>
+              <p>No preview available</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel - Controls -->
+      <div class="controls-panel">
+        <!-- Tab Navigation -->
+        <mat-card class="control-section">
+          <mat-tab-group>
+            <!-- Color Tab -->
+            <mat-tab label="{{ 'designLab.color' | translate }}">
+              <div class="tab-content">
+                <h4>{{ 'designLab.chooseColor' | translate }}</h4>
+
+                <div class="color-grid">
+                  <button
+                    *ngFor="let colorOption of getColorOptions()"
+                    class="color-option"
+                    [class.selected]="project.garmentColor === colorOption.color"
+                    [style.background-color]="colorOption.hex"
+                    [title]="colorOption.name"
+                    (click)="selectColor(colorOption.color)">
+                    <mat-icon *ngIf="project.garmentColor === colorOption.color" class="check-icon">
+                      check
+                    </mat-icon>
+                  </button>
+                </div>
+
+                <div class="selected-color-info">
+                  <p>
+                    <strong>{{ 'designLab.selectedColor' | translate }}:</strong>
+                    {{ project.garmentColor.toLowerCase().replace('_', ' ') }}
+                  </p>
+                </div>
+              </div>
+            </mat-tab>
+
+            <!-- Text Tab -->
+            <mat-tab label="{{ 'designLab.text' | translate }}">
+              <div class="tab-content">
+                <!-- Text Editor Form -->
+                <div *ngIf="isEditingText" class="text-editor-form">
+                  <h4>{{ selectedTextLayer ? 'Edit Text' : ('designLab.addText' | translate) }}</h4>
+
+                  <!-- Text Content -->
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>{{ 'designLab.properties.textContent' | translate }}</mat-label>
+                    <textarea
+                      matInput
+                      [(ngModel)]="textContent"
+                      placeholder="{{ 'designLab.properties.textContent' | translate }}"
+                      rows="3">
+                    </textarea>
+                  </mat-form-field>
+
+                  <!-- Font Family -->
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>{{ 'designLab.properties.fontFamily' | translate }}</mat-label>
+                    <mat-select [(ngModel)]="fontFamily">
+                      <mat-option *ngFor="let font of fontFamilies" [value]="font.value">
+                        {{ font.display }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <!-- Font Size -->
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>{{ 'designLab.properties.fontSize' | translate }}</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      [(ngModel)]="fontSize"
+                      min="8"
+                      max="72"
+                      placeholder="24">
+                  </mat-form-field>
+
+                  <!-- Font Color -->
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>{{ 'designLab.properties.fontColor' | translate }}</mat-label>
+                    <input
+                      matInput
+                      type="color"
+                      [(ngModel)]="fontColor"
+                      class="color-input">
+                  </mat-form-field>
+
+                  <!-- Text Style Options -->
+                  <div class="text-style-options">
+                    <mat-checkbox [(ngModel)]="isBold">
+                      <mat-icon>format_bold</mat-icon>
+                      {{ 'designLab.properties.bold' | translate }}
+                    </mat-checkbox>
+
+                    <mat-checkbox [(ngModel)]="isItalic">
+                      <mat-icon>format_italic</mat-icon>
+                      {{ 'designLab.properties.italic' | translate }}
+                    </mat-checkbox>
+
+                    <mat-checkbox [(ngModel)]="isUnderlined">
+                      <mat-icon>format_underlined</mat-icon>
+                      {{ 'designLab.properties.underlined' | translate }}
+                    </mat-checkbox>
+                  </div>
+
+                  <!-- Action Buttons -->
+                  <div class="text-editor-actions">
+                    <button
+                      mat-button
+                      (click)="cancelTextEditing()"
+                      [disabled]="isSaving"
+                      class="cancel-btn">
+                      <mat-icon>cancel</mat-icon>
+                      {{ 'common.cancel' | translate }}
+                    </button>
+
+                    <button
+                      mat-raised-button
+                      color="primary"
+                      (click)="saveTextLayer()"
+                      [disabled]="isSaving"
+                      class="save-btn">
+                      <mat-spinner diameter="20" *ngIf="isSaving"></mat-spinner>
+                      <mat-icon *ngIf="!isSaving">save</mat-icon>
+                      {{ isSaving ? 'Saving...' : (selectedTextLayer ? 'Update Text' : 'Add Text') }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Text Layer List -->
+                <div *ngIf="!isEditingText">
+                  <h4>{{ 'designLab.addText' | translate }}</h4>
+
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    (click)="addTextLayer()"
+                    class="add-text-btn">
+                    <mat-icon>text_fields</mat-icon>
+                    {{ 'designLab.addTextLayer' | translate }}
+                  </button>
+
+                  <!-- Text layers list -->
+                  <div class="layers-list" *ngIf="project.layers.length > 0">
+                    <h5>{{ 'designLab.layers' | translate }} ({{ project.layers.length }})</h5>
+                    <div
+                      *ngFor="let layer of project.layers; let i = index"
+                      class="layer-item">
+                      <mat-icon>{{ layer.type === 'TEXT' ? 'text_fields' : 'image' }}</mat-icon>
+                      <span class="layer-text">{{ layer.type === 'TEXT' ? (layer.details?.text || 'Text') : 'Image' }} - Layer {{ i + 1 }}</span>
+
+                      <div class="layer-actions" *ngIf="layer.type === 'TEXT'">
+                        <button
+                          mat-icon-button
+                          (click)="editTextLayer(layer)"
+                          [disabled]="isSaving"
+                          matTooltip="Edit text"
+                          class="edit-btn">
+                          <mat-icon>edit</mat-icon>
+                        </button>
+
+                        <button
+                          mat-icon-button
+                          (click)="deleteTextLayer(layer)"
+                          [disabled]="isSaving"
+                          matTooltip="Delete text"
+                          class="delete-btn">
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </mat-tab>
+
+            <!-- Add Image Tab -->
+            <mat-tab label="{{ 'designLab.addImage' | translate }}">
+              <div class="tab-content">
+                <h4>{{ 'designLab.addImage' | translate }}</h4>
+
+                <div class="image-upload-area">
+                  <mat-icon class="upload-icon">cloud_upload</mat-icon>
+                  <p>{{ 'designLab.clickToSelectImage' | translate }}</p>
+                  <button mat-raised-button color="accent">
+                    <mat-icon>upload</mat-icon>
+                    {{ 'designLab.chooseImage' | translate }}
+                  </button>
+                </div>
+              </div>
+            </mat-tab>
+          </mat-tab-group>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>

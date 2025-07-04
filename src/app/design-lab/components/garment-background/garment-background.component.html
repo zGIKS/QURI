@@ -1,0 +1,44 @@
+<div class="garment-background-container" [ngStyle]="getBackgroundStyle()">
+  <!-- Primary Garment Image -->
+  <img
+    *ngIf="backgroundConfig"
+    [src]="backgroundConfig.primaryUrl"
+    [alt]="'Garment background'"
+    class="garment-image primary-image"
+    [class]="backgroundConfig.silhouetteClass"
+    (error)="onImageError($event, 'generic')"
+    loading="lazy">
+
+  <!-- Generic Fallback Image -->
+  <img
+    *ngIf="backgroundConfig"
+    [src]="backgroundConfig.genericUrl"
+    [alt]="'Garment background fallback'"
+    class="garment-image generic-image"
+    [class]="backgroundConfig.silhouetteClass"
+    (error)="onImageError($event, 'color')"
+    loading="lazy"
+    style="display: none;">
+
+  <!-- Color Fallback Image -->
+  <img
+    *ngIf="backgroundConfig"
+    [src]="backgroundConfig.colorUrl"
+    [alt]="'Garment color background'"
+    class="garment-image color-image"
+    [class]="backgroundConfig.silhouetteClass"
+    (error)="onImageError($event, 'final')"
+    loading="lazy"
+    style="display: none;">
+
+  <!-- Garment Outline (if no images available) -->
+  <div class="garment-outline" *ngIf="backgroundConfig">
+    <div class="outline-shape" [class]="backgroundConfig.silhouetteClass"></div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="!backgroundConfig">
+    <div class="loading-spinner"></div>
+    <span>Loading garment...</span>
+  </div>
+</div>

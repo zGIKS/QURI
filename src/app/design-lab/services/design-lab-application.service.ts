@@ -10,8 +10,10 @@ import {
   CreateImageLayerCommand,
   UpdateTextLayerCommand,
   UpdateImageLayerCommand,
+  DeleteProjectCommand,
   ProjectCommandResult,
-  LayerCommandResult
+  LayerCommandResult,
+  DeleteProjectResult
 } from './design-lab.commands';
 import {
   GetProjectByIdQuery,
@@ -90,6 +92,14 @@ export class DesignLabApplicationService {
   deleteLayer(projectId: string, layerId: string): Observable<LayerCommandResult> {
     console.log('🏗️ ApplicationService - Delegating deleteLayer command');
     return this.commandService.deleteLayer(projectId, layerId);
+  }
+
+  /**
+   * Eliminar un proyecto
+   */
+  deleteProject(command: DeleteProjectCommand): Observable<DeleteProjectResult> {
+    console.log('🏗️ ApplicationService - Delegating deleteProject command');
+    return this.commandService.deleteProject(command);
   }
 
   // ==================== QUERIES ====================

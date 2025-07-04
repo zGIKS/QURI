@@ -59,8 +59,8 @@ export const routes: Routes = [
       {
         path: 'design-lab/edit/:id',
         loadComponent: () =>
-          import('./design-lab/components/project-edit/project-edit.component').then(
-            (c) => c.ProjectEditComponent
+          import('./design-lab/components/simple-editor/simple-editor.component').then(
+            (c) => c.SimpleEditorComponent
           ),
         canActivate: [authenticationGuard],
       },

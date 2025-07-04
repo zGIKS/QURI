@@ -60,9 +60,19 @@ export interface UpdateImageLayerCommand {
   height: number;
 }
 
+export interface DeleteProjectCommand {
+  projectId: string;
+}
+
 export interface ProjectCommandResult {
   success: boolean;
   projectId?: string;
+  message?: string;
+  error?: string;
+}
+
+export interface DeleteProjectResult {
+  success: boolean;
   message?: string;
   error?: string;
 }

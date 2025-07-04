@@ -1,0 +1,170 @@
+.garment-background-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.garment-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  transition: opacity 0.3s ease;
+}
+
+.garment-image.primary-image {
+  z-index: 3;
+}
+
+.garment-image.generic-image {
+  z-index: 2;
+}
+
+.garment-image.color-image {
+  z-index: 1;
+}
+
+/* Garment Silhouette Classes */
+.garment-men-s, .garment-men-m, .garment-men-l, .garment-men-xl, .garment-men-xxl {
+  /* Men's garment proportions */
+  aspect-ratio: 3/4;
+}
+
+.garment-women-xs, .garment-women-s, .garment-women-m, .garment-women-l, .garment-women-xl {
+  /* Women's garment proportions */
+  aspect-ratio: 3/4.2;
+}
+
+.garment-unisex-xs, .garment-unisex-s, .garment-unisex-m, .garment-unisex-l, .garment-unisex-xl, .garment-unisex-xxl {
+  /* Unisex garment proportions */
+  aspect-ratio: 3/4;
+}
+
+.garment-kids-xs, .garment-kids-s, .garment-kids-m, .garment-kids-l {
+  /* Kids garment proportions */
+  aspect-ratio: 3/3.5;
+}
+
+/* Garment Outline (fallback when no images load) */
+.garment-outline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.outline-shape {
+  position: relative;
+  width: 80%;
+  height: 90%;
+  margin: 5% auto;
+  border: 2px dashed rgba(0, 0, 0, 0.2);
+  border-radius: 20px 20px 8px 8px;
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(0, 0, 0, 0.05) 100%);
+}
+
+.outline-shape::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30%;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.outline-shape::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20%;
+  width: 60%;
+  height: 15%;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 20px 20px 0 0;
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #666;
+  font-size: 14px;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #2196f3;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .garment-background-container {
+    min-height: 300px;
+  }
+
+  .outline-shape {
+    width: 90%;
+    height: 85%;
+    margin: 7.5% auto;
+  }
+}
+
+/* High DPI Display Optimization */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .garment-image {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .garment-background-container {
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1);
+  }
+
+  .outline-shape {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg,
+      rgba(0, 0, 0, 0.1) 0%,
+      rgba(0, 0, 0, 0.05) 50%,
+      rgba(255, 255, 255, 0.05) 100%);
+  }
+
+  .outline-shape::before,
+  .outline-shape::after {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .loading-state {
+    color: #ccc;
+  }
+}

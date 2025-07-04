@@ -134,9 +134,35 @@ export class ProjectCreateComponent implements OnInit {
     console.log('🆕 Creating project with command:', command);
 
     this.designLabService.createProject(command).subscribe({
-      next: (result) => {
-        if (result.success && result.projectId) {
-          console.log('✅ Project created successfully:', result.projectId);
+      next: (result: any) => {
+        console.log('✅ Project creation response:', result);
+
+        // Verificar diferentes formatos de respuesta
+        let success = false;
+        let projectId = null;
+        let errorMessage = null;
+
+        if (result && typeof result === 'object') {
+          // Formato esperado: { success: boolean, projectId?: string, error?: string }
+          if (result.success !== undefined) {
+            success = result.success;
+            projectId = result.projectId;
+            errorMessage = result.error;
+          }
+          // Formato alternativo: respuesta directa con id
+          else if (result.id) {
+            success = true;
+            projectId = result.id;
+          }
+          // Formato alternativo: respuesta con projectId
+          else if (result.projectId) {
+            success = true;
+            projectId = result.projectId;
+          }
+        }
+
+        if (success && projectId) {
+          console.log('✅ Project created successfully with ID:', projectId);
 
           this.snackBar.open(
             this.translateService.instant('designLab.messages.projectCreated'),
@@ -148,16 +174,32 @@ export class ProjectCreateComponent implements OnInit {
           );
 
           // Navegar al editor del proyecto
-          this.router.navigate(['/home/design-lab/edit', result.projectId]);
+          this.router.navigate(['/home/design-lab/edit', projectId]);
         } else {
-          console.error('❌ Project creation failed:', result.error);
-          this.showError(result.error || this.translateService.instant('designLab.errors.creationFailed'));
+          console.error('❌ Project creation failed:', errorMessage || 'Unknown error');
+          this.showError(errorMessage || this.translateService.instant('designLab.errors.creationFailed'));
         }
         this.isCreating = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('❌ Error creating project:', error);
-        this.showError(error.message || this.translateService.instant('designLab.errors.creationFailed'));
+
+        // Extraer mensaje de error más específico
+        let errorMessage = this.translateService.instant('designLab.errors.creationFailed');
+
+        if (error) {
+          if (typeof error === 'string') {
+            errorMessage = error;
+          } else if (error.message) {
+            errorMessage = error.message;
+          } else if (error.error && error.error.message) {
+            errorMessage = error.error.message;
+          } else if (error.error && typeof error.error === 'string') {
+            errorMessage = error.error;
+          }
+        }
+
+        this.showError(errorMessage);
         this.isCreating = false;
       }
     });

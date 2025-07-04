@@ -1,0 +1,169 @@
+<div class="layer-properties-panel">
+  <div class="panel-header">
+    <h4>{{ 'designLab.properties.title' | translate }}</h4>
+    <button
+      *ngIf="selectedLayer"
+      mat-icon-button
+      (click)="resetToDefaults()"
+      matTooltip="{{ 'designLab.properties.resetToDefaults' | translate }}">
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
+
+  <div class="panel-content" *ngIf="selectedLayer; else noSelectionState">
+    <form [formGroup]="propertiesForm" class="properties-form">
+      <!-- Layer Type Badge -->
+      <div class="layer-type-badge">
+        <mat-icon>{{ selectedLayer.type === 'TEXT' ? 'text_fields' : 'image' }}</mat-icon>
+        <span>{{ selectedLayer.type }} Layer</span>
+      </div>
+
+      <!-- Common Properties -->
+      <div class="property-section">
+        <h5>{{ 'designLab.properties.transform' | translate }}</h5>
+
+        <div class="property-row">
+          <mat-form-field appearance="outline" class="property-field">
+            <mat-label>{{ 'designLab.properties.x' | translate }}</mat-label>
+            <input matInput type="number" formControlName="x" (change)="onPositionChange()">
+            <span matSuffix>px</span>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="property-field">
+            <mat-label>{{ 'designLab.properties.y' | translate }}</mat-label>
+            <input matInput type="number" formControlName="y" (change)="onPositionChange()">
+            <span matSuffix>px</span>
+          </mat-form-field>
+        </div>
+
+        <div class="property-row">
+          <mat-form-field appearance="outline" class="property-field-full">
+            <mat-label>{{ 'designLab.properties.opacity' | translate }}</mat-label>
+            <mat-slider
+              formControlName="opacity"
+              min="0"
+              max="1"
+              step="0.1"
+              (change)="onOpacityChange()"
+              class="opacity-slider">
+            </mat-slider>
+          </mat-form-field>
+        </div>
+
+        <div class="property-row">
+          <mat-checkbox
+            formControlName="isVisible"
+            (change)="onVisibilityChange()">
+            {{ 'designLab.properties.visible' | translate }}
+          </mat-checkbox>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Text Properties -->
+      <div *ngIf="isTextLayer()" class="property-section">
+        <h5>{{ 'designLab.properties.text' | translate }}</h5>
+
+        <div class="property-row">
+          <mat-form-field appearance="outline" class="property-field-full">
+            <mat-label>{{ 'designLab.properties.textContent' | translate }}</mat-label>
+            <textarea matInput formControlName="text" rows="3"></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="property-row">
+          <mat-form-field appearance="outline" class="property-field">
+            <mat-label>{{ 'designLab.properties.fontFamily' | translate }}</mat-label>
+            <mat-select formControlName="fontFamily">
+              <mat-option *ngFor="let font of fontFamilies" [value]="font.value">
+                {{ font.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="property-field">
+            <mat-label>{{ 'designLab.properties.fontSize' | translate }}</mat-label>
+            <mat-select formControlName="fontSize">
+              <mat-option *ngFor="let size of fontSizes" [value]="size">
+                {{ size }}px
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="property-row">
+          <mat-form-field appearance="outline" class="property-field-full">
+            <mat-label>{{ 'designLab.properties.fontColor' | translate }}</mat-label>
+            <input matInput type="color" formControlName="fontColor">
+          </mat-form-field>
+        </div>
+
+        <div class="property-row font-style-row">
+          <mat-checkbox formControlName="isBold">
+            <mat-icon>format_bold</mat-icon>
+            {{ 'designLab.properties.bold' | translate }}
+          </mat-checkbox>
+          <mat-checkbox formControlName="isItalic">
+            <mat-icon>format_italic</mat-icon>
+            {{ 'designLab.properties.italic' | translate }}
+          </mat-checkbox>
+          <mat-checkbox formControlName="isUnderlined">
+            <mat-icon>format_underlined</mat-icon>
+            {{ 'designLab.properties.underlined' | translate }}
+          </mat-checkbox>
+        </div>
+      </div>
+
+      <!-- Image Properties -->
+      <div *ngIf="isImageLayer()" class="property-section">
+        <h5>{{ 'designLab.properties.image' | translate }}</h5>
+
+        <div class="property-row">
+          <mat-form-field appearance="outline" class="property-field-full">
+            <mat-label>{{ 'designLab.properties.imageUrl' | translate }}</mat-label>
+            <input matInput formControlName="imageUrl" placeholder="https://...">
+          </mat-form-field>
+        </div>
+
+        <div class="property-row">
+          <mat-form-field appearance="outline" class="property-field">
+            <mat-label>{{ 'designLab.properties.width' | translate }}</mat-label>
+            <input matInput type="number" formControlName="width" min="1">
+            <span matSuffix>px</span>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="property-field">
+            <mat-label>{{ 'designLab.properties.height' | translate }}</mat-label>
+            <input matInput type="number" formControlName="height" min="1">
+            <span matSuffix>px</span>
+          </mat-form-field>
+        </div>
+
+        <div class="property-row">
+          <button
+            mat-button
+            type="button"
+            (click)="propertiesForm.patchValue({width: propertiesForm.value.height})">
+            {{ 'designLab.properties.makeSquare' | translate }}
+          </button>
+          <button
+            mat-button
+            type="button"
+            (click)="propertiesForm.patchValue({height: propertiesForm.value.width})">
+            {{ 'designLab.properties.matchWidth' | translate }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- No Selection State -->
+  <ng-template #noSelectionState>
+    <div class="no-selection-state">
+      <mat-icon class="no-selection-icon">touch_app</mat-icon>
+      <p>{{ 'designLab.properties.noSelection' | translate }}</p>
+      <small>{{ 'designLab.properties.selectLayerHint' | translate }}</small>
+    </div>
+  </ng-template>
+</div>

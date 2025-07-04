@@ -5,7 +5,8 @@ import {
   ProjectResponse,
   LayerResponse,
   CreateProjectResponse,
-  LayerOperationResponse
+  LayerOperationResponse,
+  DeleteProjectResponse
 } from './design-lab.response';
 import {
   CreateProjectRequest,
@@ -22,8 +23,10 @@ import {
   UpdateTextLayerCommand,
   UpdateImageLayerCommand,
   UpdateLayerCoordinatesCommand,
+  DeleteProjectCommand,
   ProjectCommandResult,
-  LayerCommandResult
+  LayerCommandResult,
+  DeleteProjectResult
 } from './design-lab.commands';
 import {
   PROJECT_STATUS,
@@ -216,6 +219,17 @@ export class DesignLabAssembler {
     return {
       success: response.success,
       layerId: response.layerId,
+      message: response.message,
+      error: response.error
+    };
+  }
+
+  /**
+   * Convertir DeleteProjectResponse a DeleteProjectResult
+   */
+  toDeleteProjectResult(response: DeleteProjectResponse): DeleteProjectResult {
+    return {
+      success: !response.error,
       message: response.message,
       error: response.error
     };

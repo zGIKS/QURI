@@ -1,0 +1,102 @@
+ <div class="design-lab-container">
+      <mat-toolbar color="primary" class="design-lab-toolbar">
+        <button mat-icon-button routerLink="/home/dashboard">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <span class="toolbar-title">{{ 'navigation.designLab' | translate }}</span>
+        <span class="toolbar-spacer"></span>
+        <button mat-icon-button>
+          <mat-icon>help</mat-icon>
+        </button>
+      </mat-toolbar>
+
+      <div class="design-lab-content">
+        <!-- Projects Section -->
+        <section class="projects-section">
+          <div class="section-header">
+            <h2>{{ 'designLab.myProjects' | translate }}</h2>
+            <button mat-raised-button color="primary" (click)="createNewProject()">
+              <mat-icon>add</mat-icon>
+              {{ 'designLab.newProject' | translate }}
+            </button>
+          </div>
+
+          <!-- Loading State -->
+          <div *ngIf="isLoading" class="loading-container">
+            <mat-spinner></mat-spinner>
+            <p>{{ 'designLab.loadingProjects' | translate }}</p>
+          </div>
+
+          <!-- Error State -->
+          <div *ngIf="error" class="error-container">
+            <mat-icon color="warn">error</mat-icon>
+            <p>{{ 'designLab.errorLoadingProjects' | translate }}: {{ error }}</p>
+            <button mat-raised-button color="primary" (click)="loadProjects()">
+              <mat-icon>refresh</mat-icon>
+              {{ 'common.retry' | translate }}
+            </button>
+          </div>
+
+          <!-- Projects Grid -->
+          <div *ngIf="!isLoading && !error" class="projects-grid">
+            <div *ngIf="projects.length === 0" class="empty-state">
+              <mat-icon>folder_open</mat-icon>
+              <h3>{{ 'designLab.noProjects' | translate }}</h3>
+              <p>{{ 'designLab.noProjectsDescription' | translate }}</p>
+              <button mat-raised-button color="primary" (click)="createNewProject()">
+                {{ 'designLab.createProject' | translate }}
+              </button>
+            </div>
+
+            <mat-card *ngFor="let project of projects" class="project-card">
+              <div class="project-preview">
+                <img
+                  *ngIf="project.previewUrl"
+                  [src]="project.previewUrl"
+                  [alt]="project.title"
+                  class="preview-image">
+                <div *ngIf="!project.previewUrl" class="no-preview">
+                  <mat-icon>image</mat-icon>
+                  <span>{{ 'designLab.noPreview' | translate }}</span>
+                </div>
+              </div>
+
+              <mat-card-header>
+                <mat-card-title>{{ project.title }}</mat-card-title>
+                <mat-card-subtitle>
+                  {{ 'designLab.projectCreated' | translate }}: {{ project.createdAt | date:'short' }}
+                </mat-card-subtitle>
+              </mat-card-header>
+
+              <mat-card-content>
+                <div class="project-details">
+                  <mat-chip-set>
+                    <mat-chip>{{ project.status }}</mat-chip>
+                    <mat-chip>{{ project.garmentColor }}</mat-chip>
+                    <mat-chip>{{ project.garmentSize }}</mat-chip>
+                  </mat-chip-set>
+                  <p class="layers-count">{{ project.layers.length }} {{ project.layers.length === 1 ? ('designLab.layer' | translate) : ('designLab.layers' | translate) }}</p>
+                </div>
+              </mat-card-content>
+
+              <mat-card-actions>
+                <button mat-button color="primary"
+                        (click)="debugProjectData(project); editProject(project.id)"
+                        [title]="'ID: ' + project.id">
+                  <mat-icon>edit</mat-icon>
+                  {{ 'designLab.edit' | translate }}
+                </button>
+                <button mat-button (click)="duplicateProject(project.id)">
+                  <mat-icon>content_copy</mat-icon>
+                  {{ 'designLab.duplicate' | translate }}
+                </button>
+                <button mat-button color="warn" (click)="deleteProject(project.id)">
+                  <mat-icon>delete</mat-icon>
+                  {{ 'designLab.delete' | translate }}
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          </div>
+        </section>
+      </div>
+    </div>

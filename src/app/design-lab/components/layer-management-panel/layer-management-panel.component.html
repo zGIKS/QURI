@@ -1,0 +1,86 @@
+<div class="layer-management-panel">
+  <div class="panel-header">
+    <h4>{{ 'designLab.layerManagement.title' | translate }}</h4>
+    <span class="layer-count">{{ layers.length }} {{ 'designLab.layerManagement.layers' | translate }}</span>
+  </div>
+
+  <div class="layer-list-container" cdkDropList (cdkDropListDropped)="onLayerDrop($event)">
+    <div
+      *ngFor="let layer of sortedLayers; trackBy: trackByLayerId"
+      class="layer-item"
+      [class.selected]="selectedLayerId === layer.id"
+      [class.hidden]="!layer.isVisible"
+      cdkDrag
+      [cdkDragData]="layer"
+      (click)="selectLayer(layer)">
+
+      <!-- Drag Handle -->
+      <div class="drag-handle" cdkDragHandle>
+        <mat-icon>drag_indicator</mat-icon>
+      </div>
+
+      <!-- Layer Icon -->
+      <div class="layer-icon">
+        <mat-icon>{{ getLayerIcon(layer) }}</mat-icon>
+      </div>
+
+      <!-- Layer Info -->
+      <div class="layer-info">
+        <div class="layer-name">{{ getLayerPreview(layer) }}</div>
+        <div class="layer-details">
+          <span class="layer-type">{{ layer.type }}</span>
+          <span class="layer-z">Z: {{ layer.z }}</span>
+        </div>
+      </div>
+
+      <!-- Layer Controls -->
+      <div class="layer-controls">
+        <!-- Visibility Toggle -->
+        <button
+          mat-icon-button
+          class="visibility-toggle"
+          [class.visible]="layer.isVisible"
+          (click)="toggleLayerVisibility(layer); $event.stopPropagation()"
+          matTooltip="{{ layer.isVisible ? ('designLab.layerManagement.hideLayer' | translate) : ('designLab.layerManagement.showLayer' | translate) }}">
+          <mat-icon>{{ layer.isVisible ? 'visibility' : 'visibility_off' }}</mat-icon>
+        </button>
+
+        <!-- Layer Menu -->
+        <button
+          mat-icon-button
+          [matMenuTriggerFor]="layerMenu"
+          (click)="$event.stopPropagation()"
+          matTooltip="{{ 'designLab.layerManagement.layerOptions' | translate }}">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+
+        <mat-menu #layerMenu="matMenu">
+          <button mat-menu-item (click)="duplicateLayer(layer)">
+            <mat-icon>content_copy</mat-icon>
+            <span>{{ 'designLab.layerManagement.duplicate' | translate }}</span>
+          </button>
+          <button mat-menu-item (click)="bringToFront(layer)">
+            <mat-icon>flip_to_front</mat-icon>
+            <span>{{ 'designLab.layerManagement.bringToFront' | translate }}</span>
+          </button>
+          <button mat-menu-item (click)="sendToBack(layer)">
+            <mat-icon>flip_to_back</mat-icon>
+            <span>{{ 'designLab.layerManagement.sendToBack' | translate }}</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="deleteLayer(layer)" class="delete-action">
+            <mat-icon>delete</mat-icon>
+            <span>{{ 'designLab.layerManagement.delete' | translate }}</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="layers.length === 0" class="empty-state">
+      <mat-icon class="empty-icon">layers_clear</mat-icon>
+      <p>{{ 'designLab.layerManagement.noLayers' | translate }}</p>
+      <small>{{ 'designLab.layerManagement.addLayersHint' | translate }}</small>
+    </div>
+  </div>
+</div>

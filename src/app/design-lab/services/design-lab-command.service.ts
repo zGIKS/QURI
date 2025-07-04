@@ -11,12 +11,15 @@ import {
   CreateImageLayerCommand,
   UpdateTextLayerCommand,
   UpdateImageLayerCommand,
+  DeleteProjectCommand,
   ProjectCommandResult,
-  LayerCommandResult
+  LayerCommandResult,
+  DeleteProjectResult
 } from './design-lab.commands';
 import {
   CreateProjectResponse,
-  LayerOperationResponse
+  LayerOperationResponse,
+  DeleteProjectResponse
 } from './design-lab.response';
 
 const BASE_URL = `${environment.serverBaseUrl}/api/v1/projects`;
@@ -61,6 +64,32 @@ export class DesignLabCommandService {
   }
 
   /**
+   * Eliminar un proyecto
+   */
+  deleteProject(command: DeleteProjectCommand): Observable<DeleteProjectResult> {
+    console.log('🗑️ DesignLabCommandService - Deleting project:', command);
+
+    if (!this.authService.hasValidToken()) {
+      return throwError(() => new Error('Usuario no autenticado'));
+    }
+
+    const url = `${BASE_URL}/${command.projectId}`;
+
+    return this.http.delete<DeleteProjectResponse>(url, {
+      headers: this.getHeaders()
+    }).pipe(
+      map(response => {
+        console.log('✅ Project deleted successfully:', response);
+        return this.assembler.toDeleteProjectResult(response);
+      }),
+      catchError(error => {
+        console.error('❌ Error deleting project:', error);
+        return throwError(() => this.getErrorMessage(error));
+      })
+    );
+  }
+
+  /**
    * Actualizar coordenadas de una capa
    */
   updateLayerCoordinates(command: UpdateLayerCoordinatesCommand): Observable<LayerCommandResult> {
@@ -98,7 +127,7 @@ export class DesignLabCommandService {
     }
 
     const request = this.assembler.toCreateTextLayerRequest(command);
-    const url = `${BASE_URL}/${command.projectId}/layers/text`;
+    const url = `${BASE_URL}/layers/texts`;
 
     return this.http.post<LayerOperationResponse>(url, request, {
       headers: this.getHeaders()
@@ -222,13 +251,11 @@ export class DesignLabCommandService {
   }
 
   /**
-   * Obtener headers HTTP con autenticación
+   * Obtener headers HTTP (sin Authorization ya que el interceptor se encarga)
    */
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
     return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Content-Type': 'application/json'
     });
   }
 
