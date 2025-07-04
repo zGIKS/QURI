@@ -8,6 +8,7 @@ import {MatInput} from "@angular/material/input";
 import {MatButton, MatIconButton} from "@angular/material/button";
 import {MatIcon} from "@angular/material/icon";
 import {RouterLink} from "@angular/router";
+import { LanguageSwitcherComponent } from '../../../shared/components/language-switcher.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -30,6 +31,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     MatPrefix,
     MatSuffix,
     RouterLink,
+    LanguageSwitcherComponent,
     TranslateModule
   ],
   templateUrl: './sign-up.component.html',
@@ -40,6 +42,7 @@ export class SignUpComponent implements OnInit {
   submitted: boolean = false;
   hidePassword = true;
   hideConfirmPassword = true;
+  isLoading = false;
 
   constructor(
     private builder: FormBuilder,
@@ -57,11 +60,20 @@ export class SignUpComponent implements OnInit {
 
   onSubmit() {
     if (this.form.invalid) return;
+
+    this.isLoading = true;
+    this.submitted = true;
+
     let username = this.form.value.username;
     let password = this.form.value.password;
     const signUpRequest = new SignUpRequest(username, password, ['ROLE_USER']);
+
     this.authenticationService.signUp(signUpRequest);
-    this.submitted = true;
+
+    // Reset loading state after a reasonable time
+    setTimeout(() => {
+      this.isLoading = false;
+    }, 2000);
   }
 
   passwordMatchValidator(control: AbstractControl): {[key: string]: any} | null {

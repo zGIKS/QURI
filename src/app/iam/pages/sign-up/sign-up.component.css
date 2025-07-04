@@ -1,1 +1,88 @@
-/* Pure Angular Material only - No custom CSS */
+.signup-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.language-switcher-container {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+}
+
+.signup-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.signup-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.signup-header {
+  text-align: center;
+  padding: 24px;
+}
+
+.signup-avatar {
+  width: 56px !important;
+  height: 56px !important;
+  margin: 0 auto 16px auto !important;
+}
+
+.signup-form-content {
+  padding: 0 24px 24px 24px !important;
+}
+
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.signup-button {
+  width: 100%;
+  height: 44px;
+  margin-top: 8px;
+}
+
+.signup-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.signup-footer-text {
+  font-size: 14px;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .signup-content {
+    padding: 16px;
+  }
+
+  .signup-header {
+    padding: 16px;
+  }
+
+  .signup-form-content {
+    padding: 0 16px 16px 16px !important;
+  }
+
+  .signup-form {
+    gap: 12px;
+  }
+}

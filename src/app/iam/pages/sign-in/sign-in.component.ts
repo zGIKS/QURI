@@ -41,6 +41,7 @@ export class SignInComponent implements OnInit {
   form!: FormGroup;
   submitted = false;
   hidePassword = true;
+  isLoading = false;
 
   constructor(
     private builder: FormBuilder,
@@ -57,11 +58,20 @@ export class SignInComponent implements OnInit {
 
   onSubmit() {
     if (this.form.invalid) return;
+
+    this.isLoading = true;
+    this.submitted = true;
+
     let username = this.form.value.username;
     let password = this.form.value.password;
     const signInRequest = new SignInRequest(username, password);
+
     this.authenticationService.signIn(signInRequest);
-    this.submitted = true;
+
+    // Reset loading state after a reasonable time
+    setTimeout(() => {
+      this.isLoading = false;
+    }, 2000);
   }
 
   isInvalidControl(form: FormGroup, controlName: string): boolean {
