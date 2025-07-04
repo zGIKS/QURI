@@ -28,6 +28,25 @@ export class AuthenticationService {
    * @param http The HttpClient service.
    */
   constructor(private router: Router, private http: HttpClient) {
+    this.checkStoredAuthentication();
+  }
+
+  /**
+   * Check if there's a stored authentication token and user data in localStorage
+   * @summary
+   * This method checks localStorage for authentication data and restores the user's session if valid.
+   */
+  private checkStoredAuthentication() {
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+    const username = localStorage.getItem('username');
+
+    if (token && userId && username) {
+      this.signedIn.next(true);
+      this.signedInUserId.next(parseInt(userId));
+      this.signedInUsername.next(username);
+      console.log(`Restored authentication for user: ${username}`);
+    }
   }
 
   get isSignedIn() {
@@ -62,7 +81,7 @@ export class AuthenticationService {
         error: (error) => {
           console.error(`Error while signing up:`, error);
           console.error(`Error details:`, error.error);
-          
+
           // Show more specific error messages
           if (error.status === 409) {
             alert('Username already exists. Please choose a different username.');
@@ -71,7 +90,7 @@ export class AuthenticationService {
           } else {
             alert('Sign up failed. Please try again.');
           }
-          
+
           this.router.navigate(['/sign-up']).then();
         }
       });
@@ -99,6 +118,8 @@ export class AuthenticationService {
           this.signedInUserId.next(response.id);
           this.signedInUsername.next(response.username);
           localStorage.setItem('token', response.token);
+          localStorage.setItem('userId', response.id.toString());
+          localStorage.setItem('username', response.username);
           console.log(`Signed in as ${response.username} with token ${response.token}`);
           this.router.navigate(['/home']).then();
         },
@@ -107,7 +128,7 @@ export class AuthenticationService {
           this.signedInUserId.next(0);
           this.signedInUsername.next('');
           console.error(`Error while signing in:`, error);
-          
+
           // Show more specific error messages
           if (error.status === 401) {
             alert('Invalid username or password. Please check your credentials.');
@@ -116,7 +137,7 @@ export class AuthenticationService {
           } else {
             alert('Sign in failed. Please try again.');
           }
-          
+
           this.router.navigate(['/sign-in']).then();
         }
       });
@@ -133,7 +154,30 @@ export class AuthenticationService {
     this.signedInUserId.next(0);
     this.signedInUsername.next('');
     localStorage.removeItem('token');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('username');
     this.router.navigate(['/sign-in']).then();
+  }
+
+  /**
+   * Check if the current user has a valid token
+   * @summary
+   * This method checks if there's a valid token in localStorage
+   * @returns boolean indicating if the user has a valid token
+   */
+  hasValidToken(): boolean {
+    const token = localStorage.getItem('token');
+    return token !== null && token !== '';
+  }
+
+  /**
+   * Get the current token from localStorage
+   * @summary
+   * This method retrieves the authentication token from localStorage
+   * @returns The authentication token or null if not found
+   */
+  getToken(): string | null {
+    return localStorage.getItem('token');
   }
 
 }
