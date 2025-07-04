@@ -2,13 +2,13 @@
 .home-layout {
   height: 100vh;
   width: 100%;
-  overflow: hidden;
+
 }
 
 .sidenav-container {
   height: 100%;
   width: 100%;
-  overflow: hidden;
+
 }
 
 /* Sidebar Styles */
@@ -41,7 +41,7 @@
   margin: 0;
   letter-spacing: 0.5px;
   white-space: nowrap;
-  overflow: hidden;
+
   text-overflow: ellipsis;
 }
 
