@@ -107,11 +107,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       icon: 'storefront'
     },
     {
-      name: 'Analytics',
-      route: 'analytics',
-      icon: 'analytics'
-    },
-    {
       name: 'Design Lab',
       route: 'design-lab',
       icon: 'palette'
