@@ -4,8 +4,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatGridListModule } from '@angular/material/grid-list';
-import { AuthenticationService } from '../iam/services/authentication.service';
 import { Router } from '@angular/router';
+import { AuthenticationService } from '../../../iam/services/authentication.service';
 
 @Component({
   selector: 'app-home',
@@ -31,7 +31,7 @@ import { Router } from '@angular/router';
       <!-- Dashboard Grid -->
       <section class="dashboard-section">
         <mat-grid-list cols="3" rowHeight="200px" gutterSize="24px" class="dashboard-grid">
-          
+
           <mat-grid-tile>
             <mat-card class="dashboard-card">
               <mat-card-header>
@@ -87,7 +87,7 @@ import { Router } from '@angular/router';
       <section class="quick-stats">
         <h2>Quick Statistics</h2>
         <mat-grid-list cols="4" rowHeight="120px" gutterSize="16px">
-          
+
           <mat-grid-tile>
             <mat-card class="stat-card">
               <div class="stat-content">
@@ -139,7 +139,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent {
-  
+
   constructor(
     private authService: AuthenticationService,
     private router: Router
