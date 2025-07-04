@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { Router } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-dashboard',
@@ -14,7 +15,8 @@ import { Router } from '@angular/router';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatGridListModule
+    MatGridListModule,
+    TranslateModule
   ],
   template: `
     <!-- Welcome Section -->
@@ -22,8 +24,8 @@ import { Router } from '@angular/router';
       <mat-card class="welcome-card">
         <mat-card-header>
           <mat-icon mat-card-avatar class="welcome-avatar">dashboard</mat-icon>
-          <mat-card-title>Welcome to QURI TeeLab</mat-card-title>
-          <mat-card-subtitle>Your advanced analytics platform is ready to help you make data-driven decisions.</mat-card-subtitle>
+          <mat-card-title>{{ 'dashboard.welcome' | translate }}</mat-card-title>
+          <mat-card-subtitle>{{ 'dashboard.overview' | translate }}</mat-card-subtitle>
         </mat-card-header>
       </mat-card>
     </section>
@@ -52,13 +54,13 @@ import { Router } from '@angular/router';
           <mat-card class="dashboard-card">
             <mat-card-header>
               <mat-icon mat-card-avatar>shopping_cart</mat-icon>
-              <mat-card-title>Product Catalog</mat-card-title>
-              <mat-card-subtitle>Manage your products</mat-card-subtitle>
+              <mat-card-title>{{ 'dashboard.productCatalog.title' | translate }}</mat-card-title>
+              <mat-card-subtitle>{{ 'dashboard.productCatalog.subtitle' | translate }}</mat-card-subtitle>
             </mat-card-header>
             <mat-card-actions>
               <button mat-raised-button color="primary" (click)="navigateToSection('catalog')">
                 <mat-icon>storefront</mat-icon>
-                View Catalog
+                {{ 'dashboard.productCatalog.action' | translate }}
               </button>
             </mat-card-actions>
           </mat-card>
@@ -68,13 +70,13 @@ import { Router } from '@angular/router';
           <mat-card class="dashboard-card">
             <mat-card-header>
               <mat-icon mat-card-avatar>design_services</mat-icon>
-              <mat-card-title>Design Lab</mat-card-title>
-              <mat-card-subtitle>Create and edit designs</mat-card-subtitle>
+              <mat-card-title>{{ 'dashboard.designLab.title' | translate }}</mat-card-title>
+              <mat-card-subtitle>{{ 'dashboard.designLab.subtitle' | translate }}</mat-card-subtitle>
             </mat-card-header>
             <mat-card-actions>
               <button mat-raised-button color="primary" (click)="navigateToSection('design-lab')">
                 <mat-icon>palette</mat-icon>
-                Open Lab
+                {{ 'dashboard.designLab.action' | translate }}
               </button>
             </mat-card-actions>
           </mat-card>

@@ -1,0 +1,194 @@
+{
+  "signin": {
+    "title": "Bienvenido de vuelta",
+    "subtitle": "Inicia sesión en tu cuenta",
+    "username": "Nombre de usuario",
+    "password": "Contraseña",
+    "usernameField": {
+      "label": "Nombre de usuario",
+      "placeholder": "Ingresa tu nombre de usuario"
+    },
+    "passwordField": {
+      "label": "Contraseña",
+      "placeholder": "Ingresa tu contraseña"
+    },
+    "button": {
+      "signingIn": "Iniciar Sesión"
+    },
+    "noAccount": "¿No tienes una cuenta?",
+    "validation": {
+      "required": "{{field}} es requerido",
+      "minlength": "{{field}} debe tener al menos {{length}} caracteres"
+    }
+  },
+  "signup": {
+    "title": "Crear Cuenta",
+    "subtitle": "Únete a nosotros hoy",
+    "username": "Nombre de usuario",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "usernameField": {
+      "label": "Nombre de usuario",
+      "placeholder": "Elige un nombre de usuario"
+    },
+    "passwordField": {
+      "label": "Contraseña",
+      "placeholder": "Crea una contraseña"
+    },
+    "confirmPasswordField": {
+      "label": "Confirmar Contraseña",
+      "placeholder": "Confirma tu contraseña"
+    },
+    "button": {
+      "creating": "Crear Cuenta"
+    },
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "validation": {
+      "required": "{{field}} es requerido",
+      "minlength": "{{field}} debe tener al menos {{length}} caracteres",
+      "passwordMismatch": "Las contraseñas no coinciden"
+    }
+  },
+  "common": {
+    "signUp": "Registrarse",
+    "signIn": "Iniciar Sesión",
+    "signOut": "Cerrar Sesión",
+    "loading": "Cargando...",
+    "error": "Error",
+    "retry": "Reintentar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "refresh": "Actualizar",
+    "submit": "Enviar",
+    "close": "Cerrar",
+    "yes": "Sí",
+    "no": "No",
+    "ok": "OK",
+    "hide": {
+      "password": "Ocultar contraseña",
+      "confirmPassword": "Ocultar confirmar contraseña"
+    }
+  },
+  "dashboard": {
+    "title": "Panel de Control",
+    "welcome": "Bienvenido a QURI",
+    "overview": "Tu plataforma de análisis avanzado está lista para ayudarte a tomar decisiones basadas en datos",
+    "recentActivity": "Actividad Reciente",
+    "quickActions": "Acciones Rápidas",
+    "statistics": "Estadísticas",
+    "myProjects": "Mis Proyectos",
+    "explore": "Explorar",
+    "getStarted": "Comenzar",
+    "productCatalog": {
+      "title": "Catálogo de Productos",
+      "subtitle": "Gestiona tus productos",
+      "action": "Ver Catálogo"
+    },
+    "designLab": {
+      "title": "Editor de Diseño",
+      "subtitle": "Crea y edita diseños",
+      "action": "Abrir Editor"
+    }
+  },
+  "catalog": {
+    "title": "Catálogo de Productos",
+    "products": "Productos",
+    "product": "Producto",
+    "availableProducts": "Productos Disponibles",
+    "productsFound": "productos encontrados",
+    "productFound": "producto encontrado",
+    "noProducts": "No hay productos disponibles",
+    "loadingProducts": "Cargando productos...",
+    "errorLoadingProducts": "Error al cargar productos",
+    "price": "Precio",
+    "status": "Estado",
+    "available": "Disponible",
+    "outOfStock": "Agotado",
+    "discontinued": "Descontinuado",
+    "like": "Me gusta",
+    "purchase": "Comprar",
+    "viewDetails": "Ver Detalles",
+    "addToCart": "Agregar al Carrito",
+    "liked": "Me gustó",
+    "projectTitle": "Título del Proyecto",
+    "preview": "Vista Previa"
+  },
+  "analytics": {
+    "title": "Panel de Análisis",
+    "customerAnalytics": "Análisis de Clientes",
+    "manufacturerAnalytics": "Análisis de Fabricantes",
+    "totalProjects": "Total de Proyectos",
+    "blueprints": "Planos",
+    "designedGarments": "Prendas Diseñadas",
+    "completedProjects": "Proyectos Completados",
+    "ordersReceived": "Órdenes Recibidas",
+    "pendingFulfillments": "Cumplimientos Pendientes",
+    "producedProjects": "Proyectos Producidos",
+    "avgFulfillmentTime": "Tiempo Promedio de Cumplimiento",
+    "productivityScore": "Puntuación de Productividad",
+    "efficiencyScore": "Puntuación de Eficiencia",
+    "completionRate": "Tasa de Finalización",
+    "successRate": "Tasa de Éxito",
+    "activityLevel": "Nivel de Actividad",
+    "workloadStatus": "Estado de Carga de Trabajo",
+    "fulfillmentEfficiency": "Eficiencia de Cumplimiento",
+    "high": "Alto",
+    "medium": "Medio",
+    "low": "Bajo",
+    "excellent": "Excelente",
+    "good": "Bueno",
+    "average": "Promedio",
+    "poor": "Pobre",
+    "light": "Ligero",
+    "moderate": "Moderado",
+    "heavy": "Pesado",
+    "overloaded": "Sobrecargado",
+    "loadingAnalytics": "Cargando análisis...",
+    "errorLoadingAnalytics": "Error al cargar análisis",
+    "noAnalyticsData": "No hay datos de análisis disponibles para este usuario",
+    "viewPerformance": "Ve tus métricas de rendimiento y KPIs"
+  },
+  "errors": {
+    "genericError": "Ocurrió un error",
+    "networkError": "Error de red",
+    "serverError": "Error del servidor",
+    "notFound": "No encontrado",
+    "unauthorized": "No autorizado",
+    "forbidden": "Prohibido",
+    "validationError": "Error de validación",
+    "timeout": "Tiempo de espera agotado",
+    "unknownError": "Error desconocido"
+  },
+  "messages": {
+    "success": "Éxito",
+    "info": "Información",
+    "warning": "Advertencia",
+    "confirmDelete": "¿Estás seguro de que deseas eliminar este elemento?",
+    "unsavedChanges": "Tienes cambios sin guardar. ¿Estás seguro de que deseas salir?",
+    "operationSuccessful": "Operación completada exitosamente",
+    "operationFailed": "Operación fallida"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "dashboard": "Panel de Control",
+    "catalog": "Catálogo",
+    "productCatalog": "Catálogo de Productos",
+    "designLab": "Laboratorio de Diseño",
+    "analytics": "Análisis",
+    "profile": "Perfil",
+    "settings": "Configuraciones",
+    "notifications": "Notificaciones"
+  },
+  "language": {
+    "switch": "Cambiar idioma",
+    "english": "Inglés",
+    "spanish": "Español"
+  }
+}

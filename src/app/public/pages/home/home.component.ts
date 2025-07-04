@@ -12,9 +12,12 @@ import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { AuthenticationService } from '../../../iam/services/authentication.service';
 import { Subject, takeUntil } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { LanguageSwitcherComponent } from '../../../shared/components/language-switcher.component';
 
 interface NavigationLink {
   name: string;
+  nameKey: string;
   route: string;
   icon: string;
 }
@@ -32,7 +35,9 @@ interface NavigationLink {
     MatListModule,
     MatToolbarModule,
     MatDividerModule,
-    RouterModule
+    RouterModule,
+    TranslateModule,
+    LanguageSwitcherComponent
   ],
   template: `
     <div class="home-layout">
@@ -54,7 +59,7 @@ interface NavigationLink {
               class="nav-item"
               (click)="onNavigate(link)">
               <mat-icon matListItemIcon>{{ link.icon }}</mat-icon>
-              <span matListItemTitle>{{ link.name }}</span>
+              <span matListItemTitle>{{ link.nameKey | translate }}</span>
             </mat-list-item>
           </mat-nav-list>
 
@@ -64,7 +69,7 @@ interface NavigationLink {
           <div class="sidebar-footer">
             <button mat-stroked-button color="warn" (click)="signOut()" class="sign-out-btn">
               <mat-icon>logout</mat-icon>
-              Sign Out
+              {{ 'common.signOut' | translate }}
             </button>
           </div>
         </mat-sidenav>
@@ -74,6 +79,7 @@ interface NavigationLink {
           <mat-toolbar class="toolbar">
             <span>{{ getCurrentPageTitle() }}</span>
             <span class="toolbar-spacer"></span>
+            <app-language-switcher></app-language-switcher>
             <button mat-icon-button>
               <mat-icon>notifications</mat-icon>
             </button>
@@ -98,31 +104,35 @@ export class HomeComponent implements OnInit, OnDestroy {
   navigationLinks: NavigationLink[] = [
     {
       name: 'Dashboard',
+      nameKey: 'navigation.dashboard',
       route: '',
       icon: 'dashboard'
     },
     {
       name: 'Catalog',
+      nameKey: 'navigation.catalog',
       route: 'catalog',
       icon: 'storefront'
     },
     {
       name: 'Design Lab',
+      nameKey: 'navigation.designLab',
       route: 'design-lab',
       icon: 'palette'
     }
   ];
 
   private readonly routeTitleMap = new Map<string, string>([
-    ['', 'Dashboard'],
-    ['dashboard', 'Dashboard'],
-    ['catalog', 'Product Catalog'],
-    ['design-lab', 'Design Lab']
+    ['', 'navigation.dashboard'],
+    ['dashboard', 'navigation.dashboard'],
+    ['catalog', 'navigation.catalog'],
+    ['design-lab', 'navigation.designLab']
   ]);
 
   constructor(
     private authService: AuthenticationService,
-    private router: Router
+    private router: Router,
+    private translateService: TranslateService
   ) {}
 
   ngOnInit() {
@@ -150,7 +160,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     const routeMatch = url.match(/\/home\/?(.*)/);
     const route = routeMatch ? routeMatch[1] : '';
 
-    this.currentPageTitle = this.routeTitleMap.get(route) || 'Dashboard';
+    const titleKey = this.routeTitleMap.get(route) || 'navigation.dashboard';
+    this.translateService.get(titleKey).subscribe(translatedTitle => {
+      this.currentPageTitle = translatedTitle;
+    });
   }
 
   getCurrentPageTitle(): string {

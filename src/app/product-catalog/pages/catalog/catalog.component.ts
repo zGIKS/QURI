@@ -12,6 +12,7 @@ import { ProductCatalogService } from '../../services/product-catalog.service';
 import { ProductResponse } from '../../services/product.response';
 import { ProductUtils } from '../../model/product.utils';
 import { AuthenticationService } from '../../../iam/services/authentication.service';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-catalog',
@@ -24,7 +25,8 @@ import { AuthenticationService } from '../../../iam/services/authentication.serv
     MatGridListModule,
     MatProgressSpinnerModule,
     MatChipsModule,
-    MatToolbarModule
+    MatToolbarModule,
+    TranslateModule
   ],
   template: `
     <div class="catalog-container">
@@ -33,7 +35,7 @@ import { AuthenticationService } from '../../../iam/services/authentication.serv
         <button mat-icon-button (click)="goBack()">
           <mat-icon>arrow_back</mat-icon>
         </button>
-        <span class="toolbar-title">Product Catalog</span>
+        <span class="toolbar-title">{{ 'catalog.title' | translate }}</span>
         <span class="toolbar-spacer"></span>
       </mat-toolbar>
 
@@ -42,25 +44,25 @@ import { AuthenticationService } from '../../../iam/services/authentication.serv
         <!-- Loading State -->
         <div *ngIf="loading" class="loading-container">
           <mat-spinner></mat-spinner>
-          <p>Loading products...</p>
+          <p>{{ 'catalog.loadingProducts' | translate }}</p>
         </div>
 
         <!-- Error State -->
         <div *ngIf="error && !loading" class="error-container">
           <mat-icon class="error-icon">error</mat-icon>
-          <h3>Error Loading Products</h3>
+          <h3>{{ 'catalog.errorLoadingProducts' | translate }}</h3>
           <p>{{ error }}</p>
           <button mat-raised-button color="primary" (click)="loadProducts()">
             <mat-icon>refresh</mat-icon>
-            Retry
+            {{ 'common.retry' | translate }}
           </button>
         </div>
 
         <!-- Products Grid -->
         <div *ngIf="!loading && !error && products.length > 0" class="products-section">
           <div class="products-header">
-            <h2>Available Products</h2>
-            <p>{{ products.length }} product{{ products.length !== 1 ? 's' : '' }} found</p>
+            <h2>{{ 'catalog.availableProducts' | translate }}</h2>
+            <p>{{ products.length }} {{ products.length !== 1 ? ('catalog.productsFound' | translate) : ('catalog.productFound' | translate) }}</p>
           </div>
 
           <mat-grid-list cols="4" rowHeight="350px" gutterSize="24px" class="products-grid">
