@@ -14,6 +14,7 @@ import {
   CreateTextLayerResponse,
   CreateImageLayerResponse,
   DeleteLayerResponse,
+  DeleteProjectResponse,
   UpdateLayerCoordinatesResponse,
   UpdateTextLayerDetailsResponse,
   UpdateImageLayerDetailsResponse,
@@ -114,6 +115,29 @@ export class DesignLabService {
       }),
       catchError(error => {
         console.error('❌ Error creating project:', error);
+        return throwError(() => this.getErrorMessage(error));
+      })
+    );
+  }
+
+  /**
+   * Eliminar un proyecto
+   * DELETE http://localhost:8080/api/v1/projects/{projectId}
+   */
+  deleteProject(projectId: string): Observable<DeleteResult> {
+    console.log('🗑️ DesignLabService - Deleting project:', projectId);
+
+    const url = `${BASE_URL}/${projectId}`;
+
+    return this.http.delete<DeleteProjectResponse>(url, {
+      headers: this.getHeaders()
+    }).pipe(
+      map(response => {
+        console.log('✅ Project deleted successfully:', response);
+        return this.assembler.toDeleteProjectResult(response);
+      }),
+      catchError(error => {
+        console.error('❌ Error deleting project:', error);
         return throwError(() => this.getErrorMessage(error));
       })
     );

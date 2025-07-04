@@ -11,6 +11,7 @@ import {
   CreateImageLayerRequest,
   CreateImageLayerResponse,
   DeleteLayerResponse,
+  DeleteProjectResponse,
   UpdateLayerCoordinatesRequest,
   UpdateLayerCoordinatesResponse,
   UpdateTextLayerDetailsRequest,
@@ -62,6 +63,16 @@ export class DesignLabAssembler {
     return {
       success: true,
       projectId: response.id,
+      error: undefined
+    };
+  }
+
+  /**
+   * Convertir DeleteProjectResponse a resultado simple
+   */
+  toDeleteProjectResult(_response: DeleteProjectResponse): { success: boolean; error?: string } {
+    return {
+      success: true,
       error: undefined
     };
   }

@@ -216,3 +216,12 @@ export interface Details {
   width?: number
   height?: number
 }
+
+// http://localhost:8080/api/v1/projects/{projectId}
+export interface DeleteProjectRequest {
+  projectId: string; // esto ira en el path
+}
+export interface DeleteProjectResponse {
+  message: string;
+  timestamp: string;
+}

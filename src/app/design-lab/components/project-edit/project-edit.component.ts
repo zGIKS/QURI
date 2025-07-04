@@ -10,11 +10,11 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { DesignLabApplicationService } from '../../services/design-lab-application.service';
-import { DeleteProjectCommand } from '../../services/design-lab.commands';
+import { DesignLabService } from '../../services/design-lab-real.service';
+import { AuthenticationService } from '../../../iam/services/authentication.service';
 import { Project } from '../../model/project.entity';
 import { Layer, TextLayer, ImageLayer } from '../../model/layer.entity';
-import { LayerType, DEFAULT_LAYER_STYLES } from '../../../const';
+import { LayerType } from '../../../const';
 import { DesignCanvasComponent, LayerEvent } from '../design-canvas/design-canvas.component';
 import { LayerToolbarComponent, LayerToolEvent } from '../layer-toolbar/layer-toolbar.component';
 import { LayerManagementPanelComponent, LayerManagementEvent } from '../layer-management-panel/layer-management-panel.component';
@@ -67,7 +67,8 @@ export class ProjectEditComponent implements OnInit {
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private designLabService = inject(DesignLabApplicationService);
+  private designLabService = inject(DesignLabService);
+  private authService = inject(AuthenticationService);
   private translateService = inject(TranslateService);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
@@ -207,13 +208,9 @@ export class ProjectEditComponent implements OnInit {
   private deleteProject(): void {
     if (!this.project) return;
 
-    const command: DeleteProjectCommand = {
-      projectId: this.project.id
-    };
+    console.log('🗑️ Deleting project:', this.project.id);
 
-    console.log('🗑️ Deleting project:', command);
-
-    this.designLabService.deleteProject(command).subscribe({
+    this.designLabService.deleteProject(this.project.id).subscribe({
       next: (result) => {
         console.log('✅ Project deleted successfully:', result);
 
@@ -229,11 +226,11 @@ export class ProjectEditComponent implements OnInit {
         // Navegar de vuelta a la lista de proyectos
         this.router.navigate(['/home/design-lab']);
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('❌ Error deleting project:', error);
 
         this.snackBar.open(
-          error.message || this.translateService.instant('designLab.errors.deleteFailed'),
+          error || this.translateService.instant('designLab.errors.deleteFailed'),
           this.translateService.instant('common.close'),
           {
             duration: 5000,

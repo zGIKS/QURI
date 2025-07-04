@@ -11,8 +11,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RouterModule, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { DesignLabApplicationService } from '../services/design-lab-application.service';
-import { DeleteProjectCommand } from '../services/design-lab.commands';
+import { DesignLabService } from '../services/design-lab-real.service';
+import { AuthenticationService } from '../../iam/services/authentication.service';
 import { Project } from '../model/project.entity';
 import { DeleteProjectDialogComponent, DeleteProjectDialogData } from '../components/delete-project-dialog/delete-project-dialog.component';
 
@@ -42,7 +42,8 @@ export class DesignLabComponent implements OnInit {
   error: string | null = null;
 
   constructor(
-    private designLabService: DesignLabApplicationService,
+    private designLabService: DesignLabService,
+    private authService: AuthenticationService,
     private translateService: TranslateService,
     private router: Router,
     private dialog: MatDialog,
@@ -62,38 +63,47 @@ export class DesignLabComponent implements OnInit {
     console.log('👤 Current user ID:', localStorage.getItem('userId'));
     console.log('📝 Current username:', localStorage.getItem('username'));
 
-    const userId = this.designLabService.getCurrentUserId();
-    if (!userId) {
-      this.error = this.translateService.instant('designLab.tokenExpired');
-      this.isLoading = false;
-      return;
-    }
-
-    this.designLabService.getProjectsByUser(userId).subscribe({
-      next: (projects: Project[]) => {
-        this.projects = projects;
-        this.isLoading = false;
-        console.log('✅ Projects loaded successfully:', projects);
-        console.log('🔍 First project structure:', projects[0]);
-        if (projects.length > 0) {
-          console.log('🆔 First project ID:', projects[0]?.id, 'Type:', typeof projects[0]?.id);
+    // Obtener el userId del servicio de autenticación
+    this.authService.currentUserId.subscribe({
+      next: (userId) => {
+        if (!userId) {
+          this.error = this.translateService.instant('designLab.tokenExpired');
+          this.isLoading = false;
+          return;
         }
+
+        this.designLabService.getProjectsByUser(userId.toString()).subscribe({
+          next: (projects: Project[]) => {
+            this.projects = projects;
+            this.isLoading = false;
+            console.log('✅ Projects loaded successfully:', projects);
+            console.log('🔍 First project structure:', projects[0]);
+            if (projects.length > 0) {
+              console.log('🆔 First project ID:', projects[0]?.id, 'Type:', typeof projects[0]?.id);
+            }
+          },
+          error: (error: any) => {
+            this.error = error.message || this.translateService.instant('designLab.errorLoadingProjects');
+            this.isLoading = false;
+
+            // Agregar más información sobre el error
+            if (error.status === 401) {
+              console.error('🔒 Unauthorized - Token might be invalid or expired');
+              this.error = this.translateService.instant('designLab.tokenExpired');
+            } else if (error.status === 403) {
+              console.error('🚫 Forbidden - User might not have required permissions');
+              this.error = this.translateService.instant('designLab.noPermissions');
+            } else if (error.status === 500) {
+              console.error('🔥 Server error');
+              this.error = this.translateService.instant('designLab.serverError');
+            }
+          }
+        });
       },
       error: (error: any) => {
-        this.error = error.message || this.translateService.instant('designLab.errorLoadingProjects');
+        console.error('❌ Error getting user ID:', error);
+        this.error = this.translateService.instant('designLab.tokenExpired');
         this.isLoading = false;
-
-        // Agregar más información sobre el error
-        if (error.status === 401) {
-          console.error('🔒 Unauthorized - Token might be invalid or expired');
-          this.error = this.translateService.instant('designLab.tokenExpired');
-        } else if (error.status === 403) {
-          console.error('🚫 Forbidden - User might not have required permissions');
-          this.error = this.translateService.instant('designLab.noPermissions');
-        } else if (error.status === 500) {
-          console.error('🔥 Server error');
-          this.error = this.translateService.instant('designLab.serverError');
-        }
       }
     });
   }
@@ -173,16 +183,10 @@ export class DesignLabComponent implements OnInit {
         this.performDeleteProject(projectId);
       }
     });
-  }
+  }  private performDeleteProject(projectId: string): void {
+    console.log('🗑️ Deleting project:', projectId);
 
-  private performDeleteProject(projectId: string): void {
-    const command: DeleteProjectCommand = {
-      projectId: projectId
-    };
-
-    console.log('🗑️ Deleting project from list:', command);
-
-    this.designLabService.deleteProject(command).subscribe({
+    this.designLabService.deleteProject(projectId).subscribe({
       next: (result) => {
         console.log('✅ Project deleted successfully:', result);
 
@@ -198,11 +202,11 @@ export class DesignLabComponent implements OnInit {
           }
         );
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('❌ Error deleting project:', error);
 
         this.snackBar.open(
-          error.message || this.translateService.instant('designLab.errors.deleteFailed'),
+          error || this.translateService.instant('designLab.errors.deleteFailed'),
           this.translateService.instant('common.close'),
           {
             duration: 5000,

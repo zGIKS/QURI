@@ -16,8 +16,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { DesignLabApplicationService } from '../../services/design-lab-application.service';
-import { CreateProjectCommand } from '../../services/design-lab.commands';
+import { DesignLabService } from '../../services/design-lab-real.service';
+import { CreateProjectRequest } from '../../services/project.response';
+import { AuthenticationService } from '../../../iam/services/authentication.service';
 import { GARMENT_COLOR, GARMENT_SIZE, PROJECT_GENDER } from '../../../const';
 
 interface ColorOption {
@@ -56,7 +57,8 @@ export class ProjectCreateComponent implements OnInit {
 
   // Servicios
   private fb = inject(FormBuilder);
-  private designLabService = inject(DesignLabApplicationService);
+  private designLabService = inject(DesignLabService);
+  private authService = inject(AuthenticationService);
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
   private translateService = inject(TranslateService);
@@ -128,67 +130,83 @@ export class ProjectCreateComponent implements OnInit {
   private createProject(): void {
     this.isCreating = true;
     const formValue = this.projectForm.value;
-    const userId = this.designLabService.getCurrentUserId();
 
-    if (!userId) {
-      this.showError(
-        this.translateService.instant('designLab.errors.userNotAuthenticated')
-      );
-      this.isCreating = false;
-      return;
-    }
-
-    const command: CreateProjectCommand = {
-      title: formValue.title,
-      garmentColor: formValue.garmentColor,
-      garmentGender: formValue.garmentGender,
-      garmentSize: formValue.garmentSize,
-      userId: userId,
-    };
-
-    console.log('🆕 Creating project with command:', command);
-
-    this.designLabService.createProject(command).subscribe({
-      next: (result: any) => {
-        console.log('✅ Project creation response:', result);
-
-        this.snackBar.open(
-          this.translateService.instant('designLab.messages.projectCreated'),
-          this.translateService.instant('common.close'),
-          {
-            duration: 3000,
-            panelClass: ['success-snackbar'],
-          }
-        );
-
-        console.log("RESULT:", result);
-
-        // Navegar al editor del proyecto
-        this.router.navigate(['/home/design-lab/edit', result.id]);
-      },
-      error: (error: any) => {
-        console.error('❌ Error creating project:', error);
-
-        // Extraer mensaje de error más específico
-        let errorMessage = this.translateService.instant(
-          'designLab.errors.creationFailed'
-        );
-
-        if (error) {
-          if (typeof error === 'string') {
-            errorMessage = error;
-          } else if (error.message) {
-            errorMessage = error.message;
-          } else if (error.error && error.error.message) {
-            errorMessage = error.error.message;
-          } else if (error.error && typeof error.error === 'string') {
-            errorMessage = error.error;
-          }
+    // Obtener el userId del servicio de autenticación
+    this.authService.currentUserId.subscribe({
+      next: (userId) => {
+        if (!userId) {
+          this.showError(
+            this.translateService.instant('designLab.errors.userNotAuthenticated')
+          );
+          this.isCreating = false;
+          return;
         }
 
-        this.showError(errorMessage);
-        this.isCreating = false;
+        const request: CreateProjectRequest = {
+          title: formValue.title,
+          garmentColor: formValue.garmentColor,
+          garmentGender: formValue.garmentGender,
+          garmentSize: formValue.garmentSize,
+          userId: userId.toString(),
+        };
+
+        console.log('🆕 Creating project with request:', request);
+
+        this.designLabService.createProject(request).subscribe({
+          next: (result) => {
+            console.log('✅ Project creation response:', result);
+
+            this.snackBar.open(
+              this.translateService.instant('designLab.messages.projectCreated'),
+              this.translateService.instant('common.close'),
+              {
+                duration: 3000,
+                panelClass: ['success-snackbar'],
+              }
+            );
+
+            console.log("RESULT:", result);
+
+            // Navegar al editor del proyecto
+            if (result.success && result.projectId) {
+              this.router.navigate(['/home/design-lab/edit', result.projectId]);
+            } else {
+              this.showError(result.error || 'Error creating project');
+            }
+            this.isCreating = false;
+          },
+          error: (error: any) => {
+            console.error('❌ Error creating project:', error);
+
+            // Extraer mensaje de error más específico
+            let errorMessage = this.translateService.instant(
+              'designLab.errors.creationFailed'
+            );
+
+            if (error) {
+              if (typeof error === 'string') {
+                errorMessage = error;
+              } else if (error.message) {
+                errorMessage = error.message;
+              } else if (error.error && error.error.message) {
+                errorMessage = error.error.message;
+              } else if (error.error && typeof error.error === 'string') {
+                errorMessage = error.error;
+              }
+            }
+
+            this.showError(errorMessage);
+            this.isCreating = false;
+          },
+        });
       },
+      error: (error) => {
+        console.error('❌ Error getting user ID:', error);
+        this.showError(
+          this.translateService.instant('designLab.errors.userNotAuthenticated')
+        );
+        this.isCreating = false;
+      }
     });
   }
 
