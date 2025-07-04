@@ -10,6 +10,14 @@
     <span class="toolbar-spacer"></span>
     <button
       mat-raised-button
+      color="warn"
+      (click)="testAuthentication()"
+      [disabled]="isSaving">
+      <mat-icon>security</mat-icon>
+      Test Auth
+    </button>
+    <button
+      mat-raised-button
       color="accent"
       (click)="saveProject()"
       [disabled]="isSaving">
@@ -53,6 +61,41 @@
               class="tshirt-image"
               *ngIf="getTshirtImageUrl()"
               loading="lazy">
+
+            <!-- Text Layers Overlay -->
+            <div class="layers-overlay" *ngIf="getTshirtImageUrl()">
+              <div
+                *ngFor="let layer of project.layers; let i = index"
+                [ngClass]="{'draggable-layer': layer.type === 'TEXT', 'selected': selectedLayerId === layer.id}"
+                [style.left.px]="layer.x"
+                [style.top.px]="layer.y"
+                [style.z-index]="layer.z"
+                [style.opacity]="layer.opacity"
+                [style.display]="layer.isVisible ? 'block' : 'none'"
+                (mousedown)="layer.type === 'TEXT' ? startDrag($event, layer) : null"
+                (click)="layer.type === 'TEXT' ? selectLayer(layer) : null">
+
+                <div
+                  *ngIf="layer.type === 'TEXT'"
+                  class="text-layer-content"
+                  [style.font-family]="layer.details?.fontFamily || 'Arial'"
+                  [style.font-size.px]="layer.details?.fontSize || 24"
+                  [style.color]="layer.details?.fontColor || '#000000'"
+                  [style.font-weight]="layer.details?.isBold ? 'bold' : 'normal'"
+                  [style.font-style]="layer.details?.isItalic ? 'italic' : 'normal'"
+                  [style.text-decoration]="layer.details?.isUnderlined ? 'underline' : 'none'">
+                  {{ layer.details?.text || 'Text' }}
+                </div>
+
+                <!-- Selection handles -->
+                <div class="selection-handles" *ngIf="selectedLayerId === layer.id && layer.type === 'TEXT'">
+                  <div class="handle top-left"></div>
+                  <div class="handle top-right"></div>
+                  <div class="handle bottom-left"></div>
+                  <div class="handle bottom-right"></div>
+                </div>
+              </div>
+            </div>
 
             <!-- Fallback if image doesn't load -->
             <div *ngIf="!getTshirtImageUrl()" class="tshirt-fallback">

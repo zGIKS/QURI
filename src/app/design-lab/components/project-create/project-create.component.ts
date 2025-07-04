@@ -1,6 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -36,10 +41,10 @@ interface ColorOption {
     MatCardModule,
     MatSnackBarModule,
     MatToolbarModule,
-    TranslateModule
+    TranslateModule,
   ],
-  templateUrl: "./project-create.component.html",
-  styleUrl: "./project-create.component.css",
+  templateUrl: './project-create.component.html',
+  styleUrl: './project-create.component.css',
 })
 export class ProjectCreateComponent implements OnInit {
   projectForm: FormGroup;
@@ -64,7 +69,11 @@ export class ProjectCreateComponent implements OnInit {
     { name: 'Gris Claro', value: GARMENT_COLOR.LIGHT_GRAY, hex: '#D1D5DB' },
     { name: 'Rojo', value: GARMENT_COLOR.RED, hex: '#DC2626' },
     { name: 'Rosa', value: GARMENT_COLOR.PINK, hex: '#EC4899' },
-    { name: 'Púrpura Claro', value: GARMENT_COLOR.LIGHT_PURPLE, hex: '#A78BFA' },
+    {
+      name: 'Púrpura Claro',
+      value: GARMENT_COLOR.LIGHT_PURPLE,
+      hex: '#A78BFA',
+    },
     { name: 'Púrpura', value: GARMENT_COLOR.PURPLE, hex: '#7C3AED' },
     { name: 'Azul Claro', value: GARMENT_COLOR.LIGHT_BLUE, hex: '#60A5FA' },
     { name: 'Cian', value: GARMENT_COLOR.CYAN, hex: '#06B6D4' },
@@ -73,7 +82,11 @@ export class ProjectCreateComponent implements OnInit {
     { name: 'Verde', value: GARMENT_COLOR.GREEN, hex: '#059669' },
     { name: 'Verde Claro', value: GARMENT_COLOR.LIGHT_GREEN, hex: '#34D399' },
     { name: 'Amarillo', value: GARMENT_COLOR.YELLOW, hex: '#FBBF24' },
-    { name: 'Amarillo Oscuro', value: GARMENT_COLOR.DARK_YELLOW, hex: '#D97706' }
+    {
+      name: 'Amarillo Oscuro',
+      value: GARMENT_COLOR.DARK_YELLOW,
+      hex: '#D97706',
+    },
   ];
 
   constructor() {
@@ -81,7 +94,7 @@ export class ProjectCreateComponent implements OnInit {
       title: ['', [Validators.required, Validators.minLength(3)]],
       garmentColor: [GARMENT_COLOR.WHITE, Validators.required],
       garmentGender: [PROJECT_GENDER.UNISEX, Validators.required],
-      garmentSize: [GARMENT_SIZE.M, Validators.required]
+      garmentSize: [GARMENT_SIZE.M, Validators.required],
     });
   }
 
@@ -118,7 +131,9 @@ export class ProjectCreateComponent implements OnInit {
     const userId = this.designLabService.getCurrentUserId();
 
     if (!userId) {
-      this.showError(this.translateService.instant('designLab.errors.userNotAuthenticated'));
+      this.showError(
+        this.translateService.instant('designLab.errors.userNotAuthenticated')
+      );
       this.isCreating = false;
       return;
     }
@@ -128,7 +143,7 @@ export class ProjectCreateComponent implements OnInit {
       garmentColor: formValue.garmentColor,
       garmentGender: formValue.garmentGender,
       garmentSize: formValue.garmentSize,
-      userId: userId
+      userId: userId,
     };
 
     console.log('🆕 Creating project with command:', command);
@@ -137,55 +152,27 @@ export class ProjectCreateComponent implements OnInit {
       next: (result: any) => {
         console.log('✅ Project creation response:', result);
 
-        // Verificar diferentes formatos de respuesta
-        let success = false;
-        let projectId = null;
-        let errorMessage = null;
-
-        if (result && typeof result === 'object') {
-          // Formato esperado: { success: boolean, projectId?: string, error?: string }
-          if (result.success !== undefined) {
-            success = result.success;
-            projectId = result.projectId;
-            errorMessage = result.error;
+        this.snackBar.open(
+          this.translateService.instant('designLab.messages.projectCreated'),
+          this.translateService.instant('common.close'),
+          {
+            duration: 3000,
+            panelClass: ['success-snackbar'],
           }
-          // Formato alternativo: respuesta directa con id
-          else if (result.id) {
-            success = true;
-            projectId = result.id;
-          }
-          // Formato alternativo: respuesta con projectId
-          else if (result.projectId) {
-            success = true;
-            projectId = result.projectId;
-          }
-        }
+        );
 
-        if (success && projectId) {
-          console.log('✅ Project created successfully with ID:', projectId);
+        console.log("RESULT:", result);
 
-          this.snackBar.open(
-            this.translateService.instant('designLab.messages.projectCreated'),
-            this.translateService.instant('common.close'),
-            {
-              duration: 3000,
-              panelClass: ['success-snackbar']
-            }
-          );
-
-          // Navegar al editor del proyecto
-          this.router.navigate(['/home/design-lab/edit', projectId]);
-        } else {
-          console.error('❌ Project creation failed:', errorMessage || 'Unknown error');
-          this.showError(errorMessage || this.translateService.instant('designLab.errors.creationFailed'));
-        }
-        this.isCreating = false;
+        // Navegar al editor del proyecto
+        this.router.navigate(['/home/design-lab/edit', result.id]);
       },
       error: (error: any) => {
         console.error('❌ Error creating project:', error);
 
         // Extraer mensaje de error más específico
-        let errorMessage = this.translateService.instant('designLab.errors.creationFailed');
+        let errorMessage = this.translateService.instant(
+          'designLab.errors.creationFailed'
+        );
 
         if (error) {
           if (typeof error === 'string') {
@@ -201,7 +188,7 @@ export class ProjectCreateComponent implements OnInit {
 
         this.showError(errorMessage);
         this.isCreating = false;
-      }
+      },
     });
   }
 
@@ -211,7 +198,7 @@ export class ProjectCreateComponent implements OnInit {
   private showError(message: string): void {
     this.snackBar.open(message, this.translateService.instant('common.close'), {
       duration: 5000,
-      panelClass: ['error-snackbar']
+      panelClass: ['error-snackbar'],
     });
   }
 
@@ -219,7 +206,7 @@ export class ProjectCreateComponent implements OnInit {
    * Marcar todos los campos del formulario como tocados para mostrar errores
    */
   private markFormGroupTouched(): void {
-    Object.keys(this.projectForm.controls).forEach(key => {
+    Object.keys(this.projectForm.controls).forEach((key) => {
       const control = this.projectForm.get(key);
       control?.markAsTouched();
     });

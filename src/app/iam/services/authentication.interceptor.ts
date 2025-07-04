@@ -16,6 +16,7 @@ export const authenticationInterceptor: HttpInterceptorFn = (
 
   console.log('🔧 Interceptor - Request URL:', request.url);
   console.log('🔧 Interceptor - Request Method:', request.method);
+  console.log('🔧 Interceptor - Request Body:', request.body);
   console.log('🔧 Interceptor - Token exists:', !!token);
 
   // If no token, send request as is
@@ -40,8 +41,8 @@ export const authenticationInterceptor: HttpInterceptorFn = (
   });
 
   console.log('🔧 Interceptor - Authorization header set to:', authHeaderValue.substring(0, 30) + '...');
-  console.log('🔧 Interceptor - Final headers:', handledRequest.headers.keys());
-  console.log('🔧 Interceptor - Authorization header value:', handledRequest.headers.get('Authorization')?.substring(0, 30) + '...');
+  console.log('🔧 Interceptor - Final request headers:', handledRequest.headers.keys());
+  console.log('🔧 Interceptor - Final request URL:', handledRequest.url);
 
   // Return the handled request.
   return next(handledRequest);

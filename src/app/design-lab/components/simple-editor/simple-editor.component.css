@@ -85,6 +85,7 @@
   max-width: 300px;
   width: 100%;
   position: relative;
+  user-select: none;
 }
 
 .tshirt-image {
@@ -93,10 +94,95 @@
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   transition: transform 0.2s ease;
+  display: block;
 }
 
 .tshirt-image:hover {
   transform: scale(1.02);
+}
+
+/* Layers Overlay */
+.layers-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.draggable-layer {
+  position: absolute;
+  pointer-events: all;
+  cursor: grab;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  transition: border-color 0.2s ease;
+  min-width: 20px;
+  min-height: 20px;
+}
+
+.draggable-layer:hover {
+  border-color: rgba(0, 123, 255, 0.5);
+}
+
+.draggable-layer.selected {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.draggable-layer:active {
+  cursor: grabbing;
+}
+
+.text-layer-content {
+  white-space: nowrap;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8), -1px -1px 2px rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+  line-height: 1.2;
+  padding: 2px 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Selection Handles */
+.selection-handles {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  pointer-events: none;
+}
+
+.handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #007bff;
+  border: 1px solid white;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.handle.top-left {
+  top: 0;
+  left: 0;
+}
+
+.handle.top-right {
+  top: 0;
+  right: 0;
+}
+
+.handle.bottom-left {
+  bottom: 0;
+  left: 0;
+}
+
+.handle.bottom-right {
+  bottom: 0;
+  right: 0;
 }
 
 .tshirt-fallback {
@@ -519,5 +605,14 @@
 
   .text-editor-actions button {
     width: 100%;
+  }
+
+  .draggable-layer {
+    cursor: pointer;
+  }
+
+  .handle {
+    width: 12px;
+    height: 12px;
   }
 }

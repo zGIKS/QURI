@@ -16,12 +16,13 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { DesignLabApplicationService } from '../../services/design-lab-application.service';
+import { DesignLabService } from '../../services/design-lab.service';
 import {
-  CreateTextLayerCommand,
-  UpdateTextLayerCommand,
-  LayerCommandResult
-} from '../../services/design-lab.commands';
+  CreateTextLayerRequest,
+  UpdateTextLayerRequest,
+  UpdateLayerCoordinatesRequest
+} from '../../services/design-lab.requests';
+import { LayerResult } from '../../services/design-lab.responses';
 import { Project } from '../../model/project.entity';
 import { TextLayer } from '../../model/layer.entity';
 import { GARMENT_COLOR } from '../../../const';
@@ -60,6 +61,7 @@ export class SimpleEditorComponent implements OnInit {
 
   // Text editing state
   selectedTextLayer: TextLayer | null = null;
+  selectedLayerId: string | null = null;
   isEditingText = false;
   textContent = '';
   fontSize = 24;
@@ -68,6 +70,11 @@ export class SimpleEditorComponent implements OnInit {
   isBold = false;
   isItalic = false;
   isUnderlined = false;
+
+  // Drag and drop state
+  isDragging = false;
+  dragOffset = { x: 0, y: 0 };
+  dragLayer: TextLayer | null = null;
 
   // Available font families
   fontFamilies = [
@@ -104,7 +111,7 @@ export class SimpleEditorComponent implements OnInit {
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private designLabService = inject(DesignLabApplicationService);
+  private designLabService = inject(DesignLabService);
   private translateService = inject(TranslateService);
   private snackBar = inject(MatSnackBar);
 
@@ -206,9 +213,7 @@ export class SimpleEditorComponent implements OnInit {
 
     if (this.selectedTextLayer) {
       // Update existing layer
-      const updateCommand: UpdateTextLayerCommand = {
-        projectId: this.projectId,
-        layerId: this.selectedTextLayer.id,
+      const updateRequest: UpdateTextLayerRequest = {
         text: this.textContent,
         fontColor: this.fontColor,
         fontFamily: this.fontFamily,
@@ -218,8 +223,8 @@ export class SimpleEditorComponent implements OnInit {
         isUnderlined: this.isUnderlined
       };
 
-      this.designLabService.updateTextLayer(updateCommand).subscribe({
-        next: (result: LayerCommandResult) => {
+      this.designLabService.updateTextLayer(this.projectId, this.selectedTextLayer.id, updateRequest).subscribe({
+        next: (result: LayerResult) => {
           if (result.success) {
             // Update local layer
             this.selectedTextLayer!.details = {
@@ -249,7 +254,7 @@ export class SimpleEditorComponent implements OnInit {
           }
           this.isSaving = false;
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('❌ Error updating text layer:', error);
           this.snackBar.open(
             this.translateService.instant('designLab.errors.layerUpdateFailed'),
@@ -261,7 +266,7 @@ export class SimpleEditorComponent implements OnInit {
       });
     } else {
       // Create new layer
-      const createCommand: CreateTextLayerCommand = {
+      const createRequest: CreateTextLayerRequest = {
         projectId: this.projectId,
         x: 100,
         y: 100,
@@ -275,8 +280,8 @@ export class SimpleEditorComponent implements OnInit {
         isUnderlined: this.isUnderlined
       };
 
-      this.designLabService.createTextLayer(createCommand).subscribe({
-        next: (result: LayerCommandResult) => {
+      this.designLabService.createTextLayer(createRequest).subscribe({
+        next: (result: LayerResult) => {
           if (result.success && result.layerId) {
             // Create local layer representation
             const newLayer = new TextLayer(
@@ -297,10 +302,13 @@ export class SimpleEditorComponent implements OnInit {
                 isItalic: this.isItalic,
                 isUnderlined: this.isUnderlined
               }
-            );
-
+            );            
             this.project!.layers.push(newLayer);
             this.project!.updatedAt = new Date();
+
+            // Select the newly created layer
+            this.selectedLayerId = newLayer.id;
+            this.selectedTextLayer = newLayer;
 
             this.snackBar.open(
               this.translateService.instant('designLab.messages.layerAdded'),
@@ -317,7 +325,7 @@ export class SimpleEditorComponent implements OnInit {
           }
           this.isSaving = false;
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('❌ Error creating text layer:', error);
           this.snackBar.open(
             this.translateService.instant('designLab.errors.layerCreationFailed'),
@@ -348,7 +356,7 @@ export class SimpleEditorComponent implements OnInit {
     this.isSaving = true;
 
     this.designLabService.deleteLayer(this.projectId, layer.id).subscribe({
-      next: (result: LayerCommandResult) => {
+      next: (result: LayerResult) => {
         if (result.success) {
           // Remove from local project
           const index = this.project!.layers.indexOf(layer);
@@ -371,7 +379,7 @@ export class SimpleEditorComponent implements OnInit {
         }
         this.isSaving = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('❌ Error deleting text layer:', error);
         this.snackBar.open(
           this.translateService.instant('designLab.errors.layerDeleteFailed'),
@@ -386,9 +394,136 @@ export class SimpleEditorComponent implements OnInit {
   cancelTextEditing(): void {
     this.isEditingText = false;
     this.selectedTextLayer = null;
+    this.selectedLayerId = null;
+  }
+
+  // Layer selection and drag methods
+  selectLayer(layer: TextLayer): void {
+    this.selectedLayerId = layer.id;
+    this.selectedTextLayer = layer;
+  }
+
+  startDrag(event: MouseEvent, layer: TextLayer): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.isDragging = true;
+    this.dragLayer = layer;
+    this.selectedLayerId = layer.id;
+    this.selectedTextLayer = layer;
+
+    const rect = (event.target as HTMLElement).getBoundingClientRect();
+    this.dragOffset = {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top
+    };
+
+    // Add global mouse event listeners
+    document.addEventListener('mousemove', this.onMouseMove);
+    document.addEventListener('mouseup', this.onMouseUp);
+
+    // Change cursor
+    document.body.style.cursor = 'grabbing';
+  }
+
+  onMouseMove = (event: MouseEvent): void => {
+    if (!this.isDragging || !this.dragLayer) return;
+
+    const container = document.querySelector('.tshirt-preview') as HTMLElement;
+    if (!container) return;
+
+    const containerRect = container.getBoundingClientRect();
+
+    // Calculate new position relative to container
+    const newX = event.clientX - containerRect.left - this.dragOffset.x;
+    const newY = event.clientY - containerRect.top - this.dragOffset.y;
+
+    // Ensure layer stays within bounds
+    const maxX = container.offsetWidth - 100; // Approximate text width
+    const maxY = container.offsetHeight - 30; // Approximate text height
+
+    this.dragLayer.x = Math.max(0, Math.min(newX, maxX));
+    this.dragLayer.y = Math.max(0, Math.min(newY, maxY));
+  }
+
+  onMouseUp = (_event: MouseEvent): void => {
+    if (!this.isDragging || !this.dragLayer) return;
+
+    this.isDragging = false;
+    document.body.style.cursor = 'default';
+
+    // Remove global event listeners
+    document.removeEventListener('mousemove', this.onMouseMove);
+    document.removeEventListener('mouseup', this.onMouseUp);
+
+    // Update layer coordinates on server
+    if (this.projectId && this.dragLayer) {
+      this.updateLayerCoordinates(this.dragLayer);
+    }
+
+    this.dragLayer = null;
+  }
+
+  updateLayerCoordinates(layer: TextLayer): void {
+    if (!this.projectId) return;
+
+    const updateRequest: UpdateLayerCoordinatesRequest = {
+      x: layer.x,
+      y: layer.y,
+      z: layer.z
+    };
+
+    console.log('🚀 Update layer coordinates request:', updateRequest);
+
+    this.designLabService.updateLayerCoordinates(this.projectId, layer.id, updateRequest).subscribe({
+      next: (result: LayerResult) => {
+        if (result.success) {
+          console.log('✅ Layer coordinates updated');
+        } else {
+          console.error('❌ Failed to update layer coordinates:', result.error);
+        }
+      },
+      error: (error: any) => {
+        console.error('❌ Error updating layer coordinates:', error);
+      }
+    });
   }
 
   private generateLayerId(): string {
     return 'layer_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  }
+
+  // Test method to verify authentication
+  testAuthentication(): void {
+    console.log('🧪 Testing authentication...');
+    this.designLabService.testAuthentication().subscribe({
+      next: (result: any) => {
+        console.log('✅ Authentication test successful:', result);
+        this.snackBar.open(
+          'Authentication test successful',
+          'Close',
+          { duration: 3000, panelClass: ['success-snackbar'] }
+        );
+      },
+      error: (error: any) => {
+        console.error('❌ Authentication test failed:', error);
+        this.snackBar.open(
+          'Authentication test failed: ' + error,
+          'Close',
+          { duration: 3000, panelClass: ['error-snackbar'] }
+        );
+      }
+    });
+  }
+
+  // Enhanced logging for debugging
+  logRequestDetails(): void {
+    console.log('🔍 DEBUG - Current state:');
+    console.log('  - Project ID:', this.projectId);
+    console.log('  - Project exists:', !!this.project);
+    console.log('  - Token exists:', !!localStorage.getItem('token'));
+    console.log('  - Token preview:', localStorage.getItem('token')?.substring(0, 20) + '...');
+    console.log('  - User authenticated:', this.designLabService.constructor.name);
+    console.log('  - Base URL:', 'http://localhost:8080/api/v1/projects');
   }
 }
