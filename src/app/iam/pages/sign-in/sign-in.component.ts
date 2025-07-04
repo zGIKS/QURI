@@ -8,8 +8,8 @@ import {MatError, MatFormField, MatLabel, MatPrefix, MatSuffix} from "@angular/m
 import {MatInput} from "@angular/material/input";
 import {MatIcon} from "@angular/material/icon";
 import {RouterLink} from "@angular/router";
-import { LanguageSwitcher } from '../../../public/components/language-switcher/language-switcher';
-import { TranslateModule } from '@ngx-translate/core';
+import { LanguageSwitcherComponent } from '../../../shared/components/language-switcher.component';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-sign-in',
@@ -31,7 +31,7 @@ import { TranslateModule } from '@ngx-translate/core';
     MatSuffix,
     ReactiveFormsModule,
     RouterLink,
-    LanguageSwitcher,
+    LanguageSwitcherComponent,
     TranslateModule
   ],
   templateUrl: './sign-in.component.html',
@@ -42,7 +42,11 @@ export class SignInComponent implements OnInit {
   submitted = false;
   hidePassword = true;
 
-  constructor(private builder: FormBuilder, private authenticationService: AuthenticationService) {}
+  constructor(
+    private builder: FormBuilder, 
+    private authenticationService: AuthenticationService,
+    private translateService: TranslateService
+  ) {}
 
   ngOnInit(): void {
     this.form = this.builder.group({
@@ -70,12 +74,15 @@ export class SignInComponent implements OnInit {
     if (!control || !control.errors) return '';
     
     if (control.errors['required']) {
-      return `${this.getFieldName(controlName)} is required`;
+      return this.translateService.instant('signin.validation.required', { field: this.getFieldName(controlName) });
     }
     
     if (control.errors['minlength']) {
       const requiredLength = control.errors['minlength'].requiredLength;
-      return `${this.getFieldName(controlName)} must be at least ${requiredLength} characters`;
+      return this.translateService.instant('signin.validation.minlength', { 
+        field: this.getFieldName(controlName), 
+        length: requiredLength 
+      });
     }
     
     return '';
@@ -83,8 +90,8 @@ export class SignInComponent implements OnInit {
 
   private getFieldName(controlName: string): string {
     const fieldNames: { [key: string]: string } = {
-      'username': 'Username',
-      'password': 'Password'
+      'username': this.translateService.instant('signin.username'),
+      'password': this.translateService.instant('signin.password')
     };
     return fieldNames[controlName] || controlName;
   }

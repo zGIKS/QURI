@@ -2,18 +2,24 @@
   "signin": {
     "title": "Welcome Back",
     "subtitle": "Sign in to your account",
-    "username": {
+    "username": "Username",
+    "password": "Password",
+    "usernameField": {
       "label": "Username",
       "placeholder": "Enter your username"
     },
-    "password": {
+    "passwordField": {
       "label": "Password",
       "placeholder": "Enter your password"
     },
     "button": {
       "signingIn": "Sign In"
     },
-    "noAccount": "Don't have an account?"
+    "noAccount": "Don't have an account?",
+    "validation": {
+      "required": "{{field}} is required",
+      "minlength": "{{field}} must be at least {{length}} characters"
+    }
   },
   "signup": {
     "title": "Create Account",

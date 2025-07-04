@@ -1,6 +1,25 @@
-{
-  "signin": {
-    "title": "Bienvenido de nuevo",
+{  "signin": {
+    "title": "Bienvenido de vuelta",
+    "subtitle": "Inicia sesión en tu cuenta",
+    "username": "Nombre de usuario",
+    "password": "Contraseña",
+    "usernameField": {
+      "label": "Nombre de usuario",
+      "placeholder": "Ingresa tu nombre de usuario"
+    },
+    "passwordField": {
+      "label": "Contraseña",
+      "placeholder": "Ingresa tu contraseña"
+    },
+    "button": {
+      "signingIn": "Iniciar Sesión"
+    },
+    "noAccount": "¿No tienes una cuenta?",
+    "validation": {
+      "required": "{{field}} es requerido",
+      "minlength": "{{field}} debe tener al menos {{length}} caracteres"
+    }
+  },   "title": "Bienvenido de nuevo",
     "subtitle": "Inicia sesión en tu cuenta",
     "username": {
       "label": "Nombre de usuario",

@@ -9,10 +9,10 @@ export class TranslationService {
   private currentLanguage = new BehaviorSubject<string>('en');
 
   constructor(private translate: TranslateService) {
-    this.initializeLanguage();
+    // Don't initialize here to avoid circular dependency
   }
 
-  private initializeLanguage(): void {
+  initializeLanguage(): void {
     // Set available languages
     this.translate.addLangs(['en', 'es']);
 
