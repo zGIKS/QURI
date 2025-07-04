@@ -66,13 +66,15 @@ export class DesignLabComponent implements OnInit {
     // Obtener el userId del servicio de autenticación
     this.authService.currentUserId.subscribe({
       next: (userId) => {
+
+        console.log('👤 Current user ID XDDD:', userId);
         if (!userId) {
           this.error = this.translateService.instant('designLab.tokenExpired');
           this.isLoading = false;
           return;
         }
 
-        this.designLabService.getProjectsByUser(userId.toString()).subscribe({
+        this.designLabService.getProjectsByUser(userId).subscribe({
           next: (projects: Project[]) => {
             this.projects = projects;
             this.isLoading = false;

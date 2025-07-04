@@ -147,7 +147,7 @@ export class ProjectCreateComponent implements OnInit {
           garmentColor: formValue.garmentColor,
           garmentGender: formValue.garmentGender,
           garmentSize: formValue.garmentSize,
-          userId: userId.toString(),
+          userId: userId,
         };
 
         console.log('🆕 Creating project with request:', request);

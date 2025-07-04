@@ -195,8 +195,8 @@ export class CatalogComponent implements OnInit {
   toggleLike(product: ProductResponse) {
     // Get current user ID from auth service
     this.authService.currentUserId.subscribe(userId => {
-      if (userId > 0) {
-        this.productCatalogService.toggleProductLike(product.id, userId.toString()).subscribe({
+      if (userId && userId !== '') {
+        this.productCatalogService.toggleProductLike(product.id, userId).subscribe({
           next: (result) => {
             // Update product like count
             const productIndex = this.products.findIndex(p => p.id === product.id);

@@ -2,7 +2,7 @@
  * Model for the sign in response.
  */
 export class SignInResponse {
-  public id: number;
+  public id: string;
   public username: string;
   public token: string;
 
@@ -12,7 +12,7 @@ export class SignInResponse {
    * @param username The username.
    * @param token The generated token.
    */
-  constructor(id: number, username: string, token: string) {
+  constructor(id: string, username: string, token: string) {
     this.token = token;
     this.username = username;
     this.id = id;

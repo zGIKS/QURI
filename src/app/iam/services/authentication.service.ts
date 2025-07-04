@@ -19,7 +19,7 @@ export class AuthenticationService {
   httpOptions = {headers: new HttpHeaders({'Content-Type': 'application/json'})};
 
   private signedIn: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  private signedInUserId: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+  private signedInUserId: BehaviorSubject<string> = new BehaviorSubject<string>('');
   private signedInUsername: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
   /**
@@ -45,7 +45,7 @@ export class AuthenticationService {
       // Only update the state if it's not already set
       if (!this.signedIn.value) {
         this.signedIn.next(true);
-        this.signedInUserId.next(parseInt(userId));
+        this.signedInUserId.next(userId);
         this.signedInUsername.next(username);
         console.log(`Restored authentication for user: ${username}`);
       }
@@ -108,7 +108,7 @@ export class AuthenticationService {
    * If the request is successful, the signedIn, signedInUserId, and signedInUsername are set to true,
    * the user's id, and the user's username respectively.
    * The token is stored in the local storage and the user is navigated to the home page.
-   * If the request fails, the signedIn, signedInUserId, and signedInUsername are set to false, 0, and
+   * If the request fails, the signedIn, signedInUserId, and signedInUsername are set to false, empty string, and
    * an empty string respectively.
    * An error message is logged and the user is navigated to the sign-in page.
    * @param signInRequest The {@link SignInRequest} object containing the user's username and password.
@@ -130,7 +130,7 @@ export class AuthenticationService {
         },
         error: (error) => {
           this.signedIn.next(false);
-          this.signedInUserId.next(0);
+          this.signedInUserId.next('');
           this.signedInUsername.next('');
           console.error(`Error while signing in:`, error);
 
@@ -156,7 +156,7 @@ export class AuthenticationService {
    */
   signOut() {
     this.signedIn.next(false);
-    this.signedInUserId.next(0);
+    this.signedInUserId.next('');
     this.signedInUsername.next('');
     localStorage.removeItem('token');
     localStorage.removeItem('userId');

@@ -52,6 +52,66 @@ export class DesignLabService {
     console.log('🚀 DesignLabService initialized with real endpoints');
   }
 
+  /**
+   * Obtener token de autenticación de forma segura
+   */
+  private getAuthToken(): string {
+    console.log('🔑 DesignLabService - Getting auth token...');
+
+    // Intentar obtener el token del AuthenticationService
+    let token = this.authService.getToken();
+    console.log('🔑 Token from AuthService:', token?.substring(0, 20) + '...');
+
+    // Si no hay token, forzar verificación de localStorage
+    if (!token) {
+      console.log('🔑 No token from AuthService, checking localStorage directly...');
+      token = localStorage.getItem('token');
+      console.log('🔑 Token from localStorage:', token?.substring(0, 20) + '...');
+
+      // Si encontramos token en localStorage, forzar restauración en AuthService
+      if (token) {
+        console.log('🔑 Found token in localStorage, forcing checkStoredAuthentication...');
+        this.authService.checkStoredAuthentication();
+      }
+    }
+
+    // Validar que el token existe
+    if (!token) {
+      console.error('❌ No authentication token found anywhere!');
+      console.error('❌ localStorage token:', localStorage.getItem('token'));
+      console.error('❌ AuthService token:', this.authService.getToken());
+      return '';
+    }
+
+    console.log('✅ Token obtained successfully:', token.substring(0, 20) + '...');
+    return token;
+  }
+
+  /**
+   * Asegurar que la autenticación esté disponible
+   */
+  private ensureAuthentication(): void {
+    console.log('🔧 DesignLabService - Ensuring authentication is available...');
+
+    // Verificar localStorage directamente
+    const tokenInStorage = localStorage.getItem('token');
+    const userIdInStorage = localStorage.getItem('userId');
+    const usernameInStorage = localStorage.getItem('username');
+
+    console.log('🔧 Authentication data in localStorage:');
+    console.log('  - token exists:', !!tokenInStorage);
+    console.log('  - userId exists:', !!userIdInStorage);
+    console.log('  - username exists:', !!usernameInStorage);
+
+    if (tokenInStorage && userIdInStorage && usernameInStorage) {
+      console.log('🔧 All auth data found in localStorage, forcing checkStoredAuthentication');
+      this.authService.checkStoredAuthentication();
+    } else {
+      console.error('❌ Missing authentication data in localStorage!');
+      console.error('❌ User needs to sign in again');
+    }
+  }
+
   // ==================== PROJECT METHODS ====================
 
   /**
@@ -61,7 +121,16 @@ export class DesignLabService {
   getProjectsByUser(userId: string): Observable<Project[]> {
     console.log('📋 DesignLabService - Getting projects for user:', userId);
 
+    // SIEMPRE asegurar autenticación antes de hacer petición
+    this.ensureAuthentication();
+
+    // Debug del estado completo de autenticación
+    this.debugAuthenticationState();
+
     const params = new HttpParams().set('userId', userId);
+
+    console.log('📋 Making HTTP request with params:', params.toString());
+    console.log('📋 Base URL:', BASE_URL);
 
     return this.http.get<GetAllUserProjectsResponse>(BASE_URL, {
       headers: this.getHeaders(),
@@ -73,9 +142,56 @@ export class DesignLabService {
       }),
       catchError(error => {
         console.error('❌ Error fetching projects:', error);
+        console.error('❌ URL was:', BASE_URL);
+        console.error('❌ Params were:', params.toString());
+
+        // Debug adicional en caso de error
+        console.error('❌ Running authentication debug after error:');
+        this.debugAuthenticationState();
+
         return throwError(() => this.getErrorMessage(error));
       })
     );
+  }
+
+  /**
+   * Obtener todos los proyectos de un usuario con retry en caso de problemas de autenticación
+   * GET http://localhost:8080/api/v1/projects?userId=cd9b8fcb-b943-40cf-aa90-a5cd1812f602
+   */
+  getProjectsByUserWithRetry(userId: string): Observable<Project[]> {
+    return new Observable(observer => {
+      // Primero intentar inmediatamente
+      this.getProjectsByUser(userId).subscribe({
+        next: (projects) => {
+          observer.next(projects);
+          observer.complete();
+        },
+        error: (error) => {
+          // Si es error 401, esperar un poco y reintentar una vez
+          if (error.includes('Token expirado') || error.includes('401')) {
+            console.log('🔄 Retrying after authentication error...');
+
+            setTimeout(() => {
+              // Forzar verificación de autenticación
+              this.authService.checkStoredAuthentication();
+
+              // Reintentar
+              this.getProjectsByUser(userId).subscribe({
+                next: (projects) => {
+                  observer.next(projects);
+                  observer.complete();
+                },
+                error: (retryError) => {
+                  observer.error(retryError);
+                }
+              });
+            }, 1000); // Esperar 1 segundo
+          } else {
+            observer.error(error);
+          }
+        }
+      });
+    });
   }
 
   /**
@@ -349,26 +465,69 @@ export class DesignLabService {
     );
   }
 
+  /**
+   * Debug del estado de autenticación
+   */
+  debugAuthenticationState(): void {
+    console.log('🔍 ===== AUTHENTICATION DEBUG =====');
+    console.log('🔍 localStorage data:');
+    console.log('  - token:', localStorage.getItem('token')?.substring(0, 30) + '...');
+    console.log('  - userId:', localStorage.getItem('userId'));
+    console.log('  - username:', localStorage.getItem('username'));
+
+    console.log('🔍 AuthenticationService data:');
+    console.log('  - getToken():', this.authService.getToken()?.substring(0, 30) + '...');
+    console.log('  - hasValidToken():', this.authService.hasValidToken());
+    console.log('  - isAuthenticated():', this.isAuthenticated());
+
+    // Forzar check de autenticación y ver resultado
+    console.log('🔍 Forcing checkStoredAuthentication...');
+    const authResult = this.authService.checkStoredAuthentication();
+    console.log('  - checkStoredAuthentication() result:', authResult);
+
+    // Verificar headers que se crearían
+    console.log('🔍 Testing token retrieval:');
+    const token = this.getAuthToken();
+    console.log('  - getAuthToken() result:', token.substring(0, 30) + '...');
+
+    console.log('🔍 ===== END AUTHENTICATION DEBUG =====');
+  }
+
   // ==================== PRIVATE METHODS ====================
 
   /**
    * Obtener headers HTTP con autenticación
+   * SIEMPRE incluye Bearer token
    */
   private getHeaders(): HttpHeaders {
-    if (!this.isAuthenticated()) {
-      console.warn('⚠️ DesignLabService - No valid authentication token found');
-    }
+    console.log('🔧 DesignLabService - Creating headers with authentication...');
 
-    const token = this.authService.getToken();
-    console.log('🔧 DesignLabService - Token exists:', !!token);
-    console.log('🔧 DesignLabService - Token preview:', token?.substring(0, 20) + '...');
+    // Obtener token de forma robusta
+    const token = this.getAuthToken();
 
+    // Crear headers con Bearer token SIEMPRE
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     });
 
-    console.log('🔧 DesignLabService - Headers created:', headers.keys());
+    console.log('🔧 Headers created:');
+    console.log('  - Content-Type: application/json');
+    console.log('  - Authorization: Bearer', token.substring(0, 20) + '...');
+    console.log('  - Full headers keys:', headers.keys());
+
+    // Verificar que el header Authorization se creó correctamente
+    const authHeader = headers.get('Authorization');
+    console.log('🔧 Authorization header value:', authHeader?.substring(0, 30) + '...');
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.error('❌ Authorization header is malformed!');
+      console.error('❌ Expected: Bearer <token>');
+      console.error('❌ Actual:', authHeader);
+    } else {
+      console.log('✅ Authorization header is correctly formatted');
+    }
+
     return headers;
   }
 
@@ -376,7 +535,19 @@ export class DesignLabService {
    * Obtener mensaje de error legible
    */
   private getErrorMessage(error: any): string {
+    console.log('🔍 DesignLabService - Error details:', error);
+    console.log('🔍 DesignLabService - Error status:', error.status);
+    console.log('🔍 DesignLabService - Error message:', error.message);
+    console.log('🔍 DesignLabService - Error body:', error.error);
+
     if (error.status === 401) {
+      console.error('🔒 Authentication failed - Token might be invalid or expired');
+      console.error('🔒 Current token:', this.authService.getToken()?.substring(0, 20) + '...');
+      console.error('🔒 Is authenticated:', this.isAuthenticated());
+
+      // Intentar refrescar la autenticación
+      this.authService.checkStoredAuthentication();
+
       return 'Token expirado o inválido. Por favor, inicia sesión nuevamente.';
     } else if (error.status === 403) {
       return 'No tienes permisos para realizar esta acción.';
@@ -384,6 +555,9 @@ export class DesignLabService {
       return 'Recurso no encontrado.';
     } else if (error.status === 500) {
       return 'Error interno del servidor. Intenta nuevamente más tarde.';
+    } else if (error.status === 0) {
+      console.error('🌐 Network error - No response from server');
+      return 'Error de conexión. Verifica tu conexión a internet.';
     } else if (error.error?.message) {
       return error.error.message;
     } else {
