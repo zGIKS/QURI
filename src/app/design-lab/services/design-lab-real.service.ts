@@ -266,11 +266,29 @@ export class DesignLabService {
    * Actualizar el preview URL de un proyecto
    * PUT http://localhost:8080/api/v1/projects/{projectId}/details
    */
-  updateProjectPreview(projectId: string, previewUrl: string): Observable<ProjectResult> {
+  updateProjectPreview(projectId: string, previewUrl: string, currentProject?: Project): Observable<ProjectResult> {
     console.log('🖼️ DesignLabService - Updating project preview:', { projectId, previewUrl });
 
     const url = `${BASE_URL}/${projectId}/details`;
-    const requestBody = { previewUrl };
+
+    // Construir el body con todos los campos para no perder datos
+    const requestBody: any = { previewUrl };
+
+    if (currentProject) {
+      requestBody.status = currentProject.status;
+      requestBody.garmentColor = currentProject.garmentColor;
+      requestBody.garmentSize = currentProject.garmentSize;
+      requestBody.garmentGender = currentProject.garmentGender;
+
+      console.log('🔄 Preserving current project fields:', {
+        status: currentProject.status,
+        garmentColor: currentProject.garmentColor,
+        garmentSize: currentProject.garmentSize,
+        garmentGender: currentProject.garmentGender
+      });
+    }
+
+    console.log('📤 Sending complete request body:', requestBody);
 
     return this.http.put<{ message: string; timestamp: string }>(url, requestBody, {
       headers: this.getHeaders()

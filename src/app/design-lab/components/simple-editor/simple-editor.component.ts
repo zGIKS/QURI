@@ -611,6 +611,22 @@ export class SimpleEditorComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Preload fonts to avoid CORS issues during image generation
+   */
+  private async preloadFonts(): Promise<void> {
+    try {
+      // Load Roboto font if available
+      if (document.fonts && document.fonts.load) {
+        await document.fonts.load('400 16px Roboto');
+        await document.fonts.load('500 16px Roboto');
+        console.log('✅ Fonts preloaded successfully');
+      }
+    } catch (error) {
+      console.log('⚠️ Could not preload fonts:', error);
+    }
+  }
+
+  /**
    * Generate a preview image of the current design and update the project's preview URL
    */
   private async generateAndUpdatePreview(): Promise<void> {
@@ -622,6 +638,12 @@ export class SimpleEditorComponent implements OnInit, OnDestroy {
     try {
       console.log('📸 Starting preview generation...');
 
+      // Preload fonts first
+      await this.preloadFonts();
+
+      // Wait a bit for fonts to be ready
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       // Find the design preview container (the t-shirt with layers)
       const previewElement = this.elementRef.nativeElement.querySelector('.tshirt-preview');
 
@@ -630,12 +652,17 @@ export class SimpleEditorComponent implements OnInit, OnDestroy {
         return;
       }
 
-      // Generate image from the preview container
-      const dataUrl = await toPng(previewElement, {
-        quality: 0.95,
-        pixelRatio: 2, // Higher resolution
-        backgroundColor: '#ffffff'
-      });
+      // Try multiple strategies for image generation
+      let dataUrl: string;
+
+      try {
+        // First attempt with comprehensive CORS handling
+        dataUrl = await this.generatePreviewWithCORSHandling(previewElement);
+      } catch (error) {
+        console.log('🔄 First attempt failed, trying fallback method...');
+        // Fallback with minimal options
+        dataUrl = await this.generatePreviewFallback(previewElement);
+      }
 
       console.log('📸 Preview image generated successfully');
 
@@ -662,8 +689,70 @@ export class SimpleEditorComponent implements OnInit, OnDestroy {
 
     } catch (error) {
       console.error('❌ Error generating preview:', error);
-      // Don't throw error to avoid blocking navigation
+      // Show user-friendly error message
+      this.snackBar.open('Failed to generate preview image', 'Close', {
+        duration: 3000,
+        panelClass: 'error-snackbar'
+      });
     }
+  }
+
+  /**
+   * Generate preview with comprehensive CORS handling
+   */
+  private async generatePreviewWithCORSHandling(previewElement: HTMLElement): Promise<string> {
+    return toPng(previewElement, {
+      quality: 0.95,
+      pixelRatio: 1,
+      backgroundColor: '#ffffff',
+      skipFonts: true,
+      style: {
+        fontFamily: 'Roboto, Arial, sans-serif'
+      },
+      filter: (node: any) => {
+        // Filter out any external resources that might cause CORS issues
+        if (node.tagName) {
+          const tagName = node.tagName.toLowerCase();
+          // Skip any link tags (stylesheets, external resources)
+          if (tagName === 'link') return false;
+          // Skip any style tags with external content
+          if (tagName === 'style' && node.innerHTML && (
+            node.innerHTML.includes('fonts.googleapis.com') ||
+            node.innerHTML.includes('fonts.gstatic.com') ||
+            node.innerHTML.includes('http')
+          )) return false;
+        }
+        return true;
+      }
+    });
+  }
+
+  /**
+   * Fallback preview generation with minimal options
+   */
+  private async generatePreviewFallback(previewElement: HTMLElement): Promise<string> {
+    return toPng(previewElement, {
+      quality: 0.8,
+      pixelRatio: 1,
+      backgroundColor: '#ffffff',
+      skipFonts: true,
+      style: {
+        fontFamily: 'Arial, sans-serif'
+      },
+      filter: (node: any) => {
+        // Very aggressive filtering
+        if (node.tagName) {
+          const tagName = node.tagName.toLowerCase();
+          // Skip any external resources
+          if (tagName === 'link') return false;
+          if (tagName === 'style') return false;
+          // Only allow images from cloudinary or data URLs
+          if (tagName === 'img' && node.src && !node.src.startsWith('data:') &&
+              !node.src.includes('cloudinary.com')) return false;
+        }
+        return true;
+      }
+    });
   }
 
   /**
@@ -677,9 +766,10 @@ export class SimpleEditorComponent implements OnInit, OnDestroy {
       this.project!.previewUrl = previewUrl;
       this.project!.updatedAt = new Date();
 
-      // Call backend API to update project preview URL
+      // Call backend API to update project preview URL, passing the current project
+      // to preserve all existing fields
       const updateResult = await lastValueFrom(
-        this.designLabService.updateProjectPreview(this.projectId!, previewUrl)
+        this.designLabService.updateProjectPreview(this.projectId!, previewUrl, this.project!)
       );
 
       if (updateResult?.success) {

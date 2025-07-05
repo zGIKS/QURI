@@ -166,12 +166,29 @@ export class DesignLabService {
 
   /**
    * Actualizar solo el preview URL de un proyecto
-   * Este método es un wrapper que solo actualiza el previewUrl
+   * Este método es un wrapper que actualiza el previewUrl manteniendo los demás campos
    */
-  updateProjectPreview(projectId: string, previewUrl: string): Observable<ProjectResult> {
+  updateProjectPreview(projectId: string, previewUrl: string, currentProject?: Project): Observable<ProjectResult> {
     console.log('🖼️ DesignLabService - Updating project preview only:', { projectId, previewUrl });
 
-    return this.updateProjectDetails(projectId, { previewUrl });
+    // Si tenemos el proyecto actual, incluimos todos sus campos para no perder datos
+    const updateData: any = { previewUrl };
+
+    if (currentProject) {
+      updateData.status = currentProject.status;
+      updateData.garmentColor = currentProject.garmentColor;
+      updateData.garmentSize = currentProject.garmentSize;
+      updateData.garmentGender = currentProject.garmentGender;
+
+      console.log('🔄 Preserving current project fields:', {
+        status: currentProject.status,
+        garmentColor: currentProject.garmentColor,
+        garmentSize: currentProject.garmentSize,
+        garmentGender: currentProject.garmentGender
+      });
+    }
+
+    return this.updateProjectDetails(projectId, updateData);
   }
 
   // ==================== LAYER METHODS ====================
