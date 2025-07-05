@@ -10,6 +10,16 @@ export interface CloudinaryUploadResult {
   bytes: number;
 }
 
+export interface ImageDimensions {
+  width: number;
+  height: number;
+}
+
+export interface ImageUploadWithDimensions {
+  cloudinaryResult: CloudinaryUploadResult;
+  calculatedDimensions: ImageDimensions;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -22,6 +32,76 @@ export class CloudinaryService {
     console.log('🔧 Cloud name:', this.cloudName);
     console.log('🔧 Upload preset:', this.uploadPreset);
     console.log('🔧 IMPORTANTE: Verifica que el preset sea "unsigned" en Cloudinary dashboard');
+  }
+
+  /**
+   * Calcula las dimensiones de una imagen usando HTML/JavaScript
+   * @param file El archivo de imagen
+   * @returns Promise con las dimensiones de la imagen
+   */
+  calculateImageDimensions(file: File): Promise<ImageDimensions> {
+    return new Promise((resolve, reject) => {
+      console.log('📐 Calculating image dimensions for:', file.name);
+
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+
+      img.onload = () => {
+        const dimensions = {
+          width: img.naturalWidth,
+          height: img.naturalHeight
+        };
+
+        console.log('📐 Image dimensions calculated:', dimensions);
+        URL.revokeObjectURL(url); // Liberar memoria
+        resolve(dimensions);
+      };
+
+      img.onerror = () => {
+        console.error('❌ Error loading image for dimension calculation');
+        URL.revokeObjectURL(url); // Liberar memoria
+        reject(new Error('Failed to load image for dimension calculation'));
+      };
+
+      img.src = url;
+    });
+  }
+
+  /**
+   * Sube una imagen a Cloudinary con dimensiones calculadas previamente
+   * @param file El archivo de imagen a subir
+   * @returns Observable con la respuesta de Cloudinary y las dimensiones calculadas
+   */
+  uploadImageWithDimensions(file: File): Observable<ImageUploadWithDimensions> {
+    console.log('🖼️ Starting image upload with dimension calculation:', file.name);
+
+    return from(
+      this.calculateImageDimensions(file).then(async calculatedDimensions => {
+        console.log('📐 Dimensions calculated, proceeding with upload:', calculatedDimensions);
+
+        try {
+          const cloudinaryResult = await new Promise<CloudinaryUploadResult>((resolve, reject) => {
+            this.uploadImage(file).subscribe({
+              next: (result) => resolve(result),
+              error: (error) => reject(error)
+            });
+          });
+
+          console.log('✅ Image uploaded successfully with dimensions:', {
+            cloudinaryResult,
+            calculatedDimensions
+          });
+
+          return {
+            cloudinaryResult,
+            calculatedDimensions
+          };
+        } catch (error) {
+          console.error('❌ Error uploading image:', error);
+          throw error;
+        }
+      })
+    );
   }
 
   /**

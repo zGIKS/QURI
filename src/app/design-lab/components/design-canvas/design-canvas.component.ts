@@ -85,6 +85,7 @@ export interface LayerEvent {
                [style.z-index]="layer.z"
                [style.opacity]="layer.opacity"
                [style.visibility]="layer.isVisible ? 'visible' : 'hidden'"
+               [attr.data-layer-id]="layer.id"
                cdkDrag
                [cdkDragData]="layer"
                (cdkDragStarted)="onDragStart(layer)"
@@ -364,12 +365,44 @@ export interface LayerEvent {
       border-radius: 50%;
       pointer-events: all;
       cursor: pointer;
+      z-index: 1000;
+      transition: all 0.2s ease;
     }
 
-    .handle-nw { top: -6px; left: -6px; cursor: nw-resize; }
-    .handle-ne { top: -6px; right: -6px; cursor: ne-resize; }
-    .handle-sw { bottom: -6px; left: -6px; cursor: sw-resize; }
-    .handle-se { bottom: -6px; right: -6px; cursor: se-resize; }
+    .handle:hover {
+      background: #1976d2;
+      transform: scale(1.2);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    /* Solo handles de esquinas - NO laterales */
+    .handle-nw {
+      top: -8px;
+      left: -8px;
+      cursor: nw-resize;
+      border: 2px solid white;
+    }
+    .handle-ne {
+      top: -8px;
+      right: -8px;
+      cursor: ne-resize;
+      border: 2px solid white;
+    }
+    .handle-sw {
+      bottom: -8px;
+      left: -8px;
+      cursor: sw-resize;
+      border: 2px solid white;
+    }
+    .handle-se {
+      bottom: -8px;
+      right: -8px;
+      cursor: se-resize;
+      border: 2px solid white;
+    }
+
+    /* NO incluir handles laterales */
+    /* .handle-n, .handle-s, .handle-e, .handle-w están omitidos intencionalmente */
 
     .text-layer-content {
       min-width: 50px;
@@ -864,14 +897,131 @@ export class DesignCanvasComponent implements OnInit, OnDestroy {
   }
 
   private onResize(event: MouseEvent): void {
-    if (!this.isResizing || !this.selectedLayer) return;
+    if (!this.isResizing || !this.selectedLayer || !this.resizeHandle) return;
 
     const deltaX = event.clientX - this.resizeStartPos.x;
     const deltaY = event.clientY - this.resizeStartPos.y;
 
-    // Implement resize logic based on handle and layer type
-    // This is a simplified version - you may want to implement proper resize logic
-    console.log('Resizing:', this.resizeHandle, deltaX, deltaY);
+    // Solo permitir resize en las esquinas
+    if (!['nw', 'ne', 'sw', 'se'].includes(this.resizeHandle)) {
+      console.warn('🚫 Resize solo permitido en esquinas, handle:', this.resizeHandle);
+      return;
+    }
+
+    // Obtener el elemento del layer seleccionado
+    const layerElement = document.querySelector(`[data-layer-id="${this.selectedLayer.id}"]`) as HTMLElement;
+    if (!layerElement) {
+      console.error('❌ No se encontró el elemento del layer:', this.selectedLayer.id);
+      return;
+    }
+
+    // Obtener dimensiones actuales del elemento
+    const rect = layerElement.getBoundingClientRect();
+    const currentWidth = rect.width;
+    const currentHeight = rect.height;
+
+    // Calcular nuevo tamaño basado en el handle específico
+    let newWidth = currentWidth;
+    let newHeight = currentHeight;
+    let newX = this.selectedLayer.x;
+    let newY = this.selectedLayer.y;
+
+    // Factor de sensibilidad para el resize
+    const sensitivity = 1;
+
+    switch (this.resizeHandle) {
+      case 'nw': // Esquina superior izquierda
+        newWidth = currentWidth - (deltaX * sensitivity);
+        newHeight = currentHeight - (deltaY * sensitivity);
+        newX = this.selectedLayer.x + (deltaX * sensitivity);
+        newY = this.selectedLayer.y + (deltaY * sensitivity);
+        break;
+
+      case 'ne': // Esquina superior derecha
+        newWidth = currentWidth + (deltaX * sensitivity);
+        newHeight = currentHeight - (deltaY * sensitivity);
+        newY = this.selectedLayer.y + (deltaY * sensitivity);
+        break;
+
+      case 'sw': // Esquina inferior izquierda
+        newWidth = currentWidth - (deltaX * sensitivity);
+        newHeight = currentHeight + (deltaY * sensitivity);
+        newX = this.selectedLayer.x + (deltaX * sensitivity);
+        break;
+
+      case 'se': // Esquina inferior derecha
+        newWidth = currentWidth + (deltaX * sensitivity);
+        newHeight = currentHeight + (deltaY * sensitivity);
+        break;
+    }
+
+    // Aplicar límites mínimos
+    const minSize = 20;
+    newWidth = Math.max(minSize, newWidth);
+    newHeight = Math.max(minSize, newHeight);
+
+    // Para capas de imagen, mantener proporciones
+    if (this.selectedLayer.type === LayerType.IMAGE) {
+      const originalWidth = this.selectedLayer.details?.width || currentWidth;
+      const originalHeight = this.selectedLayer.details?.height || currentHeight;
+
+      const adjustedDimensions = this.maintainImageAspectRatio(
+        originalWidth,
+        originalHeight,
+        newWidth,
+        newHeight
+      );
+
+      newWidth = adjustedDimensions.width;
+      newHeight = adjustedDimensions.height;
+
+      // Ajustar posición si cambió el tamaño manteniendo proporciones
+      if (this.resizeHandle === 'nw') {
+        newX = this.selectedLayer.x + (currentWidth - newWidth);
+        newY = this.selectedLayer.y + (currentHeight - newHeight);
+      } else if (this.resizeHandle === 'ne') {
+        newY = this.selectedLayer.y + (currentHeight - newHeight);
+      } else if (this.resizeHandle === 'sw') {
+        newX = this.selectedLayer.x + (currentWidth - newWidth);
+      }
+      // 'se' no necesita ajuste de posición
+    }
+
+    // Actualizar posición del layer
+    this.selectedLayer.x = Math.round(newX);
+    this.selectedLayer.y = Math.round(newY);
+    this.selectedLayer.updatedAt = new Date();
+
+    // Actualizar dimensiones según el tipo de layer
+    if (this.selectedLayer.type === LayerType.IMAGE) {
+      this.selectedLayer.details = {
+        ...this.selectedLayer.details,
+        width: Math.round(newWidth),
+        height: Math.round(newHeight)
+      };
+
+      // Aplicar estilos directamente al elemento imagen
+      const imgElement = layerElement.querySelector('img') as HTMLImageElement;
+      if (imgElement) {
+        imgElement.style.width = `${newWidth}px`;
+        imgElement.style.height = `${newHeight}px`;
+      }
+    }
+
+    if (this.selectedLayer.type === LayerType.TEXT) {
+      layerElement.style.width = `${newWidth}px`;
+      layerElement.style.height = `${newHeight}px`;
+      layerElement.style.fontSize = `${Math.max(12, newWidth / 10)}px`;
+    }
+
+    console.log('🔄 Resizing layer (corner only):', {
+      handle: this.resizeHandle,
+      originalSize: { width: currentWidth, height: currentHeight },
+      newSize: { width: Math.round(newWidth), height: Math.round(newHeight) },
+      newPosition: { x: Math.round(newX), y: Math.round(newY) },
+      layerType: this.selectedLayer.type,
+      maintainedAspectRatio: this.selectedLayer.type === LayerType.IMAGE
+    });
   }
 
   private stopResize(): void {
@@ -883,6 +1033,36 @@ export class DesignCanvasComponent implements OnInit, OnDestroy {
 
     this.saveToHistory();
     this.emitLayersChange();
+  }
+
+  /**
+   * Mantiene las proporciones de una imagen durante el resize
+   * @param originalWidth Ancho original de la imagen
+   * @param originalHeight Alto original de la imagen
+   * @param newWidth Nuevo ancho propuesto
+   * @param newHeight Nuevo alto propuesto
+   * @returns Dimensiones ajustadas manteniendo proporciones
+   */
+  private maintainImageAspectRatio(originalWidth: number, originalHeight: number, newWidth: number, newHeight: number): { width: number, height: number } {
+    const aspectRatio = originalWidth / originalHeight;
+
+    // Determinar qué dimensión usar como referencia basándose en el cambio más grande
+    const widthChange = Math.abs(newWidth - originalWidth);
+    const heightChange = Math.abs(newHeight - originalHeight);
+
+    if (widthChange > heightChange) {
+      // Usar el ancho como referencia
+      return {
+        width: newWidth,
+        height: Math.round(newWidth / aspectRatio)
+      };
+    } else {
+      // Usar la altura como referencia
+      return {
+        width: Math.round(newHeight * aspectRatio),
+        height: newHeight
+      };
+    }
   }
 
   // === TEXT EDITING ===

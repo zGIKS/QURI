@@ -21,7 +21,7 @@ import { LayerResult } from '../../services/design-lab-real.service';
 import { Project } from '../../model/project.entity';
 import { TextLayer } from '../../model/layer.entity';
 import { GARMENT_COLOR } from '../../../const';
-import { ImageUploadComponent, ImageUploadResult } from '../image-upload/image-upload.component';
+import { ImageUploadComponent, ImageUploadResult, DirectImageUploadResult } from '../image-upload/image-upload.component';
 
 @Component({
   selector: 'app-simple-editor',
@@ -543,14 +543,17 @@ export class SimpleEditorComponent implements OnInit {
   onImageUploaded(result: ImageUploadResult): void {
     if (!this.project || !this.projectId) return;
 
-    console.log('🖼️ Image uploaded, creating image layer:', result);
+    console.log('🖼️ Image uploaded with calculated dimensions:', result);
+    console.log('📐 Cloudinary dimensions:', { width: result.width, height: result.height });
+    console.log('📐 Calculated dimensions:', { width: result.calculatedWidth, height: result.calculatedHeight });
 
     this.isSaving = true;
 
+    // Usar las dimensiones calculadas que son más precisas
     const imageLayerRequest = {
       imageUrl: result.imageUrl,
-      width: result.width.toString(),
-      height: result.height.toString()
+      width: result.calculatedWidth.toString(),
+      height: result.calculatedHeight.toString()
     };
 
     this.designLabService.createImageLayer(this.projectId, imageLayerRequest).subscribe({
@@ -575,6 +578,74 @@ export class SimpleEditorComponent implements OnInit {
       },
       error: (error: any) => {
         console.error('❌ Error creating image layer:', error);
+        this.snackBar.open(
+          this.translateService.instant('designLab.errors.imageLayerCreationFailed'),
+          this.translateService.instant('common.close'),
+          { duration: 3000, panelClass: ['error-snackbar'] }
+        );
+        this.isSaving = false;
+      }
+    });
+  }
+
+  // Direct image upload handling
+  onDirectImageUpload(result: DirectImageUploadResult): void {
+    console.log('🖼️ Direct image upload completed:', result);
+
+    if (result.success) {
+      // Reload the project to get the updated layers
+      this.loadProject();
+
+      this.snackBar.open(
+        this.translateService.instant('designLab.messages.imageLayerCreated'),
+        this.translateService.instant('common.close'),
+        { duration: 3000, panelClass: ['success-snackbar'] }
+      );
+    } else {
+      this.snackBar.open(
+        result.error || 'Error creating image layer',
+        this.translateService.instant('common.close'),
+        { duration: 3000, panelClass: ['error-snackbar'] }
+      );
+    }
+  }
+
+  // File selection handling
+  onFileSelected(file: File): void {
+    console.log('📁 File selected:', file.name, file.size, 'bytes');
+    // Here you could add additional validation or processing if needed
+  }
+
+  // Alternative method using integrated upload and layer creation
+  onImageUploadedIntegrated(file: File): void {
+    if (!this.project || !this.projectId) return;
+
+    console.log('🖼️ Using integrated image upload and layer creation for:', file.name);
+
+    this.isSaving = true;
+
+    this.designLabService.uploadImageAndCreateLayer(file, this.projectId).subscribe({
+      next: (layerResult: LayerResult) => {
+        if (layerResult.success) {
+          // Reload the project to get the updated layers
+          this.loadProject();
+
+          this.snackBar.open(
+            this.translateService.instant('designLab.messages.imageLayerCreated'),
+            this.translateService.instant('common.close'),
+            { duration: 3000, panelClass: ['success-snackbar'] }
+          );
+        } else {
+          this.snackBar.open(
+            layerResult.error || 'Error creating image layer',
+            this.translateService.instant('common.close'),
+            { duration: 3000, panelClass: ['error-snackbar'] }
+          );
+        }
+        this.isSaving = false;
+      },
+      error: (error: any) => {
+        console.error('❌ Error with integrated image upload and layer creation:', error);
         this.snackBar.open(
           this.translateService.instant('designLab.errors.imageLayerCreationFailed'),
           this.translateService.instant('common.close'),

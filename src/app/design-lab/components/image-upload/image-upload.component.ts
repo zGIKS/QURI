@@ -1,17 +1,35 @@
-import { Component, EventEmitter, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { CloudinaryService, CloudinaryUploadResult } from '../../services/cloudinary.service';
+import { CloudinaryService, ImageUploadWithDimensions } from '../../services/cloudinary.service';
 
 export interface ImageUploadResult {
   imageUrl: string;
   width: number;
   height: number;
   publicId: string;
+  calculatedWidth: number;
+  calculatedHeight: number;
+}
+
+export interface ImageUploadResultWithFile {
+  imageUrl: string;
+  width: number;
+  height: number;
+  publicId: string;
+  calculatedWidth: number;
+  calculatedHeight: number;
+  file: File;
+}
+
+export interface DirectImageUploadResult {
+  success: boolean;
+  layerId?: string;
+  error?: string;
 }
 
 @Component({
@@ -99,6 +117,12 @@ export interface ImageUploadResult {
 })
 export class ImageUploadComponent {
   @Output() imageUploaded = new EventEmitter<ImageUploadResult>();
+  @Output() directImageUpload = new EventEmitter<DirectImageUploadResult>();
+  @Output() fileSelected = new EventEmitter<File>();
+
+  @Input() enableDirectUpload = false;
+  @Input() projectId: string | null = null;
+  @Input() designLabService: any = null;
 
   isUploading = false;
 
@@ -110,8 +134,76 @@ export class ImageUploadComponent {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
-      this.uploadImage(file);
+
+      // Emit the file for external handling if needed
+      this.fileSelected.emit(file);
+
+      // Handle upload based on mode
+      if (this.enableDirectUpload && this.projectId && this.designLabService) {
+        this.uploadImageDirectly(file);
+      } else {
+        this.uploadImage(file);
+      }
     }
+  }
+
+  private uploadImageDirectly(file: File): void {
+    // Validar el archivo
+    if (!this.cloudinaryService.isValidImageFile(file)) {
+      this.snackBar.open(
+        this.translateService.instant('designLab.imageUpload.invalidFile'),
+        this.translateService.instant('common.close'),
+        {
+          duration: 5000,
+          panelClass: ['error-snackbar']
+        }
+      );
+      return;
+    }
+
+    this.isUploading = true;
+
+    this.designLabService.uploadImageAndCreateLayer(file, this.projectId).subscribe({
+      next: (result: DirectImageUploadResult) => {
+        console.log('✅ Direct image upload and layer creation successful:', result);
+
+        this.directImageUpload.emit(result);
+        this.isUploading = false;
+
+        if (result.success) {
+          this.snackBar.open(
+            this.translateService.instant('designLab.imageUpload.success'),
+            this.translateService.instant('common.close'),
+            {
+              duration: 3000,
+              panelClass: ['success-snackbar']
+            }
+          );
+        } else {
+          this.snackBar.open(
+            result.error || this.translateService.instant('designLab.imageUpload.error'),
+            this.translateService.instant('common.close'),
+            {
+              duration: 5000,
+              panelClass: ['error-snackbar']
+            }
+          );
+        }
+      },
+      error: (error: any) => {
+        console.error('❌ Error with direct image upload:', error);
+        this.isUploading = false;
+
+        this.snackBar.open(
+          this.translateService.instant('designLab.imageUpload.error'),
+          this.translateService.instant('common.close'),
+          {
+            duration: 5000,
+            panelClass: ['error-snackbar']
+          }
+        );
+      }
+    });
   }
 
   private uploadImage(file: File): void {
@@ -130,15 +222,17 @@ export class ImageUploadComponent {
 
     this.isUploading = true;
 
-    this.cloudinaryService.uploadImage(file).subscribe({
-      next: (result: CloudinaryUploadResult) => {
-        console.log('✅ Image uploaded successfully:', result);
+    this.cloudinaryService.uploadImageWithDimensions(file).subscribe({
+      next: (result: ImageUploadWithDimensions) => {
+        console.log('✅ Image uploaded successfully with dimensions:', result);
 
         const uploadResult: ImageUploadResult = {
-          imageUrl: result.secure_url,
-          width: result.width,
-          height: result.height,
-          publicId: result.public_id
+          imageUrl: result.cloudinaryResult.secure_url,
+          width: result.cloudinaryResult.width,
+          height: result.cloudinaryResult.height,
+          publicId: result.cloudinaryResult.public_id,
+          calculatedWidth: result.calculatedDimensions.width,
+          calculatedHeight: result.calculatedDimensions.height
         };
 
         this.imageUploaded.emit(uploadResult);

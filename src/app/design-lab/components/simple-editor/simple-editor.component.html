@@ -288,7 +288,22 @@
                 <h4>{{ 'designLab.addImage' | translate }}</h4>
 
                 <div class="image-upload-area">
-                  <app-image-upload (imageUploaded)="onImageUploaded($event)"></app-image-upload>
+                  <!-- Option 1: Traditional upload (calculate dimensions, upload to Cloudinary, create layer) -->
+                  <app-image-upload
+                    (imageUploaded)="onImageUploaded($event)"
+                    (fileSelected)="onFileSelected($event)">
+                  </app-image-upload>
+
+                  <!-- Option 2: Direct integrated upload (uncomment to use) -->
+                  <!--
+                  <app-image-upload
+                    [enableDirectUpload]="true"
+                    [projectId]="projectId"
+                    [designLabService]="designLabService"
+                    (directImageUpload)="onDirectImageUpload($event)"
+                    (fileSelected)="onFileSelected($event)">
+                  </app-image-upload>
+                  -->
                 </div>
 
                 <div class="image-upload-info">

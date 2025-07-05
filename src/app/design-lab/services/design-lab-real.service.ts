@@ -1,10 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable, catchError, map, throwError } from 'rxjs';
+import { Observable, catchError, map, throwError, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthenticationService } from '../../iam/services/authentication.service';
 import { Project } from '../model/project.entity';
 import { DesignLabAssembler } from './design-lab.assemblers';
+import { CloudinaryService, ImageUploadWithDimensions } from './cloudinary.service';
 
 // Imports from project.response.ts - todos los endpoints reales
 import {
@@ -17,7 +18,6 @@ import {
   DeleteProjectResponse,
   UpdateLayerCoordinatesResponse,
   UpdateTextLayerDetailsResponse,
-  UpdateImageLayerDetailsResponse,
   GetAllUserProjectsResponse
 } from './project.response';
 
@@ -47,6 +47,7 @@ export class DesignLabService {
   private http = inject(HttpClient);
   private authService = inject(AuthenticationService);
   private assembler = inject(DesignLabAssembler);
+  private cloudinaryService = inject(CloudinaryService);
 
   constructor() {
     console.log('🚀 DesignLabService initialized with real endpoints');
@@ -363,28 +364,29 @@ export class DesignLabService {
   }
 
   /**
-   * Actualizar detalles de una capa de imagen
-   * PUT http://localhost:8080/api/v1/projects/{projectId}/layers/{layerId}/image-details
+   * Sube una imagen a Cloudinary y crea automáticamente un layer de imagen
+   * @param file El archivo de imagen a subir
+   * @param projectId El ID del proyecto donde crear el layer
+   * @returns Observable con el resultado de la creación del layer
    */
-  updateImageLayerDetails(projectId: string, layerId: string, request: {
-    imageUrl: string;
-    width: number;
-    height: number;
-  }): Observable<LayerResult> {
-    console.log('🖼️ DesignLabService - Updating image layer details:', { projectId, layerId, request });
+  uploadImageAndCreateLayer(file: File, projectId: string): Observable<LayerResult> {
+    console.log('🖼️ DesignLabService - Uploading image and creating layer:', { projectId, fileName: file.name });
 
-    const url = `${BASE_URL}/${projectId}/layers/${layerId}/image-details`;
-    const requestBody = this.assembler.toUpdateImageLayerDetailsRequest(request);
+    return this.cloudinaryService.uploadImageWithDimensions(file).pipe(
+      switchMap((result: ImageUploadWithDimensions) => {
+        console.log('📤 Image uploaded, creating layer:', result);
 
-    return this.http.put<UpdateImageLayerDetailsResponse>(url, requestBody, {
-      headers: this.getHeaders()
-    }).pipe(
-      map(response => {
-        console.log('✅ Image layer details updated successfully:', response);
-        return this.assembler.toUpdateImageLayerResult(response);
+        // Usar las dimensiones calculadas para crear el layer
+        const createLayerRequest = {
+          imageUrl: result.cloudinaryResult.secure_url,
+          width: result.calculatedDimensions.width.toString(),
+          height: result.calculatedDimensions.height.toString()
+        };
+
+        return this.createImageLayer(projectId, createLayerRequest);
       }),
       catchError(error => {
-        console.error('❌ Error updating image layer details:', error);
+        console.error('❌ Error uploading image and creating layer:', error);
         return throwError(() => this.getErrorMessage(error));
       })
     );
