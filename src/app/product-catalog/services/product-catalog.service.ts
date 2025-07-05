@@ -15,7 +15,9 @@ import { CreateProductRequest, UpdateProductRequest, GetProductsRequest } from '
 export class ProductCatalogService {
   private readonly baseUrl = `${environment.serverBaseUrl}/api/v1/products`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient
+  ) {}
 
   /**
    * Gets all products, optionally filtered by project ID
@@ -47,8 +49,14 @@ export class ProductCatalogService {
    * Creates a new product
    */
   createProduct(request: CreateProductRequest): Observable<CreateProductResponse> {
+    console.log('🛒 Creating product for project:', request.projectId);
+
     return this.http.post<CreateProductResponse>(this.baseUrl, request)
       .pipe(
+        map((productResponse: CreateProductResponse) => {
+          console.log('✅ Product created successfully:', productResponse);
+          return productResponse;
+        }),
         catchError(this.handleError)
       );
   }

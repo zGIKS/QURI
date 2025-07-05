@@ -308,6 +308,85 @@ export class DesignLabService {
     );
   }
 
+  /**
+   * Actualizar los detalles de un proyecto (incluyendo preview URL y status)
+   * PUT http://localhost:8080/api/v1/projects/{projectId}/details
+   */
+  updateProjectDetails(projectId: string, details: {
+    previewUrl?: string;
+    status?: string;
+    garmentColor?: string;
+    garmentSize?: string;
+    garmentGender?: string;
+  }): Observable<ProjectResult> {
+    console.log('🔄 DesignLabService - Updating project details:', { projectId, details });
+
+    const url = `${BASE_URL}/${projectId}/details`;
+
+    return this.http.put<{ message: string; timestamp: string }>(url, details, {
+      headers: this.getHeaders()
+    }).pipe(
+      map(response => {
+        console.log('✅ Project details updated successfully:', response);
+        return {
+          success: true,
+          projectId: projectId,
+          error: undefined
+        };
+      }),
+      catchError(error => {
+        console.error('❌ Error updating project details:', error);
+        return throwError(() => this.getErrorMessage(error));
+      })
+    );
+  }
+
+  /**
+   * Actualizar el status de un proyecto a GARMENT
+   * PUT http://localhost:8080/api/v1/projects/{projectId}/details
+   */
+  updateProjectStatus(projectId: string, status: string, currentProject?: Project): Observable<ProjectResult> {
+    console.log('🔄 DesignLabService - Updating project status:', { projectId, status });
+
+    const url = `${BASE_URL}/${projectId}/details`;
+
+    // Construir el body con todos los campos para no perder datos
+    const requestBody: any = { status };
+
+    if (currentProject) {
+      requestBody.previewUrl = currentProject.previewUrl;
+      requestBody.garmentColor = currentProject.garmentColor;
+      requestBody.garmentSize = currentProject.garmentSize;
+      requestBody.garmentGender = currentProject.garmentGender;
+
+      console.log('🔄 Preserving current project fields:', {
+        previewUrl: currentProject.previewUrl,
+        garmentColor: currentProject.garmentColor,
+        garmentSize: currentProject.garmentSize,
+        garmentGender: currentProject.garmentGender
+      });
+    }
+
+    console.log('📤 Sending project status update request body:', requestBody);
+
+    return this.http.put<{ message: string; timestamp: string }>(url, requestBody, {
+      headers: this.getHeaders()
+    }).pipe(
+      map(response => {
+        console.log('✅ Project status updated successfully:', response);
+        return {
+          success: true,
+          projectId: projectId,
+          error: undefined
+        };
+      }),
+      catchError(error => {
+        console.error('❌ Error updating project status:', error);
+        return throwError(() => this.getErrorMessage(error));
+      })
+    );
+  }
+
   // ==================== TEXT LAYER METHODS ====================
 
   /**

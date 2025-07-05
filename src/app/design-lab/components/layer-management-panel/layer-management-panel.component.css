@@ -5,7 +5,7 @@
   flex-direction: column;
   background: #fafafa;
   border-radius: 8px;
-  overflow: hidden;
+  ;
 }
 
 .panel-header {
@@ -100,7 +100,7 @@
   font-weight: 500;
   color: #333;
   margin-bottom: 4px;
-  overflow: hidden;
+  ;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

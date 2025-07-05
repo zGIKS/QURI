@@ -218,4 +218,27 @@ export class DesignLabComponent implements OnInit {
       }
     });
   }
+
+  /**
+   * Verifica si un proyecto puede ser editado
+   * Los proyectos con estado GARMENT no pueden ser editados
+   */
+  canEditProject(project: Project): boolean {
+    return project.status !== 'GARMENT';
+  }
+
+  /**
+   * Verifica si un proyecto puede ser puesto a la venta
+   * Los proyectos con estado GARMENT no pueden ser puestos a la venta
+   */
+  canSellProject(project: Project): boolean {
+    return project.status !== 'GARMENT';
+  }
+
+  /**
+   * Verifica si un proyecto está en estado GARMENT
+   */
+  isGarmentProject(project: Project): boolean {
+    return project.status === 'GARMENT';
+  }
 }

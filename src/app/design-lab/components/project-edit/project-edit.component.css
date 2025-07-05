@@ -94,7 +94,7 @@
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  ;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -131,7 +131,7 @@
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  ;
 }
 
 .panel-section:first-child {
@@ -221,7 +221,7 @@
 @media (max-width: 480px) {
   .project-edit-container {
     height: 100vh;
-    overflow: hidden;
+    ;
   }
 
   .editor-layout {

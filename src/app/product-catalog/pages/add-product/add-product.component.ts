@@ -13,7 +13,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DesignLabService } from '../../../design-lab/services/design-lab-real.service';
+import { ProductCatalogService } from '../../services/product-catalog.service';
 import { Project } from '../../../design-lab/model/project.entity';
+import { CreateProductRequest } from '../../services/product.request';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-add-product',
@@ -55,6 +58,7 @@ export class AddProductComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private designLabService: DesignLabService,
+    private productCatalogService: ProductCatalogService,
     private translateService: TranslateService,
     private snackBar: MatSnackBar
   ) {
@@ -104,20 +108,48 @@ export class AddProductComponent implements OnInit {
         priceCurrency: formData.priceCurrency
       });
 
-      // TODO: Implement product creation service call
-      // For now, just show a success message and redirect
-      setTimeout(() => {
-        this.isSaving = false;
+      // Create product request
+      const createProductRequest: CreateProductRequest = {
+        projectId: this.projectId!,
+        priceAmount: formData.priceAmount,
+        priceCurrency: formData.priceCurrency
+      };
 
-        const message = this.translateService.instant('catalog.productAddedSuccess');
-        this.snackBar.open(message, 'OK', {
-          duration: 3000,
-          horizontalPosition: 'end',
-          verticalPosition: 'top'
-        });
+      // Create product and then update project status
+      this.productCatalogService.createProduct(createProductRequest).pipe(
+        switchMap((productResponse) => {
+          console.log('✅ Product created successfully:', productResponse);
 
-        this.router.navigate(['/home/catalog']);
-      }, 1000);
+          // After creating the product, update the project status to GARMENT
+          console.log('🔄 Updating project status to GARMENT for project:', this.projectId);
+          return this.designLabService.updateProjectStatus(this.projectId!, 'GARMENT', this.project!);
+        })
+      ).subscribe({
+        next: (updateResult) => {
+          console.log('✅ Project status updated to GARMENT:', updateResult);
+          this.isSaving = false;
+
+          const message = this.translateService.instant('catalog.productAddedSuccess');
+          this.snackBar.open(message, 'OK', {
+            duration: 3000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top'
+          });
+
+          this.router.navigate(['/home/catalog']);
+        },
+        error: (error) => {
+          console.error('❌ Error in product creation or project update:', error);
+          this.isSaving = false;
+
+          const message = this.translateService.instant('catalog.productAddError');
+          this.snackBar.open(message, 'OK', {
+            duration: 5000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top'
+          });
+        }
+      });
     }
   }
 

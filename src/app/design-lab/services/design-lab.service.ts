@@ -191,6 +191,32 @@ export class DesignLabService {
     return this.updateProjectDetails(projectId, updateData);
   }
 
+  /**
+   * Actualizar el status de un proyecto a GARMENT
+   */
+  updateProjectStatus(projectId: string, status: string, currentProject?: Project): Observable<ProjectResult> {
+    console.log('🔄 DesignLabService - Updating project status:', { projectId, status });
+
+    // Construir el body con todos los campos para no perder datos
+    const updateData: any = { status };
+
+    if (currentProject) {
+      updateData.previewUrl = currentProject.previewUrl;
+      updateData.garmentColor = currentProject.garmentColor;
+      updateData.garmentSize = currentProject.garmentSize;
+      updateData.garmentGender = currentProject.garmentGender;
+
+      console.log('🔄 Preserving current project fields:', {
+        previewUrl: currentProject.previewUrl,
+        garmentColor: currentProject.garmentColor,
+        garmentSize: currentProject.garmentSize,
+        garmentGender: currentProject.garmentGender
+      });
+    }
+
+    return this.updateProjectDetails(projectId, updateData);
+  }
+
   // ==================== LAYER METHODS ====================
 
   /**

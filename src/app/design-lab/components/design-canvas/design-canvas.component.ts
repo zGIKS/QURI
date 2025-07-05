@@ -293,7 +293,7 @@ export interface LayerEvent {
     .canvas-workspace {
       display: flex;
       flex: 1;
-      overflow: hidden;
+      ;
     }
 
     .canvas-area {
@@ -303,7 +303,7 @@ export interface LayerEvent {
       border: 1px solid #e0e0e0;
       margin: 16px;
       border-radius: 8px;
-      overflow: hidden;
+      ;
       cursor: crosshair;
     }
 
