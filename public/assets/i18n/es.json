@@ -230,6 +230,7 @@
     "messages": {
       "projectCreated": "¡Proyecto creado exitosamente!",
       "projectSaved": "¡Proyecto guardado exitosamente!",
+      "saveError": "Error al guardar el proyecto. Inténtalo nuevamente.",
       "projectDeleted": "¡Proyecto eliminado exitosamente!",
       "layerAdded": "Capa agregada al proyecto",
       "layerUpdated": "Capa actualizada exitosamente",

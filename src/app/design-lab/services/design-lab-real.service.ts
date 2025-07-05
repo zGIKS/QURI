@@ -262,6 +262,34 @@ export class DesignLabService {
     );
   }
 
+  /**
+   * Actualizar el preview URL de un proyecto
+   * PUT http://localhost:8080/api/v1/projects/{projectId}/details
+   */
+  updateProjectPreview(projectId: string, previewUrl: string): Observable<ProjectResult> {
+    console.log('🖼️ DesignLabService - Updating project preview:', { projectId, previewUrl });
+
+    const url = `${BASE_URL}/${projectId}/details`;
+    const requestBody = { previewUrl };
+
+    return this.http.put<{ message: string; timestamp: string }>(url, requestBody, {
+      headers: this.getHeaders()
+    }).pipe(
+      map(response => {
+        console.log('✅ Project preview updated successfully:', response);
+        return {
+          success: true,
+          projectId: projectId,
+          error: undefined
+        };
+      }),
+      catchError(error => {
+        console.error('❌ Error updating project preview:', error);
+        return throwError(() => this.getErrorMessage(error));
+      })
+    );
+  }
+
   // ==================== TEXT LAYER METHODS ====================
 
   /**

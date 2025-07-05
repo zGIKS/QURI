@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -16,8 +16,11 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { toPng } from 'html-to-image';
+import { lastValueFrom } from 'rxjs';
 import { DesignLabService } from '../../services/design-lab-real.service';
 import { LayerResult } from '../../services/design-lab-real.service';
+import { CloudinaryService } from '../../services/cloudinary.service';
 import { Project } from '../../model/project.entity';
 import { TextLayer, ImageLayer, Layer } from '../../model/layer.entity';
 import { GARMENT_COLOR } from '../../../const';
@@ -53,7 +56,7 @@ import { ImageLayerComponent, ImageLayerEvent } from '../image-layer/image-layer
   templateUrl: './simple-editor.component.html',
   styleUrls: [ './simple-editor.component.css',  './simple-editor.component.extend.css']
 })
-export class SimpleEditorComponent implements OnInit {
+export class SimpleEditorComponent implements OnInit, OnDestroy {
   project: Project | null = null;
   isLoading = false;
   isSaving = false;
@@ -113,14 +116,36 @@ export class SimpleEditorComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private designLabService = inject(DesignLabService);
+  private cloudinaryService = inject(CloudinaryService);
   private translateService = inject(TranslateService);
   private snackBar = inject(MatSnackBar);
+  private elementRef = inject(ElementRef);
+
+  // Bound listener for beforeunload event
+  private boundBeforeUnloadHandler = this.handleBeforeUnload.bind(this);
 
   ngOnInit(): void {
     this.projectId = this.route.snapshot.paramMap.get('id');
     if (this.projectId) {
       this.loadProject();
     }
+
+    // Add beforeunload listener to capture screenshot when user closes the window
+    window.addEventListener('beforeunload', this.boundBeforeUnloadHandler);
+  }
+
+  ngOnDestroy(): void {
+    // Remove the beforeunload listener
+    window.removeEventListener('beforeunload', this.boundBeforeUnloadHandler);
+
+    // Also generate preview when component is destroyed (navigation away)
+    this.generateAndUpdatePreview();
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  handleBeforeUnload(_event: BeforeUnloadEvent): void {
+    // Generate preview before unloading
+    this.generateAndUpdatePreview();
   }
 
   loadProject(): void {
@@ -162,13 +187,18 @@ export class SimpleEditorComponent implements OnInit {
     });
   }
 
-  saveProject(): void {
+  async saveProject(): Promise<void> {
     if (!this.project || this.isSaving) return;
 
     this.isSaving = true;
-    // Por ahora solo mostramos mensaje de guardado, implementaremos la lógica después
-    setTimeout(() => {
-      this.isSaving = false;
+
+    try {
+      console.log('💾 Starting project save with preview generation...');
+
+      // Generate and update preview image
+      await this.generateAndUpdatePreview();
+
+      // Show success message
       this.snackBar.open(
         this.translateService.instant('designLab.messages.projectSaved'),
         this.translateService.instant('common.close'),
@@ -177,7 +207,24 @@ export class SimpleEditorComponent implements OnInit {
           panelClass: ['success-snackbar']
         }
       );
-    }, 1000);
+
+      console.log('✅ Project saved successfully with new preview');
+
+    } catch (error) {
+      console.error('❌ Error saving project:', error);
+
+      // Show error message
+      this.snackBar.open(
+        this.translateService.instant('designLab.messages.saveError'),
+        this.translateService.instant('common.close'),
+        {
+          duration: 5000,
+          panelClass: ['error-snackbar']
+        }
+      );
+    } finally {
+      this.isSaving = false;
+    }
   }
 
   getTshirtColor(): string {
@@ -561,6 +608,91 @@ export class SimpleEditorComponent implements OnInit {
 
   private generateLayerId(): string {
     return 'layer_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  }
+
+  /**
+   * Generate a preview image of the current design and update the project's preview URL
+   */
+  private async generateAndUpdatePreview(): Promise<void> {
+    if (!this.project || !this.projectId) {
+      console.log('⚠️ Cannot generate preview: no project or projectId');
+      return;
+    }
+
+    try {
+      console.log('📸 Starting preview generation...');
+
+      // Find the design preview container (the t-shirt with layers)
+      const previewElement = this.elementRef.nativeElement.querySelector('.tshirt-preview');
+
+      if (!previewElement) {
+        console.warn('⚠️ Preview container not found');
+        return;
+      }
+
+      // Generate image from the preview container
+      const dataUrl = await toPng(previewElement, {
+        quality: 0.95,
+        pixelRatio: 2, // Higher resolution
+        backgroundColor: '#ffffff'
+      });
+
+      console.log('📸 Preview image generated successfully');
+
+      // Convert data URL to Blob
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
+
+      // Create a File object for upload
+      const file = new File([blob], `project-${this.projectId}-preview.png`, {
+        type: 'image/png'
+      });
+
+      console.log('☁️ Uploading preview to Cloudinary...');
+
+      // Upload to Cloudinary
+      const cloudinaryResult = await lastValueFrom(this.cloudinaryService.uploadImage(file));
+
+      if (cloudinaryResult?.secure_url) {
+        console.log('☁️ Preview uploaded to Cloudinary:', cloudinaryResult.secure_url);
+
+        // Update project with new preview URL
+        await this.updateProjectPreview(cloudinaryResult.secure_url);
+      }
+
+    } catch (error) {
+      console.error('❌ Error generating preview:', error);
+      // Don't throw error to avoid blocking navigation
+    }
+  }
+
+  /**
+   * Update the project's preview URL in the backend
+   */
+  private async updateProjectPreview(previewUrl: string): Promise<void> {
+    try {
+      console.log('🔄 Updating project preview URL in backend...');
+
+      // Update the local project object first
+      this.project!.previewUrl = previewUrl;
+      this.project!.updatedAt = new Date();
+
+      // Call backend API to update project preview URL
+      const updateResult = await lastValueFrom(
+        this.designLabService.updateProjectPreview(this.projectId!, previewUrl)
+      );
+
+      if (updateResult?.success) {
+        console.log('✅ Project preview updated in backend successfully');
+      } else {
+        console.warn('⚠️ Backend update completed but returned non-success result:', updateResult);
+      }
+
+    } catch (error) {
+      console.error('❌ Error updating project preview in backend:', error);
+      // Don't throw error to avoid blocking the save process
+      // The local preview URL is still updated
+    }
   }
 
   // Test method to verify authentication

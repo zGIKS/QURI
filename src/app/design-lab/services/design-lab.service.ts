@@ -132,6 +132,48 @@ export class DesignLabService {
     );
   }
 
+  /**
+   * Actualizar los detalles de un proyecto (incluyendo preview URL)
+   */
+  updateProjectDetails(projectId: string, details: {
+    previewUrl?: string;
+    status?: string;
+    garmentColor?: string;
+    garmentSize?: string;
+    garmentGender?: string;
+  }): Observable<ProjectResult> {
+    console.log('🖼️ DesignLabService - Updating project details:', { projectId, details });
+
+    const url = `${BASE_URL}/${projectId}/details`;
+
+    return this.http.put<{ message: string; timestamp: string }>(url, details, {
+      headers: this.getHeaders()
+    }).pipe(
+      map(response => {
+        console.log('✅ Project details updated successfully:', response);
+        return {
+          success: true,
+          projectId: projectId,
+          error: undefined
+        };
+      }),
+      catchError(error => {
+        console.error('❌ Error updating project details:', error);
+        return throwError(() => this.getErrorMessage(error));
+      })
+    );
+  }
+
+  /**
+   * Actualizar solo el preview URL de un proyecto
+   * Este método es un wrapper que solo actualiza el previewUrl
+   */
+  updateProjectPreview(projectId: string, previewUrl: string): Observable<ProjectResult> {
+    console.log('🖼️ DesignLabService - Updating project preview only:', { projectId, previewUrl });
+
+    return this.updateProjectDetails(projectId, { previewUrl });
+  }
+
   // ==================== LAYER METHODS ====================
 
   /**

@@ -241,6 +241,7 @@
     "messages": {
       "projectCreated": "Project created successfully!",
       "projectSaved": "Project saved successfully!",
+      "saveError": "Error saving project. Please try again.",
       "projectDeleted": "Project deleted successfully!",
       "layerAdded": "Layer added to project",
       "layerUpdated": "Layer updated successfully",
