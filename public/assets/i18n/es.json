@@ -78,22 +78,23 @@
   },
   "dashboard": {
     "title": "Panel de Control",
-    "welcome": "Bienvenido a QURI",
-    "overview": "Tu plataforma de análisis avanzado está lista para ayudarte a tomar decisiones basadas en datos",
+    "welcome": "¡Bienvenido a QURI!",
+    "overview": "Tu plataforma de análisis avanzado está lista para ayudarte a tomar decisiones basadas en datos. Explora nuestras funcionalidades y comienza a crear diseños únicos.",
     "recentActivity": "Actividad Reciente",
     "quickActions": "Acciones Rápidas",
     "statistics": "Estadísticas",
     "myProjects": "Mis Proyectos",
     "explore": "Explorar",
     "getStarted": "Comenzar",
+    "welcomeMessage": "¡Bienvenido a tu espacio de trabajo! Desde aquí puedes acceder a todas las funcionalidades de la plataforma.",
     "productCatalog": {
       "title": "Catálogo de Productos",
-      "subtitle": "Gestiona tus productos",
+      "subtitle": "Explora y compra diseños únicos",
       "action": "Ver Catálogo"
     },
     "designLab": {
-      "title": "Editor de Diseño",
-      "subtitle": "Crea y edita diseños",
+      "title": "Laboratorio de Diseño",
+      "subtitle": "Crea y edita tus propios diseños",
       "action": "Abrir Editor"
     }
   },

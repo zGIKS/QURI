@@ -24,36 +24,32 @@ export const authenticationGuard: CanActivateFn = (route, state) => {
   console.log('🔐 localStorage state:', {
     hasToken: !!token,
     hasUserId: !!userId,
-    hasUsername: !!username,
-    tokenPrefix: token?.substring(0, 20) + '...'
+    hasUsername: !!username
   });
 
-  // Check authentication service state
-  const serviceToken = authenticationService.getToken();
-  const hasValidToken = authenticationService.hasValidToken();
+  // If we have all required data in localStorage, allow access
+  if (token && userId && username) {
+    console.log('🔐 Valid authentication data found in localStorage');
 
-  console.log('🔐 AuthenticationService state:', {
-    serviceToken: !!serviceToken,
-    hasValidToken
-  });
-
-  // Try to restore authentication if we have localStorage data but service doesn't
-  if (token && userId && username && !serviceToken) {
-    console.log('🔐 Attempting to restore authentication from localStorage...');
+    // Ensure authentication service is aware of the session
     const restored = authenticationService.checkStoredAuthentication();
-    console.log('🔐 Restoration result:', restored);
-  }
+    console.log('🔐 Authentication service restored:', restored);
 
-  // Final check
-  const finalCheck = authenticationService.hasValidToken();
-  console.log('🔐 Final authentication check:', finalCheck);
-
-  if (finalCheck) {
     console.log('✅ Authentication guard: Access granted to', state.url);
     return true;
-  } else {
-    console.log('❌ Authentication guard: Access denied, redirecting to sign-in');
-    router.navigate(['/sign-in']).then();
-    return false;
   }
+
+  // Check authentication service as fallback
+  const hasValidToken = authenticationService.hasValidToken();
+  console.log('🔐 AuthenticationService hasValidToken:', hasValidToken);
+
+  if (hasValidToken) {
+    console.log('✅ Authentication guard: Access granted via service to', state.url);
+    return true;
+  }
+
+  // No valid authentication found, redirect to sign-in
+  console.log('❌ Authentication guard: No valid authentication, redirecting to sign-in');
+  router.navigate(['/sign-in']).then();
+  return false;
 };

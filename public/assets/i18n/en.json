@@ -90,23 +90,24 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "welcome": "Welcome to QURI",
-    "overview": "Your advanced analytics platform is ready to help you make data-driven decisions",
+    "welcome": "Welcome to QURI!",
+    "overview": "Your advanced analytics platform is ready to help you make data-driven decisions. Explore our features and start creating unique designs.",
     "recentActivity": "Recent Activity",
     "quickActions": "Quick Actions",
     "statistics": "Statistics",
     "myProjects": "My Projects",
     "explore": "Explore",
     "getStarted": "Get Started",
+    "welcomeMessage": "Welcome to your workspace! From here you can access all platform features.",
     "productCatalog": {
       "title": "Product Catalog",
-      "subtitle": "Manage your products",
+      "subtitle": "Explore and purchase unique designs",
       "action": "View Catalog"
     },
     "designLab": {
       "title": "Design Lab",
-      "subtitle": "Create and edit designs",
-      "action": "Open Lab"
+      "subtitle": "Create and edit your own designs",
+      "action": "Open Editor"
     }
   },
   "catalog": {

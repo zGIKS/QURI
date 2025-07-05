@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatGridListModule } from '@angular/material/grid-list';
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -15,275 +14,248 @@ import { TranslateModule } from '@ngx-translate/core';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatGridListModule,
     TranslateModule
   ],
   template: `
-    <!-- Welcome Section -->
-    <section class="welcome-section">
-      <mat-card class="welcome-card">
-        <mat-card-header>
-          <mat-icon mat-card-avatar class="welcome-avatar">dashboard</mat-icon>
-          <mat-card-title>{{ 'dashboard.welcome' | translate }}</mat-card-title>
-          <mat-card-subtitle>{{ 'dashboard.overview' | translate }}</mat-card-subtitle>
-        </mat-card-header>
-      </mat-card>
+    <!-- Welcome Hero Section -->
+    <section class="hero-section">
+      <div class="hero-content">
+        <mat-card class="hero-card">
+          <mat-card-content>
+            <div class="hero-text">
+              <h1 class="hero-title">{{ 'dashboard.welcome' | translate }}</h1>
+              <p class="hero-subtitle">{{ 'dashboard.overview' | translate }}</p>
+            </div>
+            <div class="hero-icon">
+              <mat-icon class="hero-icon-graphic">dashboard</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
     </section>
 
-    <!-- Dashboard Grid -->
-    <section class="dashboard-section">
-      <mat-grid-list cols="3" rowHeight="200px" gutterSize="24px" class="dashboard-grid">
+    <!-- Quick Actions Section -->
+    <section class="quick-actions-section">
+      <h2 class="section-title">{{ 'dashboard.quickActions' | translate }}</h2>
+      <div class="actions-grid">
+        <mat-card class="action-card" (click)="navigateToSection('catalog')">
+          <mat-card-header>
+            <mat-icon mat-card-avatar class="action-icon catalog-icon">storefront</mat-icon>
+            <mat-card-title>{{ 'dashboard.productCatalog.title' | translate }}</mat-card-title>
+            <mat-card-subtitle>{{ 'dashboard.productCatalog.subtitle' | translate }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-actions>
+            <button mat-raised-button color="primary">
+              <mat-icon>arrow_forward</mat-icon>
+              {{ 'dashboard.productCatalog.action' | translate }}
+            </button>
+          </mat-card-actions>
+        </mat-card>
 
-        <mat-grid-tile>
-          <mat-card class="dashboard-card">
-            <mat-card-header>
-              <mat-icon mat-card-avatar>analytics</mat-icon>
-              <mat-card-title>Analytics</mat-card-title>
-              <mat-card-subtitle>View your data insights</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-actions>
-              <button mat-raised-button color="primary">
-                <mat-icon>trending_up</mat-icon>
-                View Analytics
-              </button>
-            </mat-card-actions>
-          </mat-card>
-        </mat-grid-tile>
+        <mat-card class="action-card" (click)="navigateToSection('design-lab')">
+          <mat-card-header>
+            <mat-icon mat-card-avatar class="action-icon design-icon">palette</mat-icon>
+            <mat-card-title>{{ 'dashboard.designLab.title' | translate }}</mat-card-title>
+            <mat-card-subtitle>{{ 'dashboard.designLab.subtitle' | translate }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-actions>
+            <button mat-raised-button color="accent">
+              <mat-icon>create</mat-icon>
+              {{ 'dashboard.designLab.action' | translate }}
+            </button>
+          </mat-card-actions>
+        </mat-card>
 
-        <mat-grid-tile>
-          <mat-card class="dashboard-card">
-            <mat-card-header>
-              <mat-icon mat-card-avatar>shopping_cart</mat-icon>
-              <mat-card-title>{{ 'dashboard.productCatalog.title' | translate }}</mat-card-title>
-              <mat-card-subtitle>{{ 'dashboard.productCatalog.subtitle' | translate }}</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-actions>
-              <button mat-raised-button color="primary" (click)="navigateToSection('catalog')">
-                <mat-icon>storefront</mat-icon>
-                {{ 'dashboard.productCatalog.action' | translate }}
-              </button>
-            </mat-card-actions>
-          </mat-card>
-        </mat-grid-tile>
-
-        <mat-grid-tile>
-          <mat-card class="dashboard-card">
-            <mat-card-header>
-              <mat-icon mat-card-avatar>design_services</mat-icon>
-              <mat-card-title>{{ 'dashboard.designLab.title' | translate }}</mat-card-title>
-              <mat-card-subtitle>{{ 'dashboard.designLab.subtitle' | translate }}</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-actions>
-              <button mat-raised-button color="primary" (click)="navigateToSection('design-lab')">
-                <mat-icon>palette</mat-icon>
-                {{ 'dashboard.designLab.action' | translate }}
-              </button>
-            </mat-card-actions>
-          </mat-card>
-        </mat-grid-tile>
-
-      </mat-grid-list>
-    </section>
-
-    <!-- Quick Stats -->
-    <section class="quick-stats">
-      <h2>Quick Statistics</h2>
-      <mat-grid-list cols="4" rowHeight="120px" gutterSize="16px">
-
-        <mat-grid-tile>
-          <mat-card class="stat-card">
-            <mat-card-content class="stat-content">
-              <div class="stat-number">1,234</div>
-              <div class="stat-label">Total Users</div>
-            </mat-card-content>
-          </mat-card>
-        </mat-grid-tile>
-
-        <mat-grid-tile>
-          <mat-card class="stat-card">
-            <mat-card-content class="stat-content">
-              <div class="stat-number">567</div>
-              <div class="stat-label">Active Projects</div>
-            </mat-card-content>
-          </mat-card>
-        </mat-grid-tile>
-
-        <mat-grid-tile>
-          <mat-card class="stat-card">
-            <mat-card-content class="stat-content">
-              <div class="stat-number">89%</div>
-              <div class="stat-label">Success Rate</div>
-            </mat-card-content>
-          </mat-card>
-        </mat-grid-tile>
-
-        <mat-grid-tile>
-          <mat-card class="stat-card">
-            <mat-card-content class="stat-content">
-              <div class="stat-number">24/7</div>
-              <div class="stat-label">Uptime</div>
-            </mat-card-content>
-          </mat-card>
-        </mat-grid-tile>
-
-      </mat-grid-list>
+        <mat-card class="action-card" (click)="navigateToSection('cart')">
+          <mat-card-header>
+            <mat-icon mat-card-avatar class="action-icon cart-icon">shopping_cart</mat-icon>
+            <mat-card-title>{{ 'navigation.cart' | translate }}</mat-card-title>
+            <mat-card-subtitle>{{ 'cart.emptyCartDescription' | translate }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-actions>
+            <button mat-raised-button color="warn">
+              <mat-icon>shopping_cart</mat-icon>
+              {{ 'catalog.viewCart' | translate }}
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
     </section>
   `,
   styles: [`
-    .welcome-section {
+    .hero-section {
       margin-bottom: 32px;
     }
 
-    .welcome-card {
-      border-radius: 12px;
+    .hero-content {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .hero-card {
+      border-radius: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
       padding: 0;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
     }
 
-    .welcome-card mat-card-header {
-      padding: 24px;
-    }
-
-    .welcome-avatar {
-      font-size: 24px;
-      width: 48px;
-      height: 48px;
+    .hero-card mat-card-content {
+      padding: 48px;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
     }
 
-    .welcome-card mat-card-title {
-      font-size: 28px;
+    .hero-text {
+      flex: 1;
+    }
+
+    .hero-title {
+      font-size: 48px;
       font-weight: 700;
-      margin-bottom: 8px;
+      margin: 0 0 16px 0;
+      line-height: 1.2;
     }
 
-    .welcome-card mat-card-subtitle {
-      font-size: 16px;
+    .hero-subtitle {
+      font-size: 20px;
       line-height: 1.5;
+      margin: 0;
+      opacity: 0.9;
     }
 
-    .dashboard-section {
+    .hero-icon {
+      flex-shrink: 0;
+      margin-left: 32px;
+    }
+
+    .hero-icon-graphic {
+      font-size: 120px;
+      width: 120px;
+      height: 120px;
+      opacity: 0.3;
+    }
+
+    .quick-actions-section {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-size: 32px;
+      font-weight: 600;
       margin-bottom: 32px;
+      color: #333;
     }
 
-    .dashboard-grid {
-      margin-bottom: 0;
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-bottom: 48px;
     }
 
-    .dashboard-card {
+    .action-card {
       border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
       height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
-    .dashboard-card:hover {
-      transform: translateY(-2px);
+    .action-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
     }
 
-    .dashboard-card mat-card-header {
-      padding: 20px;
+    .action-card mat-card-header {
+      padding: 24px;
       flex-grow: 1;
     }
 
-    .dashboard-card mat-card-header mat-icon {
-      font-size: 20px;
-      width: 40px;
-      height: 40px;
+    .action-icon {
+      font-size: 24px;
+      width: 56px;
+      height: 56px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 8px;
+      border-radius: 12px;
     }
 
-    .dashboard-card mat-card-title {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 8px;
+    .catalog-icon {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
     }
 
-    .dashboard-card mat-card-subtitle {
-      font-size: 14px;
-      line-height: 1.4;
+    .design-icon {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
     }
 
-    .dashboard-card mat-card-actions {
-      padding: 20px;
-      padding-top: 0;
+    .cart-icon {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
     }
 
-    .dashboard-card mat-card-actions button {
-      width: 100%;
-      height: 40px;
-      border-radius: 8px;
-      font-weight: 500;
-    }
-
-    .dashboard-card mat-card-actions button mat-icon {
-      margin-right: 8px;
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-    }
-
-    .quick-stats {
-      margin-bottom: 32px;
-    }
-
-    .quick-stats h2 {
+    .action-card mat-card-title {
       font-size: 24px;
       font-weight: 600;
-      margin-bottom: 20px;
-    }
-
-    .stat-card {
-      border-radius: 12px;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-    }
-
-    .stat-card:hover {
-      transform: translateY(-1px);
-    }
-
-    .stat-content {
-      text-align: center;
-      padding: 16px;
-    }
-
-    .stat-number {
-      font-size: 32px;
-      font-weight: 700;
       margin-bottom: 8px;
+      color: #333;
     }
 
-    .stat-label {
-      font-size: 14px;
-      font-weight: 500;
+    .action-card mat-card-subtitle {
+      font-size: 16px;
+      line-height: 1.5;
+      color: #666;
     }
 
-    @media (max-width: 900px) {
-      .dashboard-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .quick-stats mat-grid-list {
-        grid-template-columns: repeat(2, 1fr);
-      }
+    .action-card mat-card-actions {
+      padding: 16px 24px 24px 24px;
     }
 
-    @media (max-width: 600px) {
-      .dashboard-grid {
-        grid-template-columns: 1fr;
+    .action-card button {
+      width: 100%;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 12px 24px;
+      border-radius: 8px;
+    }
+
+    .action-card button mat-icon {
+      margin-right: 8px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .hero-card mat-card-content {
+        flex-direction: column;
+        text-align: center;
+        padding: 32px 24px;
       }
 
-      .quick-stats mat-grid-list {
+      .hero-icon {
+        margin: 24px 0 0 0;
+      }
+
+      .hero-title {
+        font-size: 36px;
+      }
+
+      .hero-subtitle {
+        font-size: 18px;
+      }
+
+      .section-title {
+        font-size: 28px;
+      }
+
+      .actions-grid {
         grid-template-columns: 1fr;
       }
     }
