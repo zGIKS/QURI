@@ -18,6 +18,8 @@ import {
   DeleteProjectResponse,
   UpdateLayerCoordinatesResponse,
   UpdateTextLayerDetailsResponse,
+  UpdateImageLayerDetailsRequest,
+  UpdateImageLayerDetailsResponse,
   GetAllUserProjectsResponse
 } from './project.response';
 
@@ -387,6 +389,34 @@ export class DesignLabService {
       }),
       catchError(error => {
         console.error('❌ Error uploading image and creating layer:', error);
+        return throwError(() => this.getErrorMessage(error));
+      })
+    );
+  }
+
+  /**
+   * Actualizar detalles de una capa de imagen (width, height, imageUrl)
+   * PUT http://localhost:8080/api/v1/projects/{projectId}/layers/{layerId}/image-details
+   */
+  updateImageLayerDetails(projectId: string, layerId: string, request: {
+    imageUrl: string;
+    width: number;
+    height: number;
+  }): Observable<LayerResult> {
+    console.log('🖼️ DesignLabService - Updating image layer details:', { projectId, layerId, request });
+
+    const url = `${BASE_URL}/${projectId}/layers/${layerId}/image-details`;
+    const requestBody = this.assembler.toUpdateImageLayerDetailsRequest(request);
+
+    return this.http.put<UpdateImageLayerDetailsResponse>(url, requestBody, {
+      headers: this.getHeaders()
+    }).pipe(
+      map(response => {
+        console.log('✅ Image layer details updated successfully:', response);
+        return this.assembler.toUpdateImageLayerResult(response);
+      }),
+      catchError(error => {
+        console.error('❌ Error updating image layer details:', error);
         return throwError(() => this.getErrorMessage(error));
       })
     );

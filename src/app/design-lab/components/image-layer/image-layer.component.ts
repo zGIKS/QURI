@@ -537,8 +537,8 @@ export class ImageLayerComponent implements OnInit, OnDestroy {
     this.layer.details.width = Math.round(this.currentWidth);
     this.layer.details.height = Math.round(this.currentHeight);
 
-    // Update backend
-    this.updateLayerPosition();
+    // Update backend with new dimensions and position
+    this.updateImageLayerDetails();
 
     this.cdr.detectChanges();
   }
@@ -603,6 +603,65 @@ export class ImageLayerComponent implements OnInit, OnDestroy {
             this.layer.details.width = this.resizeInitialWidth;
             this.layer.details.height = this.resizeInitialHeight;
           }
+        }
+
+        this.cdr.detectChanges();
+      }
+    });
+
+    this.subscriptions.push(subscription);
+  }
+
+  private updateImageLayerDetails() {
+    console.log('🔄 Updating image layer details in backend:', {
+      layerId: this.layer.id,
+      position: { x: this.layer.x, y: this.layer.y },
+      dimensions: { width: this.layer.details?.width, height: this.layer.details?.height },
+      imageUrl: this.getImageUrl()
+    });
+
+    const updateRequest = {
+      imageUrl: this.getImageUrl(),
+      width: this.layer.details?.width || this.currentWidth,
+      height: this.layer.details?.height || this.currentHeight
+    };
+
+    const subscription = this.designLabService.updateImageLayerDetails(
+      this.projectId,
+      this.layer.id,
+      updateRequest
+    ).subscribe({
+      next: (result: any) => {
+        console.log('✅ Image layer details updated successfully:', result);
+        this.layer.updatedAt = new Date();
+
+        // Update position separately if it also changed
+        if (this.layer.x !== this.resizeInitialX || this.layer.y !== this.resizeInitialY) {
+          this.updateLayerPosition();
+        }
+
+        this.layerEvent.emit({
+          layerId: this.layer.id,
+          type: 'update',
+          data: {
+            x: this.layer.x,
+            y: this.layer.y,
+            width: this.layer.details?.width,
+            height: this.layer.details?.height
+          }
+        });
+      },
+      error: (error: any) => {
+        console.error('❌ Failed to update image layer details:', error);
+
+        // Revert to initial state on error
+        this.currentX = this.layer.x = this.resizeInitialX;
+        this.currentY = this.layer.y = this.resizeInitialY;
+        this.currentWidth = this.resizeInitialWidth;
+        this.currentHeight = this.resizeInitialHeight;
+        if (this.layer.details) {
+          this.layer.details.width = this.resizeInitialWidth;
+          this.layer.details.height = this.resizeInitialHeight;
         }
 
         this.cdr.detectChanges();
