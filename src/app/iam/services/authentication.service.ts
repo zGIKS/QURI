@@ -36,21 +36,32 @@ export class AuthenticationService {
    * @summary
    * This method checks localStorage for authentication data and restores the user's session if valid.
    */
-  checkStoredAuthentication() {
+  checkStoredAuthentication(): boolean {
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
     const username = localStorage.getItem('username');
 
+    console.log('🔐 checkStoredAuthentication called with:', {
+      hasToken: !!token,
+      hasUserId: !!userId,
+      hasUsername: !!username,
+      currentSignedInValue: this.signedIn.value
+    });
+
     if (token && userId && username) {
-      // Only update the state if it's not already set
-      if (!this.signedIn.value) {
-        this.signedIn.next(true);
-        this.signedInUserId.next(userId);
-        this.signedInUsername.next(username);
-        console.log(`Restored authentication for user: ${username}`);
-      }
+      // Always update the state to ensure it's current
+      this.signedIn.next(true);
+      this.signedInUserId.next(userId);
+      this.signedInUsername.next(username);
+      console.log(`✅ Restored authentication for user: ${username}`);
       return true;
     }
+
+    console.log('❌ No valid authentication data found in localStorage');
+    // Clear the state if no valid data
+    this.signedIn.next(false);
+    this.signedInUserId.next('');
+    this.signedInUsername.next('');
     return false;
   }
 
@@ -183,6 +194,52 @@ export class AuthenticationService {
    */
   getToken(): string | null {
     return localStorage.getItem('token');
+  }
+
+  /**
+   * Comprehensive authentication check
+   * @summary
+   * This method performs a comprehensive check of the user's authentication state
+   * @returns boolean indicating if the user is fully authenticated
+   */
+  isAuthenticated(): boolean {
+    // Check localStorage
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+    const username = localStorage.getItem('username');
+
+    // Check service state
+    const serviceSignedIn = this.signedIn.value;
+    const serviceUserId = this.signedInUserId.value;
+    const serviceUsername = this.signedInUsername.value;
+
+    // Simple check: if localStorage has all data, consider authenticated
+    const hasLocalStorageData = !!(token && userId && username);
+    const hasServiceData = !!(serviceSignedIn && serviceUserId && serviceUsername);
+
+    // If both localStorage and service have data, return true
+    if (hasLocalStorageData && hasServiceData) {
+      return true;
+    }
+
+    // If only localStorage has data, sync with service (but don't log to avoid spam)
+    if (hasLocalStorageData && !hasServiceData) {
+      this.signedIn.next(true);
+      this.signedInUserId.next(userId);
+      this.signedInUsername.next(username);
+      return true;
+    }
+
+    // If only service has data but no localStorage, clear service state
+    if (!hasLocalStorageData && hasServiceData) {
+      this.signedIn.next(false);
+      this.signedInUserId.next('');
+      this.signedInUsername.next('');
+      return false;
+    }
+
+    // Neither has data
+    return false;
   }
 
 }

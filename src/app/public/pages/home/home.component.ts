@@ -46,68 +46,7 @@ interface NavigationLink {
     TranslateModule,
     LanguageSwitcherComponent
   ],
-  template: `
-    <div class="home-layout">
-      <!-- Sidebar -->
-      <mat-sidenav-container class="sidenav-container">
-        <mat-sidenav #drawer class="sidenav" fixedInViewport="true" mode="side" opened="true">
-          <div class="sidebar-header">
-            <mat-icon class="brand-icon">science</mat-icon>
-            <h2 class="brand-name">QURI</h2>
-          </div>
-
-          <mat-divider></mat-divider>
-
-          <mat-nav-list class="nav-list">
-            <mat-list-item
-              *ngFor="let link of navigationLinks"
-              [routerLink]="['/home', link.route]"
-              routerLinkActive="active"
-              class="nav-item"
-              (click)="onNavigate(link)">
-              <mat-icon matListItemIcon>{{ link.icon }}</mat-icon>
-              <span matListItemTitle>{{ link.nameKey | translate }}</span>
-            </mat-list-item>
-          </mat-nav-list>
-
-          <mat-divider></mat-divider>
-
-          <!-- Sign Out Button -->
-          <div class="sidebar-footer">
-            <button mat-stroked-button color="warn" (click)="signOut()" class="sign-out-btn">
-              <mat-icon>logout</mat-icon>
-              {{ 'common.signOut' | translate }}
-            </button>
-          </div>
-        </mat-sidenav>
-
-        <!-- Main Content -->
-        <mat-sidenav-content class="main-content">
-          <mat-toolbar class="toolbar">
-            <span>{{ getCurrentPageTitle() }}</span>
-            <span class="toolbar-spacer"></span>
-            <app-language-switcher></app-language-switcher>
-            <button
-              mat-icon-button
-              (click)="viewCart()"
-              [matBadge]="cartService.cartCount > 0 ? cartService.cartCount : null"
-              matBadgeColor="accent"
-              matBadgeSize="small"
-              matTooltip="{{ 'catalog.viewCart' | translate }}">
-              <mat-icon>shopping_cart</mat-icon>
-            </button>
-            <button mat-icon-button>
-              <mat-icon>account_circle</mat-icon>
-            </button>
-          </mat-toolbar>
-
-          <div class="content-container">
-            <router-outlet></router-outlet>
-          </div>
-        </mat-sidenav-content>
-      </mat-sidenav-container>
-    </div>
-  `,
+  templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit, OnDestroy {
@@ -118,7 +57,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     {
       name: 'Dashboard',
       nameKey: 'navigation.dashboard',
-      route: '',
+      route: 'dashboard',
       icon: 'dashboard'
     },
     {
@@ -183,9 +122,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     const route = routeMatch ? routeMatch[1] : '';
 
     const titleKey = this.routeTitleMap.get(route) || 'navigation.dashboard';
-    this.translateService.get(titleKey).subscribe(translatedTitle => {
-      this.currentPageTitle = translatedTitle;
-    });
+    
+    // Use synchronous translation to avoid subscription issues
+    const translatedTitle = this.translateService.instant(titleKey);
+    this.currentPageTitle = translatedTitle || titleKey;
   }
 
   getCurrentPageTitle(): string {
@@ -197,7 +137,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   navigateToSection(section: string) {
-    this.router.navigate([`/${section}`]);
+    // Always navigate to /home/${section} to stay within the authenticated area
+    this.router.navigate(['/home', section]);
   }
 
   signOut() {

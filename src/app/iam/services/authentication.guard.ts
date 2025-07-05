@@ -10,41 +10,18 @@ import { AuthenticationService } from './authentication.service';
  * @param route The route object.
  * @param state The state object.
  */
-export const authenticationGuard: CanActivateFn = (route, state) => {
+export const authenticationGuard: CanActivateFn = (_route, _state) => {
   const authenticationService = inject(AuthenticationService);
   const router = inject(Router);
 
-  console.log('🔐 Authentication Guard - Checking access to:', state.url);
-
-  // Check localStorage directly first
+  // Simple check: if we have token, userId, and username in localStorage, allow access
   const token = localStorage.getItem('token');
   const userId = localStorage.getItem('userId');
   const username = localStorage.getItem('username');
 
-  console.log('🔐 localStorage state:', {
-    hasToken: !!token,
-    hasUserId: !!userId,
-    hasUsername: !!username
-  });
-
-  // If we have all required data in localStorage, allow access
   if (token && userId && username) {
-    console.log('🔐 Valid authentication data found in localStorage');
-
-    // Ensure authentication service is aware of the session
-    const restored = authenticationService.checkStoredAuthentication();
-    console.log('🔐 Authentication service restored:', restored);
-
-    console.log('✅ Authentication guard: Access granted to', state.url);
-    return true;
-  }
-
-  // Check authentication service as fallback
-  const hasValidToken = authenticationService.hasValidToken();
-  console.log('🔐 AuthenticationService hasValidToken:', hasValidToken);
-
-  if (hasValidToken) {
-    console.log('✅ Authentication guard: Access granted via service to', state.url);
+    // Ensure authentication service is synced (silent sync)
+    authenticationService.checkStoredAuthentication();
     return true;
   }
 

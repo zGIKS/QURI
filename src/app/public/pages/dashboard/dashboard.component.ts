@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { AuthenticationService } from '../../../iam/services/authentication.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -80,6 +81,13 @@ import { TranslateModule } from '@ngx-translate/core';
           </mat-card-actions>
         </mat-card>
       </div>
+    </section>
+
+    <!-- Debug Section (only for testing) -->
+    <section class="debug-section">
+      <button mat-raised-button color="warn" (click)="checkAuthState()">
+        🔍 Check Authentication State
+      </button>
     </section>
   `,
   styles: [`
@@ -259,12 +267,55 @@ import { TranslateModule } from '@ngx-translate/core';
         grid-template-columns: 1fr;
       }
     }
+
+    .debug-section {
+      margin-top: 32px;
+      text-align: center;
+      padding: 16px;
+      background-color: #f5f5f5;
+      border-radius: 8px;
+    }
+
+    .debug-section button {
+      font-size: 12px;
+      padding: 8px 16px;
+    }
   `]
 })
 export class DashboardComponent {
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthenticationService
+  ) {}
 
   navigateToSection(section: string) {
     this.router.navigate(['/home', section]);
+  }
+
+  // Debug method to check authentication state
+  checkAuthState() {
+    const isAuthenticated = this.authService.isAuthenticated();
+    const hasValidToken = this.authService.hasValidToken();
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+    const username = localStorage.getItem('username');
+
+    console.log('🔍 Dashboard Auth Debug:', {
+      isAuthenticated,
+      hasValidToken,
+      localStorage: {
+        hasToken: !!token,
+        hasUserId: !!userId,
+        hasUsername: !!username,
+        token: token ? token.substring(0, 20) + '...' : null
+      }
+    });
+
+    alert(`Authentication State:
+    - Is Authenticated: ${isAuthenticated}
+    - Has Valid Token: ${hasValidToken}
+    - LocalStorage Token: ${!!token}
+    - LocalStorage User ID: ${!!userId}
+    - LocalStorage Username: ${!!username}`);
   }
 }
