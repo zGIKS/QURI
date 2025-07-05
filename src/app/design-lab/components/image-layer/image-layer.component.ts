@@ -60,23 +60,31 @@ export interface ImageLayerEvent {
     }
 
     .image-layer-wrapper.selected {
-      outline: 2px solid #2196F3;
-      outline-offset: 2px;
+      /* No outline by default when selected */
     }
 
     .image-layer-wrapper.dragging {
       z-index: 10000 !important;
       opacity: 0.8;
       cursor: grabbing !important;
+      outline: 2px solid #2196F3;
+      outline-offset: 2px;
     }
 
     .image-layer-wrapper.resizing {
       z-index: 10000 !important;
+      outline: 2px solid #2196F3;
+      outline-offset: 2px;
     }
 
     .image-layer-wrapper:hover {
       outline: 1px solid #2196F3;
       outline-offset: 1px;
+    }
+
+    .image-layer-wrapper.selected:hover {
+      outline: 2px solid #2196F3;
+      outline-offset: 2px;
     }
 
     .image-layer-content {
@@ -105,6 +113,16 @@ export interface ImageLayerEvent {
       right: 0;
       bottom: 0;
       pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .image-layer-wrapper:hover .resize-handles {
+      opacity: 1;
+    }
+
+    .image-layer-wrapper.resizing .resize-handles {
+      opacity: 1;
     }
 
     .resize-handle {
