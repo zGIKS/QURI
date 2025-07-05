@@ -465,7 +465,8 @@
     "analytics": "Análisis",
     "profile": "Perfil",
     "settings": "Configuraciones",
-    "notifications": "Notificaciones"
+    "notifications": "Notificaciones",
+    "fulfillments": "Fulfillments"
   },
   "language": {
     "switch": "Cambiar idioma",

@@ -53,32 +53,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   currentPageTitle = 'Dashboard';
 
-  navigationLinks: NavigationLink[] = [
-    {
-      name: 'Dashboard',
-      nameKey: 'navigation.dashboard',
-      route: 'dashboard',
-      icon: 'dashboard'
-    },
-    {
-      name: 'Catalog',
-      nameKey: 'navigation.catalog',
-      route: 'catalog',
-      icon: 'storefront'
-    },
-    {
-      name: 'Design Lab',
-      nameKey: 'navigation.designLab',
-      route: 'design-lab',
-      icon: 'palette'
-    },
-    {
-      name: 'Cart',
-      nameKey: 'navigation.cart',
-      route: 'cart',
-      icon: 'shopping_cart'
-    }
-  ];
+  navigationLinks: NavigationLink[] = [];
 
   private readonly routeTitleMap = new Map<string, string>([
     ['', 'navigation.dashboard'],
@@ -97,6 +72,43 @@ export class HomeComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    // Always build navigationLinks fresh
+    this.navigationLinks = [
+      {
+        name: 'Dashboard',
+        nameKey: 'navigation.dashboard',
+        route: 'dashboard',
+        icon: 'dashboard'
+      },
+      {
+        name: 'Catalog',
+        nameKey: 'navigation.catalog',
+        route: 'catalog',
+        icon: 'storefront'
+      },
+      {
+        name: 'Design Lab',
+        nameKey: 'navigation.designLab',
+        route: 'design-lab',
+        icon: 'palette'
+      },
+      {
+        name: 'Cart',
+        nameKey: 'navigation.cart',
+        route: 'cart',
+        icon: 'shopping_cart'
+      }
+    ];
+    const roles = JSON.parse(localStorage.getItem('roles') || '[]');
+    if (roles.includes('ROLE_MANUFACTURER')) {
+      this.navigationLinks.push({
+        name: 'Fulfillments',
+        nameKey: 'navigation.fulfillments',
+        route: 'fulfillments',
+        icon: 'local_shipping'
+      });
+    }
+
     // Listen to router events to update page title
     this.router.events
       .pipe(

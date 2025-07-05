@@ -80,6 +80,13 @@ export const routes: Routes = [
             (c) => c.SimpleEditorComponent
           ),
       },
+      {
+        path: 'fulfillments',
+        loadComponent: () =>
+          import('./public/pages/fulfillments/fulfillments.component').then(
+            (c) => c.FulfillmentsComponent
+          ),
+      },
     ],
   },
   { path: '**', redirectTo: '/sign-in' },

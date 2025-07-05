@@ -136,8 +136,21 @@ export class AuthenticationService {
           localStorage.setItem('token', response.token);
           localStorage.setItem('userId', response.id.toString());
           localStorage.setItem('username', response.username);
-          console.log(`Signed in as ${response.username} with token ${response.token}`);
-          this.router.navigate(['/home']).then();
+          // Obtener roles del usuario
+          this.http.get<any>(`${this.basePath}/api/v1/users/${response.id}`, this.httpOptions)
+            .subscribe({
+              next: (userDetails) => {
+                if (userDetails.roles) {
+                  localStorage.setItem('roles', JSON.stringify(userDetails.roles));
+                }
+                this.router.navigate(['/home']).then();
+              },
+              error: (err) => {
+                // Si falla, limpiar roles y continuar
+                localStorage.removeItem('roles');
+                this.router.navigate(['/home']).then();
+              }
+            });
         },
         error: (error) => {
           this.signedIn.next(false);
@@ -172,6 +185,7 @@ export class AuthenticationService {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
     localStorage.removeItem('username');
+    localStorage.removeItem('roles');
     this.router.navigate(['/sign-in']).then();
   }
 
