@@ -233,8 +233,11 @@
                       <mat-icon>{{ layer.type === 'TEXT' ? 'text_fields' : 'image' }}</mat-icon>
                       <span class="layer-text">{{ layer.type === 'TEXT' ? (layer.details?.text || 'Text') : 'Image' }} - Layer {{ i + 1 }}</span>
 
-                      <div class="layer-actions" *ngIf="layer.type === 'TEXT'">
+                      <!-- Actions for all layer types -->
+                      <div class="layer-actions">
+                        <!-- Edit button only for text layers -->
                         <button
+                          *ngIf="layer.type === 'TEXT'"
                           mat-icon-button
                           (click)="editTextLayer(layer)"
                           [disabled]="isSaving"
@@ -243,11 +246,12 @@
                           <mat-icon>edit</mat-icon>
                         </button>
 
+                        <!-- Delete button for all layer types -->
                         <button
                           mat-icon-button
-                          (click)="deleteTextLayer(layer)"
+                          (click)="deleteLayer(layer)"
                           [disabled]="isSaving"
-                          matTooltip="Delete text"
+                          [matTooltip]="layer.type === 'TEXT' ? 'Delete text' : 'Delete image'"
                           class="delete-btn">
                           <mat-icon>delete</mat-icon>
                         </button>

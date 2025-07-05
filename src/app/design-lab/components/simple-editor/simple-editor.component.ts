@@ -453,6 +453,14 @@ export class SimpleEditorComponent implements OnInit {
     });
   }
 
+  deleteLayer(layer: Layer): void {
+    if (layer.type === 'TEXT') {
+      this.deleteTextLayer(layer as TextLayer);
+    } else if (layer.type === 'IMAGE') {
+      this.deleteImageLayer(layer as ImageLayer);
+    }
+  }
+
   cancelTextEditing(): void {
     this.isEditingText = false;
     this.selectedTextLayer = null;
