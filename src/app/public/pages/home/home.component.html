@@ -1,4 +1,4 @@
-  <div class="home-layout">
+<div class="home-layout">
       <!-- Sidebar -->
       <mat-sidenav-container class="sidenav-container">
         <mat-sidenav #drawer class="sidenav" fixedInViewport="true" mode="side" opened="true">
@@ -46,6 +46,13 @@
               matBadgeSize="small"
               matTooltip="{{ 'catalog.viewCart' | translate }}">
               <mat-icon>shopping_cart</mat-icon>
+            </button>
+            <button
+              *ngIf="isManufacturer()"
+              mat-icon-button
+              (click)="navigateToSection('fulfillments')"
+              matTooltip="{{ 'navigation.fulfillments' | translate }}">
+              <mat-icon>local_shipping</mat-icon>
             </button>
             <button mat-icon-button>
               <mat-icon>account_circle</mat-icon>

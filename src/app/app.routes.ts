@@ -81,6 +81,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'profile',
+        loadComponent: () =>
+          import('./public/pages/profile/profile.component').then(
+            (c) => c.ProfileComponent
+          ),
+      },
+      {
         path: 'fulfillments',
         loadComponent: () =>
           import('./public/pages/fulfillments/fulfillments.component').then(

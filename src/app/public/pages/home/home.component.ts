@@ -97,6 +97,12 @@ export class HomeComponent implements OnInit, OnDestroy {
         nameKey: 'navigation.cart',
         route: 'cart',
         icon: 'shopping_cart'
+      },
+      {
+        name: 'Profile',
+        nameKey: 'navigation.profile',
+        route: 'profile',
+        icon: 'account_circle'
       }
     ];
     const roles = JSON.parse(localStorage.getItem('roles') || '[]');
@@ -159,5 +165,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   }  viewCart() {
     // Navigate to cart page
     this.router.navigate(['/home/cart']);
+  }
+
+  isManufacturer(): boolean {
+    const roles = JSON.parse(localStorage.getItem('roles') || '[]');
+    return roles.includes('ROLE_MANUFACTURER');
   }
 }
