@@ -106,7 +106,7 @@ export class DesignLabAssembler {
     }
 
     if (response.type === LayerType.IMAGE || response.type === 'IMAGE') {
-      return new ImageLayer(
+      const imageLayer = new ImageLayer(
         response.id,
         response.x,
         response.y,
@@ -115,6 +115,16 @@ export class DesignLabAssembler {
         response.isVisible,
         response.details?.imageUrl || ''
       );
+
+      // Agregar details para compatibilidad con el template
+      imageLayer.details = {
+        imageUrl: response.details?.imageUrl || '',
+        width: response.details?.width || 100,
+        height: response.details?.height || 100
+      };
+
+      console.log('🖼️ Assembled image layer:', imageLayer);
+      return imageLayer;
     }
 
     // Fallback para tipos no reconocidos

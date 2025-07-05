@@ -130,6 +130,25 @@ export class SimpleEditorComponent implements OnInit {
         this.project = project;
         this.isLoading = false;
         console.log('✅ Project loaded:', project);
+        console.log('📋 Project layers:', project.layers);
+
+        // Debug específico para image layers
+        const imageLayers = project.layers.filter(layer => layer.type === 'IMAGE');
+        if (imageLayers.length > 0) {
+          console.log('🖼️ Image layers found:', imageLayers);
+          imageLayers.forEach((layer, index) => {
+            console.log(`🖼️ Image layer ${index}:`, {
+              id: layer.id,
+              type: layer.type,
+              details: layer.details,
+              x: layer.x,
+              y: layer.y,
+              z: layer.z,
+              opacity: layer.opacity,
+              isVisible: layer.isVisible
+            });
+          });
+        }
       },
       error: (error: any) => {
         console.error('❌ Error loading project:', error);
@@ -564,5 +583,19 @@ export class SimpleEditorComponent implements OnInit {
         this.isSaving = false;
       }
     });
+  }
+
+  // Image error handling
+  onImageError(event: Event, layer: any): void {
+    console.error('❌ Image failed to load for layer:', layer);
+    console.error('❌ Image src was:', layer.details?.imageUrl);
+    console.error('❌ Image error event:', event);
+
+    // Opcional: Mostrar un placeholder o notificación
+    this.snackBar.open(
+      'Image failed to load. Please try uploading again.',
+      'Close',
+      { duration: 5000, panelClass: ['error-snackbar'] }
+    );
   }
 }

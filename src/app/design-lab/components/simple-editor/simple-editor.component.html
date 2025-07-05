@@ -58,14 +58,14 @@
             <div class="layers-overlay" *ngIf="getTshirtImageUrl()">
               <div
                 *ngFor="let layer of project.layers; let i = index"
-                [ngClass]="{'draggable-layer': layer.type === 'TEXT', 'selected': selectedLayerId === layer.id}"
+                [ngClass]="{'draggable-layer': layer.type === 'TEXT' || layer.type === 'IMAGE', 'selected': selectedLayerId === layer.id}"
                 [style.left.px]="layer.x"
                 [style.top.px]="layer.y"
                 [style.z-index]="layer.z"
                 [style.opacity]="layer.opacity"
                 [style.display]="layer.isVisible ? 'block' : 'none'"
-                (mousedown)="layer.type === 'TEXT' ? startDrag($event, layer) : null"
-                (click)="layer.type === 'TEXT' ? selectLayer(layer) : null">
+                (mousedown)="(layer.type === 'TEXT' || layer.type === 'IMAGE') ? startDrag($event, layer) : null"
+                (click)="(layer.type === 'TEXT' || layer.type === 'IMAGE') ? selectLayer(layer) : null">
 
                 <div
                   *ngIf="layer.type === 'TEXT'"
@@ -87,11 +87,12 @@
                     [style.width.px]="layer.details?.width || 100"
                     [style.height.px]="layer.details?.height || 100"
                     [alt]="'Image layer'"
+                    (error)="onImageError($event, layer)"
                     loading="lazy">
                 </div>
 
                 <!-- Selection handles -->
-                <div class="selection-handles" *ngIf="selectedLayerId === layer.id && layer.type === 'TEXT'">
+                <div class="selection-handles" *ngIf="selectedLayerId === layer.id && (layer.type === 'TEXT' || layer.type === 'IMAGE')">
                   <div class="handle top-left"></div>
                   <div class="handle top-right"></div>
                   <div class="handle bottom-left"></div>

@@ -15,9 +15,14 @@ export interface CloudinaryUploadResult {
 })
 export class CloudinaryService {
   private readonly cloudName = 'dkkfv72vo'; // Tu cloud name de Cloudinary
-  private readonly uploadPreset = 'design-lab-images'; // Necesitarás crear este preset en Cloudinary
+  private readonly uploadPreset = 'teelab'; // CAMBIAR: Usa el nombre de tu preset unsigned
 
-  constructor() {}
+  constructor() {
+    console.log('🔧 CloudinaryService initialized');
+    console.log('🔧 Cloud name:', this.cloudName);
+    console.log('🔧 Upload preset:', this.uploadPreset);
+    console.log('🔧 IMPORTANTE: Verifica que el preset sea "unsigned" en Cloudinary dashboard');
+  }
 
   /**
    * Sube una imagen a Cloudinary
@@ -25,22 +30,45 @@ export class CloudinaryService {
    * @returns Observable con la respuesta de Cloudinary
    */
   uploadImage(file: File): Observable<CloudinaryUploadResult> {
+    console.log('📤 Uploading image to Cloudinary:', file.name, file.size, 'bytes');
+
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', this.uploadPreset);
-    formData.append('folder', 'design-lab'); // Organizar las imágenes en una carpeta
+    formData.append('folder', 'design-lab');
 
     const uploadUrl = `https://api.cloudinary.com/v1_1/${this.cloudName}/image/upload`;
+
+    console.log('📤 Upload URL:', uploadUrl);
+    console.log('📤 Upload preset:', this.uploadPreset);
+    console.log('📤 FormData contents:');
+    for (const [key, value] of formData.entries()) {
+      console.log(`  ${key}:`, value instanceof File ? `File(${value.name})` : value);
+    }
 
     return from(
       fetch(uploadUrl, {
         method: 'POST',
         body: formData
-      }).then(response => {
+      }).then(async response => {
+        const responseText = await response.text();
+        console.log('📤 Response status:', response.status);
+        console.log('📤 Response text:', responseText);
+
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          let errorData;
+          try {
+            errorData = JSON.parse(responseText);
+            console.error('❌ Cloudinary error:', errorData);
+          } catch {
+            console.error('❌ Raw error response:', responseText);
+          }
+          throw new Error(`Cloudinary upload failed: ${responseText}`);
         }
-        return response.json();
+
+        const result = JSON.parse(responseText);
+        console.log('✅ Upload successful:', result);
+        return result;
       })
     );
   }
