@@ -7,7 +7,6 @@ export interface CreateProductRequest {
   projectId: string;
   priceAmount: number;
   priceCurrency: string;
-  status?: ProductStatus;
 }
 
 /**
