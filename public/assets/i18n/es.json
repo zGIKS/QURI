@@ -151,7 +151,15 @@
     "loginRequired": "Por favor inicie sesión para comprar productos.",
     "productNotAvailable": "Este producto no está disponible para comprar.",
     "processingPurchase": "Procesando su compra...",
-    "purchaseSuccess": "¡Compra completada exitosamente! Revise su email para más detalles."
+    "purchaseSuccess": "¡Compra completada exitosamente! Revise su email para más detalles.",
+    "loadingProduct": "Cargando detalles del producto...",
+    "errorLoadingProduct": "Error al cargar el producto",
+    "productInformation": "Información del Producto",
+    "productId": "ID del Producto",
+    "likes": "Me gusta",
+    "views": "Vistas",
+    "purchaseOptions": "Opciones de Compra",
+    "addedToCart": "¡Producto agregado al carrito exitosamente!"
   },
   "analytics": {
     "title": "Panel de Análisis",

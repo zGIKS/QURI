@@ -39,6 +39,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'catalog/:productId',
+        loadComponent: () =>
+          import('./product-catalog/pages/product-detail/product-detail.component').then(
+            (c) => c.ProductDetailComponent
+          ),
+      },
+      {
         path: 'catalog/add-product/:projectId',
         loadComponent: () =>
           import('./product-catalog/pages/add-product/add-product.component').then(

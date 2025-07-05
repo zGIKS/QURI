@@ -276,8 +276,7 @@ export class CatalogComponent implements OnInit {
 
   viewProduct(product: ProductResponse) {
     // Navigate to product detail page
-    console.log('Viewing product:', product.id);
-    // this.router.navigate(['/product', product.id]);
+    this.router.navigate(['/home/catalog', product.id]);
   }
 
   purchaseProduct(product: ProductResponse) {

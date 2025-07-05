@@ -162,7 +162,15 @@
     "loginRequired": "Please log in to purchase products.",
     "productNotAvailable": "This product is not available for purchase.",
     "processingPurchase": "Processing your purchase...",
-    "purchaseSuccess": "Purchase completed successfully! Check your email for details."
+    "purchaseSuccess": "Purchase completed successfully! Check your email for details.",
+    "loadingProduct": "Loading product details...",
+    "errorLoadingProduct": "Error Loading Product",
+    "productInformation": "Product Information",
+    "productId": "Product ID",
+    "likes": "Likes",
+    "views": "Views",
+    "purchaseOptions": "Purchase Options",
+    "addedToCart": "Product added to cart successfully!"
   },
   "analytics": {
     "title": "Analytics Dashboard",
