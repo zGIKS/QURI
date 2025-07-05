@@ -69,7 +69,7 @@ export class DesignLabComponent implements OnInit, OnDestroy {
 
     // Get userId directly from localStorage to avoid subscription issues
     const userId = localStorage.getItem('userId');
-    
+
     if (!userId) {
       this.error = this.translateService.instant('designLab.tokenExpired');
       this.isLoading = false;

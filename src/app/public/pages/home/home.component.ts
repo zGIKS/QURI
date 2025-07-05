@@ -122,7 +122,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     const route = routeMatch ? routeMatch[1] : '';
 
     const titleKey = this.routeTitleMap.get(route) || 'navigation.dashboard';
-    
+
     // Use synchronous translation to avoid subscription issues
     const translatedTitle = this.translateService.instant(titleKey);
     this.currentPageTitle = translatedTitle || titleKey;
