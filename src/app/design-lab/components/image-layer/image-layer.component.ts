@@ -47,6 +47,15 @@ export interface ImageLayerEvent {
         <div class="resize-handle sw" (mousedown)="onResizeStart($event, 'sw')"></div>
         <div class="resize-handle se" (mousedown)="onResizeStart($event, 'se')"></div>
       </div>
+
+      <!-- Delete Button (appears on hover, centered at top) -->
+      <button
+        class="delete-btn"
+        (click)="onDelete($event)"
+        (mousedown)="$event.stopPropagation()"
+        title="Delete image layer">
+        <span class="delete-icon">×</span>
+      </button>
     </div>
   `,
   styles: [`
@@ -164,6 +173,42 @@ export interface ImageLayerEvent {
       bottom: -6px;
       right: -6px;
       cursor: se-resize;
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 20px;
+      background: #f44336;
+      border: 1px solid #fff;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 1002;
+    }
+
+    .image-layer-wrapper:hover .delete-btn {
+      opacity: 1;
+    }
+
+    .delete-btn:hover {
+      background: #d32f2f;
+      transform: translateX(-50%) scale(1.1);
+    }
+
+    .delete-icon {
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      line-height: 1;
+      user-select: none;
     }
   `]
 })
@@ -565,5 +610,18 @@ export class ImageLayerComponent implements OnInit, OnDestroy {
     });
 
     this.subscriptions.push(subscription);
+  }
+
+  onDelete(event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    console.log('🗑️ ImageLayerComponent - Deleting image layer:', this.layer.id);
+
+    this.layerEvent.emit({
+      layerId: this.layer.id,
+      type: 'delete',
+      data: { layer: this.layer }
+    });
   }
 }

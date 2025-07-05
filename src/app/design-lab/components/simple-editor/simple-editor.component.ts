@@ -407,6 +407,52 @@ export class SimpleEditorComponent implements OnInit {
     });
   }
 
+  deleteImageLayer(layer: ImageLayer): void {
+    if (!this.project || !this.projectId) return;
+
+    this.isSaving = true;
+
+    this.designLabService.deleteLayer(this.projectId, layer.id).subscribe({
+      next: (result: LayerResult) => {
+        if (result.success) {
+          // Remove from local project
+          const index = this.project!.layers.indexOf(layer);
+          if (index > -1) {
+            this.project!.layers.splice(index, 1);
+            this.project!.updatedAt = new Date();
+          }
+
+          // Clear selection if this layer was selected
+          if (this.selectedLayerId === layer.id) {
+            this.selectedLayerId = null;
+          }
+
+          this.snackBar.open(
+            this.translateService.instant('designLab.messages.layerRemoved'),
+            this.translateService.instant('common.close'),
+            { duration: 3000, panelClass: ['success-snackbar'] }
+          );
+        } else {
+          this.snackBar.open(
+            result.error || 'Error deleting image layer',
+            this.translateService.instant('common.close'),
+            { duration: 3000, panelClass: ['error-snackbar'] }
+          );
+        }
+        this.isSaving = false;
+      },
+      error: (error: any) => {
+        console.error('❌ Error deleting image layer:', error);
+        this.snackBar.open(
+          this.translateService.instant('designLab.errors.layerDeleteFailed'),
+          this.translateService.instant('common.close'),
+          { duration: 3000, panelClass: ['error-snackbar'] }
+        );
+        this.isSaving = false;
+      }
+    });
+  }
+
   cancelTextEditing(): void {
     this.isEditingText = false;
     this.selectedTextLayer = null;
@@ -703,7 +749,11 @@ export class SimpleEditorComponent implements OnInit {
         }
         break;
       case 'delete':
-        // Handle deletion if needed
+        // Handle text layer deletion
+        const textLayer = this.project?.layers?.find(l => l.id === event.layerId) as TextLayer;
+        if (textLayer) {
+          this.deleteTextLayer(textLayer);
+        }
         break;
     }
   }
@@ -725,7 +775,11 @@ export class SimpleEditorComponent implements OnInit {
         // Handle any other updates
         break;
       case 'delete':
-        // Handle deletion if needed
+        // Handle image layer deletion
+        const imageLayer = this.project?.layers?.find(l => l.id === event.layerId) as ImageLayer;
+        if (imageLayer) {
+          this.deleteImageLayer(imageLayer);
+        }
         break;
     }
   }

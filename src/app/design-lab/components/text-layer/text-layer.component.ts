@@ -48,6 +48,15 @@ export interface TextLayerEvent {
         <div class="handle handle-sw"></div>
         <div class="handle handle-se"></div>
       </div>
+
+      <!-- Delete Button (appears on hover) -->
+      <button
+        class="delete-btn"
+        (click)="onDelete($event)"
+        (mousedown)="$event.stopPropagation()"
+        title="Delete text layer">
+        <span class="delete-icon">×</span>
+      </button>
     </div>
   `,
   styles: [`
@@ -139,6 +148,41 @@ export interface TextLayerEvent {
     .text-layer-wrapper:hover {
       outline: 1px solid #2196F3;
       outline-offset: 1px;
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 18px;
+      height: 18px;
+      background: #f44336;
+      border: 1px solid #fff;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 1002;
+    }
+
+    .text-layer-wrapper:hover .delete-btn {
+      opacity: 1;
+    }
+
+    .delete-btn:hover {
+      background: #d32f2f;
+      transform: scale(1.1);
+    }
+
+    .delete-icon {
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      line-height: 1;
+      user-select: none;
     }
   `]
 })
@@ -371,5 +415,18 @@ export class TextLayerComponent implements OnDestroy {
     });
 
     this.subscriptions.push(subscription);
+  }
+
+  onDelete(event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    console.log('🗑️ TextLayerComponent - Deleting text layer:', this.layer.id);
+
+    this.layerEvent.emit({
+      layerId: this.layer.id,
+      type: 'delete',
+      data: { layer: this.layer }
+    });
   }
 }
