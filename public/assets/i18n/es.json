@@ -42,6 +42,11 @@
     "button": {
       "creating": "Crear Cuenta"
     },
+    "roleField": {
+      "label": "Rol",
+      "customer": "Cliente",
+      "manufacturer": "Fabricante"
+    },
     "alreadyHaveAccount": "¿Ya tienes una cuenta?",
     "validation": {
       "required": "{{field}} es requerido",

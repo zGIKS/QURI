@@ -42,6 +42,11 @@
     "button": {
       "creating": "Create Account"
     },
+    "roleField": {
+      "label": "Role",
+      "customer": "Customer",
+      "manufacturer": "Manufacturer"
+    },
     "alreadyHaveAccount": "Already have an account?",
     "validation": {
       "required": "{{field}} is required",

@@ -6,9 +6,6 @@
   <div class="signup-content">
     <mat-card class="signup-card">
       <mat-card-header class="signup-header">
-        <div mat-card-avatar class="signup-avatar">
-          <mat-icon>person_add</mat-icon>
-        </div>
         <mat-card-title class="signup-title">{{ 'signup.title' | translate }}</mat-card-title>
         <mat-card-subtitle class="signup-subtitle">{{ 'signup.subtitle' | translate }}</mat-card-subtitle>
       </mat-card-header>
@@ -67,6 +64,14 @@
             @if (isInvalidControl(form,'confirmPassword')) {
               <mat-error>{{ errorMessagesForControl(form,'confirmPassword')}}</mat-error>
             }
+          </mat-form-field>
+
+          <!-- Roles Section -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ 'signup.roleField.label' | translate }}</mat-label>
+            <mat-select formControlName="role">
+              <mat-option *ngFor="let r of roles" [value]="r.value">{{ r.label }}</mat-option>
+            </mat-select>
           </mat-form-field>
 
           <button mat-raised-button
