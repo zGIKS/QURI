@@ -53,6 +53,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'cart',
+        loadComponent: () =>
+          import('./shared/components/cart/cart.component').then(
+            (c) => c.CartComponent
+          ),
+      },
+      {
         path: 'design-lab',
         loadComponent: () =>
           import('./design-lab/pages/design-lab.component').then(

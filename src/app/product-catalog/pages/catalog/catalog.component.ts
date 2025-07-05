@@ -22,6 +22,7 @@ import { ProductStatus } from '../../model/product.entity';
 import { AuthenticationService } from '../../../iam/services/authentication.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PurchaseConfirmationDialog } from '../../components/purchase-confirmation-dialog/purchase-confirmation-dialog.component';
+import { CartService } from '../../../shared/services/cart.service';
 
 @Component({
   selector: 'app-catalog',
@@ -53,6 +54,18 @@ import { PurchaseConfirmationDialog } from '../../components/purchase-confirmati
         </button>
         <span class="toolbar-title">{{ 'catalog.title' | translate }}</span>
         <span class="toolbar-spacer"></span>
+
+        <!-- Cart Button -->
+        <button
+          mat-icon-button
+          (click)="viewCart()"
+          [matBadge]="cartService.cartCount > 0 ? cartService.cartCount : null"
+          matBadgeColor="accent"
+          matBadgeSize="small"
+          matTooltip="{{ 'catalog.viewCart' | translate }}">
+          <mat-icon>shopping_cart</mat-icon>
+        </button>
+
         <button mat-icon-button [matMenuTriggerFor]="menu" matTooltip="{{ 'common.options' | translate }}">
           <mat-icon>more_vert</mat-icon>
         </button>
@@ -176,6 +189,16 @@ import { PurchaseConfirmationDialog } from '../../components/purchase-confirmati
                 </button>
 
                 <button
+                  mat-button
+                  color="accent"
+                  [disabled]="!canPurchase(product.status) || isProductInCart(product.id)"
+                  (click)="addToCart(product)"
+                  [matTooltip]="getAddToCartTooltip(product)">
+                  <mat-icon>{{ getAddToCartIcon(product) }}</mat-icon>
+                  {{ getAddToCartText(product) }}
+                </button>
+
+                <button
                   mat-raised-button
                   [color]="canPurchase(product.status) ? 'accent' : 'warn'"
                   [disabled]="!canPurchase(product.status)"
@@ -215,7 +238,8 @@ export class CatalogComponent implements OnInit {
     private authService: AuthenticationService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private translateService: TranslateService
+    private translateService: TranslateService,
+    public cartService: CartService
   ) {}
 
   ngOnInit() {
@@ -223,25 +247,25 @@ export class CatalogComponent implements OnInit {
   }
 
   // Helper method to check if product is liked by user
-  isProductLiked(product: ProductResponse): boolean {
+  isProductLiked(_product: ProductResponse): boolean {
     // This would need to be implemented based on your business logic
     return false;
   }
 
   // Helper method to get product view count
-  getProductViewCount(product: ProductResponse): number {
+  getProductViewCount(_product: ProductResponse): number {
     // This would need to be implemented based on your business logic
     return 0;
   }
 
   // Helper method to get product garment color
-  getProductGarmentColor(product: ProductResponse): string {
+  getProductGarmentColor(_product: ProductResponse): string {
     // This would need to be implemented based on your business logic
     return 'N/A';
   }
 
   // Helper method to get product garment size
-  getProductGarmentSize(product: ProductResponse): string {
+  getProductGarmentSize(_product: ProductResponse): string {
     // This would need to be implemented based on your business logic
     return 'N/A';
   }
@@ -277,6 +301,11 @@ export class CatalogComponent implements OnInit {
   viewProduct(product: ProductResponse) {
     // Navigate to product detail page
     this.router.navigate(['/home/catalog', product.id]);
+  }
+
+  viewCart() {
+    // Navigate to cart page
+    this.router.navigate(['/home/cart']);
   }
 
   purchaseProduct(product: ProductResponse) {
@@ -412,5 +441,84 @@ export class CatalogComponent implements OnInit {
 
   canPurchase(status: string): boolean {
     return ProductUtils.canPurchase(status as any);
+  }
+
+  /**
+   * Check if product is in cart
+   */
+  isProductInCart(productId: string): boolean {
+    return this.cartService.isInCart(productId);
+  }
+
+  /**
+   * Add product to cart
+   */
+  addToCart(product: ProductResponse) {
+    this.authService.currentUserId.subscribe(userId => {
+      if (!userId || userId === '') {
+        const message = this.translateService.instant('catalog.loginRequired');
+        this.snackBar.open(message, this.translateService.instant('common.close'), {
+          duration: 5000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top'
+        });
+        return;
+      }
+
+      const success = this.cartService.addToCart(product.id);
+
+      if (success) {
+        const message = this.translateService.instant('catalog.addedToCart');
+        this.snackBar.open(message, this.translateService.instant('common.close'), {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+      } else {
+        const message = this.translateService.instant('catalog.alreadyInCart');
+        this.snackBar.open(message, this.translateService.instant('common.close'), {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['warning-snackbar']
+        });
+      }
+    });
+  }
+
+  /**
+   * Get add to cart button icon
+   */
+  getAddToCartIcon(product: ProductResponse): string {
+    if (!this.canPurchase(product.status)) return 'block';
+    if (this.isProductInCart(product.id)) return 'check_circle';
+    return 'add_shopping_cart';
+  }
+
+  /**
+   * Get add to cart button text
+   */
+  getAddToCartText(product: ProductResponse): string {
+    if (!this.canPurchase(product.status)) {
+      return this.translateService.instant('catalog.unavailable');
+    }
+    if (this.isProductInCart(product.id)) {
+      return this.translateService.instant('catalog.inCart');
+    }
+    return this.translateService.instant('catalog.addToCart');
+  }
+
+  /**
+   * Get add to cart button tooltip
+   */
+  getAddToCartTooltip(product: ProductResponse): string {
+    if (!this.canPurchase(product.status)) {
+      return this.translateService.instant('catalog.unavailable');
+    }
+    if (this.isProductInCart(product.id)) {
+      return this.translateService.instant('catalog.alreadyInCart');
+    }
+    return this.translateService.instant('catalog.addToCart');
   }
 }

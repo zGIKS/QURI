@@ -14,6 +14,10 @@ import { Subject, takeUntil } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageSwitcherComponent } from '../../../shared/components/language-switcher.component';
+import { CartService } from '../../../shared/services/cart.service';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 interface NavigationLink {
   name: string;
@@ -35,6 +39,9 @@ interface NavigationLink {
     MatListModule,
     MatToolbarModule,
     MatDividerModule,
+    MatBadgeModule,
+    MatSnackBarModule,
+    MatTooltipModule,
     RouterModule,
     TranslateModule,
     LanguageSwitcherComponent
@@ -80,8 +87,14 @@ interface NavigationLink {
             <span>{{ getCurrentPageTitle() }}</span>
             <span class="toolbar-spacer"></span>
             <app-language-switcher></app-language-switcher>
-            <button mat-icon-button>
-              <mat-icon>notifications</mat-icon>
+            <button
+              mat-icon-button
+              (click)="viewCart()"
+              [matBadge]="cartService.cartCount > 0 ? cartService.cartCount : null"
+              matBadgeColor="accent"
+              matBadgeSize="small"
+              matTooltip="{{ 'catalog.viewCart' | translate }}">
+              <mat-icon>shopping_cart</mat-icon>
             </button>
             <button mat-icon-button>
               <mat-icon>account_circle</mat-icon>
@@ -119,6 +132,12 @@ export class HomeComponent implements OnInit, OnDestroy {
       nameKey: 'navigation.designLab',
       route: 'design-lab',
       icon: 'palette'
+    },
+    {
+      name: 'Cart',
+      nameKey: 'navigation.cart',
+      route: 'cart',
+      icon: 'shopping_cart'
     }
   ];
 
@@ -126,13 +145,16 @@ export class HomeComponent implements OnInit, OnDestroy {
     ['', 'navigation.dashboard'],
     ['dashboard', 'navigation.dashboard'],
     ['catalog', 'navigation.catalog'],
-    ['design-lab', 'navigation.designLab']
+    ['design-lab', 'navigation.designLab'],
+    ['cart', 'navigation.cart']
   ]);
 
   constructor(
     private authService: AuthenticationService,
     private router: Router,
-    private translateService: TranslateService
+    private translateService: TranslateService,
+    public cartService: CartService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit() {
@@ -181,5 +203,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   signOut() {
     this.authService.signOut();
     this.router.navigate(['/sign-in']);
+  }  viewCart() {
+    // Navigate to cart page
+    this.router.navigate(['/home/cart']);
   }
 }

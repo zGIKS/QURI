@@ -18,6 +18,7 @@ import { ProductUtils } from '../../model/product.utils';
 import { AuthenticationService } from '../../../iam/services/authentication.service';
 import { DesignLabService } from '../../../design-lab/services/design-lab.service';
 import { Project } from '../../../design-lab/model/project.entity';
+import { CartService } from '../../../shared/services/cart.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -82,7 +83,7 @@ import { Project } from '../../../design-lab/model/project.entity';
                   class="main-image">
 
                 <!-- Status Badge -->
-                <div class="status-badge">
+                <div class="status-badge" *ngIf="!shouldHideProductStatus()">
                   <mat-chip [class]="getStatusClass(product.status)">
                     <mat-icon matChipAvatar>{{ getStatusIcon(product.status) }}</mat-icon>
                     {{ getStatusLabel(product.status) }}
@@ -140,7 +141,7 @@ import { Project } from '../../../design-lab/model/project.entity';
                         <span class="detail-value">{{ getProductSize() }}</span>
                       </div>
 
-                      <div class="detail-row" *ngIf="project">
+                      <div class="detail-row" *ngIf="project && project.status !== 'GARMENT'">
                         <mat-icon class="detail-icon">category</mat-icon>
                         <span class="detail-label">{{ 'catalog.status' | translate }}:</span>
                         <span class="detail-value">{{ project.status }}</span>
@@ -181,11 +182,11 @@ import { Project } from '../../../design-lab/model/project.entity';
                   <button
                     mat-raised-button
                     color="accent"
-                    [disabled]="!canAddToCart()"
+                    [disabled]="!canAddToCart() || isInCart()"
                     (click)="addToCart()"
-                    matTooltip="{{ canAddToCart() ? ('catalog.addToCart' | translate) : ('catalog.unavailable' | translate) }}">
-                    <mat-icon>{{ canAddToCart() ? 'add_shopping_cart' : 'block' }}</mat-icon>
-                    {{ canAddToCart() ? ('catalog.addToCart' | translate) : ('catalog.unavailable' | translate) }}
+                    [matTooltip]="getCartButtonTooltip()">
+                    <mat-icon>{{ getCartButtonIcon() }}</mat-icon>
+                    {{ getCartButtonText() }}
                   </button>
                 </mat-card-actions>
               </mat-card>
@@ -213,7 +214,8 @@ export class ProductDetailComponent implements OnInit {
     private designLabService: DesignLabService,
     private authService: AuthenticationService,
     private snackBar: MatSnackBar,
-    private translateService: TranslateService
+    private translateService: TranslateService,
+    private cartService: CartService
   ) {}
 
   ngOnInit() {
@@ -308,22 +310,33 @@ export class ProductDetailComponent implements OnInit {
         return;
       }
 
-      // Add to cart logic (simulated)
-      const message = this.translateService.instant('catalog.addedToCart');
-      this.snackBar.open(message, this.translateService.instant('common.close'), {
-        duration: 3000,
-        horizontalPosition: 'end',
-        verticalPosition: 'top',
-        panelClass: ['success-snackbar']
-      });
+      // Add product ID to cart using CartService
+      const success = this.cartService.addToCart(this.product!.id);
 
-      // Here you would call your cart service
-      // this.cartService.addToCart(this.product);
+      if (success) {
+        const message = this.translateService.instant('catalog.addedToCart');
+        this.snackBar.open(message, this.translateService.instant('common.close'), {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+      } else {
+        // Product is already in cart
+        const message = this.translateService.instant('catalog.alreadyInCart');
+        this.snackBar.open(message, this.translateService.instant('common.close'), {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['warning-snackbar']
+        });
+      }
     });
   }
 
   canAddToCart(): boolean {
-    return this.product ? ProductUtils.canPurchase(this.product.status) : false;
+    if (!this.product) return false;
+    return ProductUtils.canPurchase(this.product.status) && !this.isInCart();
   }
 
   goBack() {
@@ -367,11 +380,58 @@ export class ProductDetailComponent implements OnInit {
   }
 
   getProductColor(): string {
-    return this.project?.garmentColor || 'N/A';
+    const color = this.project?.garmentColor || 'N/A';
+    return this.translateColor(color);
   }
 
   getProductSize(): string {
     return this.project?.garmentSize || 'N/A';
+  }
+
+  translateColor(color: string): string {
+    if (color === 'N/A') return color;
+
+    const colorTranslations: { [key: string]: string } = {
+      // English colors
+      'BLACK': this.translateService.instant('colors.black'),
+      'WHITE': this.translateService.instant('colors.white'),
+      'RED': this.translateService.instant('colors.red'),
+      'BLUE': this.translateService.instant('colors.blue'),
+      'GREEN': this.translateService.instant('colors.green'),
+      'YELLOW': this.translateService.instant('colors.yellow'),
+      'ORANGE': this.translateService.instant('colors.orange'),
+      'PURPLE': this.translateService.instant('colors.purple'),
+      'PINK': this.translateService.instant('colors.pink'),
+      'BROWN': this.translateService.instant('colors.brown'),
+      'GRAY': this.translateService.instant('colors.gray'),
+      'GREY': this.translateService.instant('colors.gray'),
+      'NAVY': this.translateService.instant('colors.navy'),
+      'BEIGE': this.translateService.instant('colors.beige'),
+      'CREAM': this.translateService.instant('colors.cream'),
+      'GOLD': this.translateService.instant('colors.gold'),
+      'SILVER': this.translateService.instant('colors.silver'),
+
+      // Lowercase versions
+      'black': this.translateService.instant('colors.black'),
+      'white': this.translateService.instant('colors.white'),
+      'red': this.translateService.instant('colors.red'),
+      'blue': this.translateService.instant('colors.blue'),
+      'green': this.translateService.instant('colors.green'),
+      'yellow': this.translateService.instant('colors.yellow'),
+      'orange': this.translateService.instant('colors.orange'),
+      'purple': this.translateService.instant('colors.purple'),
+      'pink': this.translateService.instant('colors.pink'),
+      'brown': this.translateService.instant('colors.brown'),
+      'gray': this.translateService.instant('colors.gray'),
+      'grey': this.translateService.instant('colors.gray'),
+      'navy': this.translateService.instant('colors.navy'),
+      'beige': this.translateService.instant('colors.beige'),
+      'cream': this.translateService.instant('colors.cream'),
+      'gold': this.translateService.instant('colors.gold'),
+      'silver': this.translateService.instant('colors.silver')
+    };
+
+    return colorTranslations[color] || color;
   }
 
   getAvailabilityIcon(): string {
@@ -392,9 +452,63 @@ export class ProductDetailComponent implements OnInit {
     if (!this.project) return 'N/A';
 
     const info = [];
-    if (this.project.garmentColor) info.push(`Color: ${this.project.garmentColor}`);
-    if (this.project.garmentSize) info.push(`Size: ${this.project.garmentSize}`);
+    if (this.project.garmentColor) {
+      const translatedColor = this.translateColor(this.project.garmentColor);
+      info.push(`${this.translateService.instant('catalog.color')}: ${translatedColor}`);
+    }
+    if (this.project.garmentSize) {
+      info.push(`${this.translateService.instant('catalog.size')}: ${this.project.garmentSize}`);
+    }
 
     return info.length > 0 ? info.join(' • ') : 'N/A';
+  }
+
+  /**
+   * Check if product is in cart
+   */
+  isInCart(): boolean {
+    return this.product ? this.cartService.isInCart(this.product.id) : false;
+  }
+
+  /**
+   * Get cart button icon
+   */
+  getCartButtonIcon(): string {
+    if (!this.canAddToCart()) return 'block';
+    if (this.isInCart()) return 'check_circle';
+    return 'add_shopping_cart';
+  }
+
+  /**
+   * Get cart button text
+   */
+  getCartButtonText(): string {
+    if (!this.canAddToCart()) {
+      return this.translateService.instant('catalog.unavailable');
+    }
+    if (this.isInCart()) {
+      return this.translateService.instant('catalog.inCart');
+    }
+    return this.translateService.instant('catalog.addToCart');
+  }
+
+  /**
+   * Get cart button tooltip
+   */
+  getCartButtonTooltip(): string {
+    if (!this.canAddToCart()) {
+      return this.translateService.instant('catalog.unavailable');
+    }
+    if (this.isInCart()) {
+      return this.translateService.instant('catalog.alreadyInCart');
+    }
+    return this.translateService.instant('catalog.addToCart');
+  }
+
+  /**
+   * Check if product status should be hidden
+   */
+  shouldHideProductStatus(): boolean {
+    return this.project?.status === 'GARMENT';
   }
 }
