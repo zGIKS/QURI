@@ -159,7 +159,8 @@
     "likes": "Me gusta",
     "views": "Vistas",
     "purchaseOptions": "Opciones de Compra",
-    "addedToCart": "¡Producto agregado al carrito exitosamente!"
+    "addedToCart": "¡Producto agregado al carrito exitosamente!",
+    "description": "Descripción"
   },
   "analytics": {
     "title": "Panel de Análisis",

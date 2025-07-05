@@ -16,6 +16,8 @@ import { ProductCatalogService } from '../../services/product-catalog.service';
 import { ProductResponse } from '../../services/product.response';
 import { ProductUtils } from '../../model/product.utils';
 import { AuthenticationService } from '../../../iam/services/authentication.service';
+import { DesignLabService } from '../../../design-lab/services/design-lab.service';
+import { Project } from '../../../design-lab/model/project.entity';
 
 @Component({
   selector: 'app-product-detail',
@@ -127,18 +129,6 @@ import { AuthenticationService } from '../../../iam/services/authentication.serv
 
                     <div class="detail-grid">
                       <div class="detail-row">
-                        <mat-icon class="detail-icon">badge</mat-icon>
-                        <span class="detail-label">{{ 'catalog.productId' | translate }}:</span>
-                        <span class="detail-value">{{ product.id }}</span>
-                      </div>
-
-                      <div class="detail-row">
-                        <mat-icon class="detail-icon">account_circle</mat-icon>
-                        <span class="detail-label">{{ 'catalog.designer' | translate }}:</span>
-                        <span class="detail-value">{{ product.projectUserId }}</span>
-                      </div>
-
-                      <div class="detail-row">
                         <mat-icon class="detail-icon">palette</mat-icon>
                         <span class="detail-label">{{ 'catalog.color' | translate }}:</span>
                         <span class="detail-value">{{ getProductColor() }}</span>
@@ -150,10 +140,10 @@ import { AuthenticationService } from '../../../iam/services/authentication.serv
                         <span class="detail-value">{{ getProductSize() }}</span>
                       </div>
 
-                      <div class="detail-row">
-                        <mat-icon class="detail-icon">monetization_on</mat-icon>
-                        <span class="detail-label">{{ 'catalog.priceCurrency' | translate }}:</span>
-                        <span class="detail-value">{{ product.priceCurrency }}</span>
+                      <div class="detail-row" *ngIf="project">
+                        <mat-icon class="detail-icon">category</mat-icon>
+                        <span class="detail-label">{{ 'catalog.status' | translate }}:</span>
+                        <span class="detail-value">{{ project.status }}</span>
                       </div>
                     </div>
                   </div>
@@ -209,6 +199,7 @@ import { AuthenticationService } from '../../../iam/services/authentication.serv
 })
 export class ProductDetailComponent implements OnInit {
   product: ProductResponse | null = null;
+  project: Project | null = null;
   loading = false;
   error: string | null = null;
   isLiked = false;
@@ -219,6 +210,7 @@ export class ProductDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private productCatalogService: ProductCatalogService,
+    private designLabService: DesignLabService,
     private authService: AuthenticationService,
     private snackBar: MatSnackBar,
     private translateService: TranslateService
@@ -241,13 +233,30 @@ export class ProductDetailComponent implements OnInit {
     this.productCatalogService.getProductById(this.productId).subscribe({
       next: (product) => {
         this.product = product;
-        this.loading = false;
         this.viewCount = Math.floor(Math.random() * 1000); // Simulated view count
+
+        // Load project details using the projectId from the product
+        this.loadProjectDetails(product.projectId);
       },
       error: (error) => {
         this.error = error.message || 'Failed to load product';
         this.loading = false;
         console.error('Error loading product:', error);
+      }
+    });
+  }
+
+  loadProjectDetails(projectId: string) {
+    this.designLabService.getProjectById(projectId).subscribe({
+      next: (project) => {
+        this.project = project;
+        this.loading = false;
+        console.log('✅ Project details loaded:', project);
+      },
+      error: (error) => {
+        console.error('Error loading project details:', error);
+        this.loading = false;
+        // Continue without project details if they fail to load
       }
     });
   }
@@ -358,13 +367,11 @@ export class ProductDetailComponent implements OnInit {
   }
 
   getProductColor(): string {
-    // This would come from your product data
-    return 'N/A';
+    return this.project?.garmentColor || 'N/A';
   }
 
   getProductSize(): string {
-    // This would come from your product data
-    return 'N/A';
+    return this.project?.garmentSize || 'N/A';
   }
 
   getAvailabilityIcon(): string {
@@ -379,5 +386,15 @@ export class ProductDetailComponent implements OnInit {
     return this.canAddToCart()
       ? this.translateService.instant('catalog.available')
       : this.translateService.instant('catalog.unavailable');
+  }
+
+  getProjectInfo(): string {
+    if (!this.project) return 'N/A';
+
+    const info = [];
+    if (this.project.garmentColor) info.push(`Color: ${this.project.garmentColor}`);
+    if (this.project.garmentSize) info.push(`Size: ${this.project.garmentSize}`);
+
+    return info.length > 0 ? info.join(' • ') : 'N/A';
   }
 }
