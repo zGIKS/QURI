@@ -86,9 +86,9 @@
                   <mat-icon>edit</mat-icon>
                   {{ 'designLab.edit' | translate }}
                 </button>
-                <button mat-button (click)="duplicateProject(project.id)">
-                  <mat-icon>content_copy</mat-icon>
-                  {{ 'designLab.duplicate' | translate }}
+                <button mat-button [routerLink]="['/home/catalog/add-product', project.id]">
+                  <mat-icon>sell</mat-icon>
+                  {{ 'designLab.sell' | translate }}
                 </button>
                 <button mat-button color="warn" (click)="deleteProject(project.id)">
                   <mat-icon>delete</mat-icon>

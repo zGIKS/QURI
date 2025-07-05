@@ -1,0 +1,132 @@
+<div class="add-product-container">
+  <!-- Toolbar -->
+  <mat-toolbar color="primary" class="add-product-toolbar">
+    <button mat-icon-button (click)="onCancel()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="toolbar-title">{{ 'catalog.addProduct' | translate }}</span>
+    <span class="toolbar-spacer"></span>
+    <button mat-icon-button>
+      <mat-icon>help</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <!-- Main Content -->
+  <div class="add-product-content">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>{{ 'catalog.loadingProject' | translate }}</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error" class="error-container">
+      <mat-icon color="warn">error</mat-icon>
+      <p>{{ error }}</p>
+      <button mat-raised-button color="primary" (click)="loadProject()">
+        <mat-icon>refresh</mat-icon>
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+
+    <!-- Form Content -->
+    <div *ngIf="!isLoading && !error && project" class="form-container">
+      <!-- Project Preview -->
+      <mat-card class="project-preview-card">
+        <mat-card-header>
+          <mat-card-title>{{ 'catalog.projectPreview' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="project-info">
+            <div class="project-image">
+              <img *ngIf="project.previewUrl" [src]="project.previewUrl" [alt]="project.title" class="preview-image">
+              <div *ngIf="!project.previewUrl" class="no-preview">
+                <mat-icon>image</mat-icon>
+                <span>{{ 'designLab.noPreview' | translate }}</span>
+              </div>
+            </div>
+            <div class="project-details">
+              <h3>{{ project.title }}</h3>
+              <p><strong>{{ 'catalog.color' | translate }}:</strong> {{ project.garmentColor }}</p>
+              <p><strong>{{ 'catalog.size' | translate }}:</strong> {{ project.garmentSize }}</p>
+              <p><strong>{{ 'catalog.layers' | translate }}:</strong> {{ project.layers.length }}</p>
+              <p><strong>{{ 'catalog.created' | translate }}:</strong> {{ project.createdAt | date:'short' }}</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Product Form -->
+      <mat-card class="product-form-card">
+        <mat-card-header>
+          <mat-card-title>{{ 'catalog.productDetails' | translate }}</mat-card-title>
+          <mat-card-subtitle>{{ 'catalog.productDetailsSubtitle' | translate }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+            <!-- Price Amount -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{ 'catalog.priceAmount' | translate }}</mat-label>
+              <input
+                matInput
+                type="number"
+                formControlName="priceAmount"
+                step="0.01"
+                min="0.01"
+                placeholder="0.00">
+              <mat-error *ngIf="productForm.get('priceAmount')?.hasError('required')">
+                {{ 'catalog.priceAmountRequired' | translate }}
+              </mat-error>
+              <mat-error *ngIf="productForm.get('priceAmount')?.hasError('min')">
+                {{ 'catalog.priceAmountMin' | translate }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Price Currency -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{ 'catalog.priceCurrency' | translate }}</mat-label>
+              <mat-select formControlName="priceCurrency">
+                <mat-option *ngFor="let currency of currencies" [value]="currency.value">
+                  {{ currency.label }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="productForm.get('priceCurrency')?.hasError('required')">
+                {{ 'catalog.priceCurrencyRequired' | translate }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Price Preview -->
+            <div class="price-preview" *ngIf="productForm.get('priceAmount')?.value > 0">
+              <h4>{{ 'catalog.pricePreview' | translate }}</h4>
+              <p class="price-display">
+                {{ productForm.get('priceAmount')?.value | currency:productForm.get('priceCurrency')?.value:'symbol':'1.2-2' }}
+              </p>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+              <button
+                mat-button
+                type="button"
+                (click)="onCancel()"
+                [disabled]="isSaving">
+                <mat-icon>cancel</mat-icon>
+                {{ 'common.cancel' | translate }}
+              </button>
+
+              <button
+                mat-raised-button
+                color="primary"
+                type="submit"
+                [disabled]="productForm.invalid || isSaving">
+                <mat-spinner diameter="20" *ngIf="isSaving"></mat-spinner>
+                <mat-icon *ngIf="!isSaving">add_shopping_cart</mat-icon>
+                {{ isSaving ? ('common.saving' | translate) : ('catalog.addToMarket' | translate) }}
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

@@ -30,7 +30,6 @@ export const routes: Routes = [
           import('./public/pages/dashboard/dashboard.component').then(
             (c) => c.DashboardComponent
           ),
-        canActivate: [authenticationGuard],
       },
       {
         path: 'catalog',
@@ -38,7 +37,13 @@ export const routes: Routes = [
           import('./product-catalog/pages/catalog/catalog.component').then(
             (c) => c.CatalogComponent
           ),
-        canActivate: [authenticationGuard],
+      },
+      {
+        path: 'catalog/add-product/:projectId',
+        loadComponent: () =>
+          import('./product-catalog/pages/add-product/add-product.component').then(
+            (c) => c.AddProductComponent
+          ),
       },
       {
         path: 'design-lab',
@@ -46,7 +51,6 @@ export const routes: Routes = [
           import('./design-lab/pages/design-lab.component').then(
             (c) => c.DesignLabComponent
           ),
-        canActivate: [authenticationGuard],
       },
       {
         path: 'design-lab/create',
@@ -54,7 +58,6 @@ export const routes: Routes = [
           import('./design-lab/components/project-create/project-create.component').then(
             (c) => c.ProjectCreateComponent
           ),
-        canActivate: [authenticationGuard],
       },
       {
         path: 'design-lab/edit/:id',
@@ -62,7 +65,6 @@ export const routes: Routes = [
           import('./design-lab/components/simple-editor/simple-editor.component').then(
             (c) => c.SimpleEditorComponent
           ),
-        canActivate: [authenticationGuard],
       },
     ],
   },
