@@ -147,7 +147,22 @@
     "priceCurrency": "Currency",
     "priceCurrencyRequired": "Currency is required",
     "pricePreview": "Price Preview",
-    "addToMarket": "Add to Market"
+    "addToMarket": "Add to Market",
+    "buyNow": "Buy Now",
+    "unavailable": "Unavailable",
+    "addToFavorites": "Add to Favorites",
+    "designer": "Designer",
+    "loadingDescription": "Please wait while we load the latest products...",
+    "noProductsDescription": "Check back later for new designs and products from our talented designers.",
+    "sold": "Sold",
+    "pending": "Pending",
+    "confirmPurchase": "Confirm Purchase",
+    "purchaseDescription": "You are about to purchase this unique design. Once purchased, you will receive instructions on how to access your design.",
+    "purchaseWarning": "This purchase is final. Please make sure you want to buy this product before confirming.",
+    "loginRequired": "Please log in to purchase products.",
+    "productNotAvailable": "This product is not available for purchase.",
+    "processingPurchase": "Processing your purchase...",
+    "purchaseSuccess": "Purchase completed successfully! Check your email for details."
   },
   "analytics": {
     "title": "Analytics Dashboard",

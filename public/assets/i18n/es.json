@@ -136,7 +136,22 @@
     "priceCurrency": "Moneda",
     "priceCurrencyRequired": "La moneda es requerida",
     "pricePreview": "Vista Previa del Precio",
-    "addToMarket": "Agregar al Mercado"
+    "addToMarket": "Agregar al Mercado",
+    "buyNow": "Comprar Ahora",
+    "unavailable": "No Disponible",
+    "addToFavorites": "Agregar a Favoritos",
+    "designer": "Diseñador",
+    "loadingDescription": "Por favor espere mientras cargamos los productos más recientes...",
+    "noProductsDescription": "Vuelva más tarde para ver nuevos diseños y productos de nuestros talentosos diseñadores.",
+    "sold": "Vendido",
+    "pending": "Pendiente",
+    "confirmPurchase": "Confirmar Compra",
+    "purchaseDescription": "Está a punto de comprar este diseño único. Una vez comprado, recibirá instrucciones sobre cómo acceder a su diseño.",
+    "purchaseWarning": "Esta compra es definitiva. Por favor asegúrese de querer comprar este producto antes de confirmar.",
+    "loginRequired": "Por favor inicie sesión para comprar productos.",
+    "productNotAvailable": "Este producto no está disponible para comprar.",
+    "processingPurchase": "Procesando su compra...",
+    "purchaseSuccess": "¡Compra completada exitosamente! Revise su email para más detalles."
   },
   "analytics": {
     "title": "Panel de Análisis",

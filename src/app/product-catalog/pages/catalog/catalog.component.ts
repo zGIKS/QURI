@@ -7,12 +7,21 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatRippleModule } from '@angular/material/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { ProductCatalogService } from '../../services/product-catalog.service';
 import { ProductResponse } from '../../services/product.response';
 import { ProductUtils } from '../../model/product.utils';
+import { ProductStatus } from '../../model/product.entity';
 import { AuthenticationService } from '../../../iam/services/authentication.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { PurchaseConfirmationDialog } from '../../components/purchase-confirmation-dialog/purchase-confirmation-dialog.component';
 
 @Component({
   selector: 'app-catalog',
@@ -26,117 +35,178 @@ import { TranslateModule } from '@ngx-translate/core';
     MatProgressSpinnerModule,
     MatChipsModule,
     MatToolbarModule,
+    MatBadgeModule,
+    MatDividerModule,
+    MatRippleModule,
+    MatTooltipModule,
+    MatMenuModule,
+    MatDialogModule,
+    MatSnackBarModule,
     TranslateModule
   ],
   template: `
     <div class="catalog-container">
-      <!-- Header -->
-      <mat-toolbar class="catalog-toolbar">
-        <button mat-icon-button (click)="goBack()">
+      <!-- Header Toolbar -->
+      <mat-toolbar color="primary" class="catalog-toolbar">
+        <button mat-icon-button (click)="goBack()" matTooltip="{{ 'common.back' | translate }}">
           <mat-icon>arrow_back</mat-icon>
         </button>
         <span class="toolbar-title">{{ 'catalog.title' | translate }}</span>
         <span class="toolbar-spacer"></span>
+        <button mat-icon-button [matMenuTriggerFor]="menu" matTooltip="{{ 'common.options' | translate }}">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="refreshProducts()">
+            <mat-icon>refresh</mat-icon>
+            <span>{{ 'common.refresh' | translate }}</span>
+          </button>
+        </mat-menu>
       </mat-toolbar>
 
-      <!-- Content -->
+      <!-- Content Area -->
       <div class="catalog-content">
         <!-- Loading State -->
-        <div *ngIf="loading" class="loading-container">
-          <mat-spinner></mat-spinner>
-          <p>{{ 'catalog.loadingProducts' | translate }}</p>
+        <div *ngIf="loading" class="state-container loading-state">
+          <mat-spinner diameter="64"></mat-spinner>
+          <h3>{{ 'catalog.loadingProducts' | translate }}</h3>
+          <p>{{ 'catalog.loadingDescription' | translate }}</p>
         </div>
 
         <!-- Error State -->
-        <div *ngIf="error && !loading" class="error-container">
-          <mat-icon class="error-icon">error</mat-icon>
+        <div *ngIf="error && !loading" class="state-container error-state">
+          <mat-icon class="state-icon error-icon">error_outline</mat-icon>
           <h3>{{ 'catalog.errorLoadingProducts' | translate }}</h3>
-          <p>{{ error }}</p>
+          <p class="error-message">{{ error }}</p>
           <button mat-raised-button color="primary" (click)="loadProducts()">
             <mat-icon>refresh</mat-icon>
             {{ 'common.retry' | translate }}
           </button>
         </div>
 
-        <!-- Products Grid -->
+        <!-- Products Section -->
         <div *ngIf="!loading && !error && products.length > 0" class="products-section">
-          <div class="products-header">
-            <h2>{{ 'catalog.availableProducts' | translate }}</h2>
-            <p>{{ products.length }} {{ products.length !== 1 ? ('catalog.productsFound' | translate) : ('catalog.productFound' | translate) }}</p>
+          <!-- Section Header -->
+          <div class="section-header">
+            <div class="header-content">
+              <h2 class="section-title">{{ 'catalog.availableProducts' | translate }}</h2>
+              <mat-chip-set>
+                <mat-chip class="products-count">
+                  <mat-icon matChipAvatar>inventory_2</mat-icon>
+                  {{ products.length }} {{ products.length !== 1 ? ('catalog.products' | translate) : ('catalog.product' | translate) }}
+                </mat-chip>
+              </mat-chip-set>
+            </div>
+            <mat-divider></mat-divider>
           </div>
 
-          <mat-grid-list cols="4" rowHeight="350px" gutterSize="24px" class="products-grid">
-            <mat-grid-tile *ngFor="let product of products">
-              <mat-card class="product-card">
-                <!-- Product Image -->
-                <div class="product-image">
-                  <img
-                    [src]="product.projectPreviewUrl || '/assets/placeholder-image.svg'"
-                    [alt]="product.projectTitle"
-                    (error)="onImageError($event)"
-                    class="product-img">
-                  <div class="product-overlay">
-                    <button mat-icon-button class="like-btn" (click)="toggleLike(product)">
-                      <mat-icon>favorite_border</mat-icon>
-                    </button>
+          <!-- Products Grid -->
+          <div class="products-grid">
+            <mat-card *ngFor="let product of products" class="product-card" matRipple>
+              <!-- Product Image Container -->
+              <div class="product-image-container">
+                <img
+                  [src]="product.projectPreviewUrl || '/assets/placeholder-image.svg'"
+                  [alt]="product.projectTitle"
+                  (error)="onImageError($event)"
+                  class="product-image">
+
+                <!-- Overlay with Actions -->
+                <div class="product-overlay">
+                  <button
+                    mat-mini-fab
+                    color="accent"
+                    class="like-button"
+                    (click)="toggleLike(product)"
+                    matTooltip="{{ 'catalog.addToFavorites' | translate }}">
+                    <mat-icon>{{ isProductLiked(product) ? 'favorite' : 'favorite_border' }}</mat-icon>
+                  </button>
+                </div>
+
+                <!-- Status Badge -->
+                <div class="status-badge">
+                  <mat-chip [class]="getStatusClass(product.status)">
+                    <mat-icon matChipAvatar>{{ getStatusIcon(product.status) }}</mat-icon>
+                    {{ getStatusLabel(product.status) }}
+                  </mat-chip>
+                </div>
+              </div>
+
+              <!-- Product Information -->
+              <mat-card-header class="product-header">
+                <div class="product-title-section">
+                  <mat-card-title class="product-title">{{ product.projectTitle }}</mat-card-title>
+                  <mat-card-subtitle class="product-price">
+                    {{ formatPrice(product.priceAmount, product.priceCurrency) }}
+                  </mat-card-subtitle>
+                </div>
+              </mat-card-header>
+
+              <mat-card-content class="product-content">
+                <!-- Product Stats -->
+                <div class="product-stats">
+                  <div class="stat-item">
+                    <mat-icon class="stat-icon">favorite</mat-icon>
+                    <span class="stat-label">{{ product.likeCount || 0 }}</span>
+                  </div>
+                  <div class="stat-item">
+                    <mat-icon class="stat-icon">visibility</mat-icon>
+                    <span class="stat-label">{{ getProductViewCount(product) }}</span>
+                  </div>
+                  <div class="stat-item">
+                    <mat-icon class="stat-icon">person</mat-icon>
+                    <span class="stat-label">{{ 'catalog.designer' | translate }}</span>
                   </div>
                 </div>
 
-                <!-- Product Content -->
-                <mat-card-content class="product-content">
-                  <div class="product-info">
-                    <h3 class="product-title">{{ product.projectTitle }}</h3>
-                    <p class="product-price">{{ formatPrice(product.priceAmount, product.priceCurrency) }}</p>
+                <mat-divider class="content-divider"></mat-divider>
 
-                    <!-- Product Status -->
-                    <mat-chip-set>
-                      <mat-chip [class]="getStatusClass(product.status)">
-                        {{ getStatusLabel(product.status) }}
-                      </mat-chip>
-                    </mat-chip-set>
-
-                    <!-- Product Stats -->
-                    <div class="product-stats">
-                      <span class="stat-item">
-                        <mat-icon>favorite</mat-icon>
-                        {{ product.likeCount }} likes
-                      </span>
-                      <span class="stat-item">
-                        <mat-icon>person</mat-icon>
-                        Designer
-                      </span>
-                    </div>
+                <!-- Product Details -->
+                <div class="product-details">
+                  <div class="detail-item">
+                    <mat-icon class="detail-icon">palette</mat-icon>
+                    <span class="detail-label">{{ getProductGarmentColor(product) }}</span>
                   </div>
-                </mat-card-content>
+                  <div class="detail-item">
+                    <mat-icon class="detail-icon">straighten</mat-icon>
+                    <span class="detail-label">{{ getProductGarmentSize(product) }}</span>
+                  </div>
+                </div>
+              </mat-card-content>
 
-                <!-- Product Actions -->
-                <mat-card-actions class="product-actions">
-                  <button mat-button (click)="viewProduct(product)">
-                    <mat-icon>visibility</mat-icon>
-                    View Details
-                  </button>
-                  <button
-                    mat-raised-button
-                    color="primary"
-                    [disabled]="!canPurchase(product.status)"
-                    (click)="purchaseProduct(product)">
-                    <mat-icon>shopping_cart</mat-icon>
-                    {{ canPurchase(product.status) ? 'Buy Now' : 'Unavailable' }}
-                  </button>
-                </mat-card-actions>
-              </mat-card>
-            </mat-grid-tile>
-          </mat-grid-list>
+              <!-- Product Actions -->
+              <mat-card-actions class="product-actions">
+                <button
+                  mat-button
+                  color="primary"
+                  (click)="viewProduct(product)"
+                  matTooltip="{{ 'catalog.viewDetails' | translate }}">
+                  <mat-icon>visibility</mat-icon>
+                  {{ 'catalog.viewDetails' | translate }}
+                </button>
+
+                <button
+                  mat-raised-button
+                  [color]="canPurchase(product.status) ? 'accent' : 'warn'"
+                  [disabled]="!canPurchase(product.status)"
+                  (click)="purchaseProduct(product)"
+                  [matTooltip]="canPurchase(product.status) ? ('catalog.buyNow' | translate) : ('catalog.unavailable' | translate)">
+                  <mat-icon>{{ canPurchase(product.status) ? 'shopping_cart' : 'block' }}</mat-icon>
+                  {{ canPurchase(product.status) ? ('catalog.buyNow' | translate) : ('catalog.unavailable' | translate) }}
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          </div>
         </div>
 
         <!-- Empty State -->
-        <div *ngIf="!loading && !error && products.length === 0" class="empty-container">
-          <mat-icon class="empty-icon">inventory_2</mat-icon>
-          <h3>No Products Found</h3>
-          <p>There are no products available in the catalog at the moment.</p>
+        <div *ngIf="!loading && !error && products.length === 0" class="state-container empty-state">
+          <mat-icon class="state-icon empty-icon">inventory_2</mat-icon>
+          <h3>{{ 'catalog.noProducts' | translate }}</h3>
+          <p>{{ 'catalog.noProductsDescription' | translate }}</p>
           <button mat-raised-button color="primary" (click)="loadProducts()">
             <mat-icon>refresh</mat-icon>
-            Refresh
+            {{ 'common.refresh' | translate }}
           </button>
         </div>
       </div>
@@ -152,11 +222,38 @@ export class CatalogComponent implements OnInit {
   constructor(
     private productCatalogService: ProductCatalogService,
     private router: Router,
-    private authService: AuthenticationService
+    private authService: AuthenticationService,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar,
+    private translateService: TranslateService
   ) {}
 
   ngOnInit() {
     this.loadProducts();
+  }
+
+  // Helper method to check if product is liked by user
+  isProductLiked(product: ProductResponse): boolean {
+    // This would need to be implemented based on your business logic
+    return false;
+  }
+
+  // Helper method to get product view count
+  getProductViewCount(product: ProductResponse): number {
+    // This would need to be implemented based on your business logic
+    return 0;
+  }
+
+  // Helper method to get product garment color
+  getProductGarmentColor(product: ProductResponse): string {
+    // This would need to be implemented based on your business logic
+    return 'N/A';
+  }
+
+  // Helper method to get product garment size
+  getProductGarmentSize(product: ProductResponse): string {
+    // This would need to be implemented based on your business logic
+    return 'N/A';
   }
 
   loadProducts() {
@@ -176,6 +273,13 @@ export class CatalogComponent implements OnInit {
     });
   }
 
+  /**
+   * Refresh products (alias for loadProducts)
+   */
+  refreshProducts() {
+    this.loadProducts();
+  }
+
   goBack() {
     this.router.navigate(['/home']);
   }
@@ -187,9 +291,82 @@ export class CatalogComponent implements OnInit {
   }
 
   purchaseProduct(product: ProductResponse) {
-    // Handle purchase logic
-    console.log('Purchasing product:', product.id);
-    // Add purchase logic here
+    // Check if user is authenticated
+    this.authService.currentUserId.subscribe(userId => {
+      if (!userId || userId === '') {
+        // Show login required message
+        const message = this.translateService.instant('catalog.loginRequired');
+        this.snackBar.open(message, this.translateService.instant('common.close'), {
+          duration: 5000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top'
+        });
+        return;
+      }
+
+      // Check if product is available for purchase
+      if (!this.canPurchase(product.status)) {
+        const message = this.translateService.instant('catalog.productNotAvailable');
+        this.snackBar.open(message, this.translateService.instant('common.close'), {
+          duration: 5000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top'
+        });
+        return;
+      }
+
+      // Show purchase confirmation dialog
+      this.showPurchaseConfirmation(product);
+    });
+  }
+
+  private showPurchaseConfirmation(product: ProductResponse) {
+    const dialogRef = this.dialog.open(PurchaseConfirmationDialog, {
+      width: '400px',
+      data: {
+        product: product,
+        price: this.formatPrice(product.priceAmount, product.priceCurrency)
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'confirm') {
+        this.processPurchase(product);
+      }
+    });
+  }
+
+  private processPurchase(product: ProductResponse) {
+    // Show processing message
+    const processingMessage = this.translateService.instant('catalog.processingPurchase');
+    this.snackBar.open(processingMessage, '', {
+      duration: 0, // Keep open until dismissed
+      horizontalPosition: 'end',
+      verticalPosition: 'top'
+    });
+
+    // Simulate purchase processing (replace with actual API call)
+    setTimeout(() => {
+      this.snackBar.dismiss();
+
+      // Show success message
+      const successMessage = this.translateService.instant('catalog.purchaseSuccess');
+      this.snackBar.open(successMessage, this.translateService.instant('common.close'), {
+        duration: 5000,
+        horizontalPosition: 'end',
+        verticalPosition: 'top',
+        panelClass: ['success-snackbar']
+      });
+
+      // Update product status to UNAVAILABLE (optional, depends on your business logic)
+      const productIndex = this.products.findIndex(p => p.id === product.id);
+      if (productIndex !== -1) {
+        this.products[productIndex].status = ProductStatus.UNAVAILABLE;
+      }
+
+      // Navigate to order confirmation or user orders
+      // this.router.navigate(['/orders']);
+    }, 2000);
   }
 
   toggleLike(product: ProductResponse) {
@@ -227,6 +404,21 @@ export class CatalogComponent implements OnInit {
 
   getStatusClass(status: string): string {
     return ProductUtils.getStatusClass(status as any);
+  }
+
+  getStatusIcon(status: string): string {
+    switch (status?.toUpperCase()) {
+      case 'AVAILABLE':
+        return 'check_circle';
+      case 'SOLD':
+        return 'sold';
+      case 'PENDING':
+        return 'schedule';
+      case 'DISCONTINUED':
+        return 'cancel';
+      default:
+        return 'help';
+    }
   }
 
   canPurchase(status: string): boolean {
