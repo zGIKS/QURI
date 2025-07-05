@@ -13,7 +13,7 @@ import { LayerType } from '../../../const';
 
 export interface LayerEvent {
   layerId: string;
-  type: 'select' | 'move' | 'resize' | 'delete' | 'duplicate' | 'z-index';
+  type: 'select' | 'move' | 'resize' | 'delete' | 'duplicate' | 'z-index' | 'text-move' | 'image-move';
   data?: any;
 }
 
@@ -543,6 +543,63 @@ export interface LayerEvent {
       margin-left: 8px;
     }
 
+    /* === DRAG STYLES FOR DIFFERENT LAYER TYPES === */
+
+    /* Text Layer Drag Styles */
+    .dragging-text-layer {
+      z-index: 1000 !important;
+      transform: scale(1.05) !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+      border: 2px solid #4CAF50 !important;
+      border-radius: 4px !important;
+      background: rgba(76, 175, 80, 0.1) !important;
+      cursor: grabbing !important;
+    }
+
+    .dragging-text-layer .text-layer-content {
+      pointer-events: none;
+      user-select: none;
+      opacity: 0.9;
+    }
+
+    /* Image Layer Drag Styles */
+    .dragging-image-layer {
+      z-index: 1000 !important;
+      transform: scale(1.02) !important;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.4) !important;
+      border: 3px solid #2196F3 !important;
+      border-radius: 8px !important;
+      cursor: grabbing !important;
+      transition: none !important;
+    }
+
+    .dragging-image-layer .image-layer-content {
+      pointer-events: none;
+      opacity: 0.9;
+    }
+
+    .dragging-image-layer .image-layer-content img {
+      filter: brightness(1.1) contrast(1.05);
+    }
+
+    /* General drag improvements */
+    .cdk-drag-preview {
+      box-sizing: border-box;
+      border-radius: 4px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+      z-index: 1001;
+    }
+
+    .cdk-drag-placeholder {
+      opacity: 0.3;
+      border: 2px dashed #ccc;
+    }
+
+    .cdk-drag-animating {
+      transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+    }
+
+    /* Canvas area styles */
     @media (max-width: 768px) {
       .canvas-workspace {
         flex-direction: column;
@@ -675,27 +732,229 @@ export class DesignCanvasComponent implements OnInit, OnDestroy {
   onDragStart(layer: Layer): void {
     this.draggingLayer = layer;
     this.selectedLayer = layer;
+
+    // Lógica específica por tipo de layer
+    if (layer.type === LayerType.TEXT) {
+      this.onTextLayerDragStart(layer);
+    } else if (layer.type === LayerType.IMAGE) {
+      this.onImageLayerDragStart(layer);
+    }
   }
 
   onDragEnd(event: CdkDragEnd, layer: Layer): void {
     this.draggingLayer = null;
 
     if (event.distance.x !== 0 || event.distance.y !== 0) {
-      this.updateLayerPosition(layer, layer.x + event.distance.x, layer.y + event.distance.y);
+      // Lógica específica por tipo de layer
+      if (layer.type === LayerType.TEXT) {
+        this.onTextLayerDragEnd(event, layer);
+      } else if (layer.type === LayerType.IMAGE) {
+        this.onImageLayerDragEnd(event, layer);
+      } else {
+        // Fallback para otros tipos
+        this.updateLayerPosition(layer, layer.x + event.distance.x, layer.y + event.distance.y);
+      }
     }
   }
 
   onDragMove(event: any, layer: Layer): void {
-    // Update layer position during drag
+    // Lógica específica por tipo de layer
+    if (layer.type === LayerType.TEXT) {
+      this.onTextLayerDragMove(event, layer);
+    } else if (layer.type === LayerType.IMAGE) {
+      this.onImageLayerDragMove(event, layer);
+    }
+  }
+
+  // === TEXT LAYER DRAG METHODS ===
+  private onTextLayerDragStart(layer: Layer): void {
+    console.log('📝 Starting text layer drag:', {
+      layerId: layer.id,
+      text: layer.details?.text?.substring(0, 30) + '...',
+      position: { x: layer.x, y: layer.y }
+    });
+
+    // Agregar clase CSS específica para text layers en drag
+    const layerElement = document.querySelector(`[data-layer-id="${layer.id}"]`) as HTMLElement;
+    if (layerElement) {
+      layerElement.classList.add('dragging-text-layer');
+      layerElement.style.cursor = 'grabbing';
+
+      // Disable text selection during drag
+      layerElement.style.userSelect = 'none';
+      layerElement.style.webkitUserSelect = 'none';
+    }
+  }
+
+  private onTextLayerDragMove(event: any, layer: Layer): void {
+    // Calcular nueva posición para text layer
     const newX = layer.x + event.distance.x;
     const newY = layer.y + event.distance.y;
 
-    // Constrain to canvas bounds
-    const constrainedX = Math.max(0, Math.min(this.canvasWidth - 50, newX));
-    const constrainedY = Math.max(0, Math.min(this.canvasHeight - 50, newY));
+    // Obtener dimensiones aproximadas del texto
+    const textLength = layer.details?.text?.length || 10;
+    const fontSize = layer.details?.fontSize || 16;
+    const estimatedWidth = Math.max(100, textLength * (fontSize * 0.6));
+    const estimatedHeight = fontSize + 10;
+
+    // Restricciones específicas para text layers
+    const minX = 10; // Margen mínimo
+    const minY = 10;
+    const maxX = this.canvasWidth - estimatedWidth - 10;
+    const maxY = this.canvasHeight - estimatedHeight - 10;
+
+    const constrainedX = Math.max(minX, Math.min(maxX, newX));
+    const constrainedY = Math.max(minY, Math.min(maxY, newY));
 
     layer.x = constrainedX;
     layer.y = constrainedY;
+
+    console.log('📝 Moving text layer:', {
+      layerId: layer.id,
+      position: { x: constrainedX, y: constrainedY },
+      estimated: { width: estimatedWidth, height: estimatedHeight },
+      text: layer.details?.text?.substring(0, 20) + '...'
+    });
+  }
+
+  private onTextLayerDragEnd(event: CdkDragEnd, layer: Layer): void {
+    console.log('📝 Ending text layer drag:', {
+      layerId: layer.id,
+      finalDistance: event.distance,
+      text: layer.details?.text?.substring(0, 30) + '...'
+    });
+
+    // Remover clase CSS específica
+    const layerElement = document.querySelector(`[data-layer-id="${layer.id}"]`) as HTMLElement;
+    if (layerElement) {
+      layerElement.classList.remove('dragging-text-layer');
+      layerElement.style.cursor = 'grab';
+      layerElement.style.userSelect = '';
+      layerElement.style.webkitUserSelect = '';
+    }
+
+    // Actualizar posición final con restricciones
+    const finalX = Math.round(layer.x + event.distance.x);
+    const finalY = Math.round(layer.y + event.distance.y);
+
+    this.updateLayerPosition(layer, finalX, finalY);
+
+    // Emitir evento específico para text layers
+    this.layerEvent.emit({
+      layerId: layer.id,
+      type: 'text-move',
+      data: {
+        x: finalX,
+        y: finalY,
+        text: layer.details?.text,
+        fontSize: layer.details?.fontSize,
+        fontColor: layer.details?.fontColor
+      }
+    });
+  }
+
+  // === IMAGE LAYER DRAG METHODS ===
+  private onImageLayerDragStart(layer: Layer): void {
+    console.log('🖼️ Starting image layer drag:', {
+      layerId: layer.id,
+      imageUrl: layer.details?.imageUrl?.substring(0, 50) + '...',
+      size: { width: layer.details?.width, height: layer.details?.height },
+      position: { x: layer.x, y: layer.y }
+    });
+
+    // Agregar clase CSS específica para image layers en drag
+    const layerElement = document.querySelector(`[data-layer-id="${layer.id}"]`) as HTMLElement;
+    if (layerElement) {
+      layerElement.classList.add('dragging-image-layer');
+      layerElement.style.cursor = 'grabbing';
+
+      // Agregar outline para mejor visibilidad durante el drag
+      layerElement.style.outline = '3px solid #2196F3';
+      layerElement.style.outlineOffset = '2px';
+
+      // Prevent image selection
+      const imgElement = layerElement.querySelector('img');
+      if (imgElement) {
+        imgElement.style.userSelect = 'none';
+        imgElement.style.webkitUserSelect = 'none';
+        imgElement.style.pointerEvents = 'none';
+      }
+    }
+  }
+
+  private onImageLayerDragMove(event: any, layer: Layer): void {
+    // Calcular nueva posición para image layer
+    const newX = layer.x + event.distance.x;
+    const newY = layer.y + event.distance.y;
+
+    // Obtener dimensiones reales de la imagen
+    const imageWidth = layer.details?.width || 100;
+    const imageHeight = layer.details?.height || 100;
+
+    // Restricciones específicas para image layers con márgenes
+    const margin = 5;
+    const minX = margin;
+    const minY = margin;
+    const maxX = this.canvasWidth - imageWidth - margin;
+    const maxY = this.canvasHeight - imageHeight - margin;
+
+    const constrainedX = Math.max(minX, Math.min(maxX, newX));
+    const constrainedY = Math.max(minY, Math.min(maxY, newY));
+
+    layer.x = constrainedX;
+    layer.y = constrainedY;
+
+    console.log('🖼️ Moving image layer:', {
+      layerId: layer.id,
+      position: { x: constrainedX, y: constrainedY },
+      imageSize: { width: imageWidth, height: imageHeight },
+      canvasBounds: { width: this.canvasWidth, height: this.canvasHeight },
+      imageUrl: layer.details?.imageUrl?.substring(0, 30) + '...'
+    });
+  }
+
+  private onImageLayerDragEnd(event: CdkDragEnd, layer: Layer): void {
+    console.log('🖼️ Ending image layer drag:', {
+      layerId: layer.id,
+      finalDistance: event.distance,
+      imageSize: { width: layer.details?.width, height: layer.details?.height }
+    });
+
+    // Remover clase CSS específica
+    const layerElement = document.querySelector(`[data-layer-id="${layer.id}"]`) as HTMLElement;
+    if (layerElement) {
+      layerElement.classList.remove('dragging-image-layer');
+      layerElement.style.cursor = 'grab';
+      layerElement.style.outline = 'none';
+      layerElement.style.outlineOffset = '';
+
+      // Restore image interaction
+      const imgElement = layerElement.querySelector('img');
+      if (imgElement) {
+        imgElement.style.userSelect = '';
+        imgElement.style.webkitUserSelect = '';
+        imgElement.style.pointerEvents = '';
+      }
+    }
+
+    // Actualizar posición final con restricciones
+    const finalX = Math.round(layer.x + event.distance.x);
+    const finalY = Math.round(layer.y + event.distance.y);
+
+    this.updateLayerPosition(layer, finalX, finalY);
+
+    // Emitir evento específico para image layers
+    this.layerEvent.emit({
+      layerId: layer.id,
+      type: 'image-move',
+      data: {
+        x: finalX,
+        y: finalY,
+        imageUrl: layer.details?.imageUrl,
+        width: layer.details?.width,
+        height: layer.details?.height
+      }
+    });
   }
 
   onDropNewLayer(_event: CdkDragDrop<Layer[]>): void {

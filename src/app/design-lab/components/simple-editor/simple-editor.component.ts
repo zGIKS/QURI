@@ -19,9 +19,11 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DesignLabService } from '../../services/design-lab-real.service';
 import { LayerResult } from '../../services/design-lab-real.service';
 import { Project } from '../../model/project.entity';
-import { TextLayer } from '../../model/layer.entity';
+import { TextLayer, ImageLayer, Layer } from '../../model/layer.entity';
 import { GARMENT_COLOR } from '../../../const';
 import { ImageUploadComponent, ImageUploadResult, DirectImageUploadResult } from '../image-upload/image-upload.component';
+import { TextLayerComponent, TextLayerEvent } from '../text-layer/text-layer.component';
+import { ImageLayerComponent, ImageLayerEvent } from '../image-layer/image-layer.component';
 
 @Component({
   selector: 'app-simple-editor',
@@ -44,7 +46,9 @@ import { ImageUploadComponent, ImageUploadResult, DirectImageUploadResult } from
     MatSliderModule,
     MatTooltipModule,
     TranslateModule,
-    ImageUploadComponent
+    ImageUploadComponent,
+    TextLayerComponent,
+    ImageLayerComponent
   ],
   templateUrl: './simple-editor.component.html',
   styleUrls: [ './simple-editor.component.css',  './simple-editor.component.extend.css']
@@ -668,5 +672,61 @@ export class SimpleEditorComponent implements OnInit {
       'Close',
       { duration: 5000, panelClass: ['error-snackbar'] }
     );
+  }
+
+  // New methods for layer components
+  getTextLayers(): TextLayer[] {
+    return this.project?.layers?.filter(layer => layer.type === 'TEXT') as TextLayer[] || [];
+  }
+
+  getImageLayers(): ImageLayer[] {
+    return this.project?.layers?.filter(layer => layer.type === 'IMAGE') as ImageLayer[] || [];
+  }
+
+  onTextLayerEvent(event: TextLayerEvent): void {
+    console.log('🎯 Text layer event:', event);
+
+    switch (event.type) {
+      case 'select':
+        this.selectedLayerId = event.layerId;
+        break;
+      case 'move':
+        // Position update is handled automatically by the component
+        break;
+      case 'update':
+        if (event.data?.action === 'edit') {
+          // Find the layer and start editing
+          const layer = this.project?.layers?.find(l => l.id === event.layerId);
+          if (layer) {
+            this.editTextLayer(layer as TextLayer);
+          }
+        }
+        break;
+      case 'delete':
+        // Handle deletion if needed
+        break;
+    }
+  }
+
+  onImageLayerEvent(event: ImageLayerEvent): void {
+    console.log('🎯 Image layer event:', event);
+
+    switch (event.type) {
+      case 'select':
+        this.selectedLayerId = event.layerId;
+        break;
+      case 'move':
+        // Position update is handled automatically by the component
+        break;
+      case 'resize':
+        // Size update is handled automatically by the component
+        break;
+      case 'update':
+        // Handle any other updates
+        break;
+      case 'delete':
+        // Handle deletion if needed
+        break;
+    }
   }
 }
