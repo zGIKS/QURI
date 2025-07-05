@@ -162,12 +162,12 @@ export interface PurchaseDialogData {
     }
 
     .confirm-button {
-      background: #667eea;
+      background: #007bff;
       color: white;
     }
 
     .confirm-button:hover {
-      background: #5a6fd8;
+      background: #0056b3;
     }
   `]
 })

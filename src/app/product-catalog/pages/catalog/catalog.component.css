@@ -1,12 +1,12 @@
 /* ===== MAIN CONTAINER ===== */
 .catalog-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: #f8f9fa;
 }
 
 /* ===== TOOLBAR ===== */
 .catalog-toolbar {
-  background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+  background: #6c757d;
   color: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   position: sticky;
@@ -113,14 +113,10 @@
   font-weight: 600;
   color: #2d3748;
   margin: 0;
-  background: linear-gradient(45deg, #667eea, #764ba2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .products-count {
-  background: linear-gradient(45deg, #667eea, #764ba2);
+  background: #6c757d;
   color: white;
   font-weight: 500;
 }
@@ -155,7 +151,7 @@
   position: relative;
   height: 240px;
   overflow: hidden;
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  background: #f8f9fa;
 }
 
 .product-image {
@@ -242,6 +238,7 @@
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -249,7 +246,7 @@
 .product-price {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #667eea;
+  color: #28a745;
   margin: 0;
 }
 
@@ -345,16 +342,16 @@
 
 /* ===== PURCHASE BUTTON IMPROVEMENTS ===== */
 .product-actions button[color="accent"] {
-  background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+  background: #007bff;
   color: white;
   font-weight: 600;
   transition: all 0.3s ease;
 }
 
 .product-actions button[color="accent"]:hover:not(:disabled) {
-  background: linear-gradient(45deg, #5a6fd8 0%, #6b3fa0 100%);
+  background: #0056b3;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
 }
 
 .product-actions button[color="accent"]:disabled {

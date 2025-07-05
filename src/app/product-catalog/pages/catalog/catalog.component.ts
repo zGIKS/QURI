@@ -161,17 +161,7 @@ import { PurchaseConfirmationDialog } from '../../components/purchase-confirmati
 
                 <mat-divider class="content-divider"></mat-divider>
 
-                <!-- Product Details -->
-                <div class="product-details">
-                  <div class="detail-item">
-                    <mat-icon class="detail-icon">palette</mat-icon>
-                    <span class="detail-label">{{ getProductGarmentColor(product) }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <mat-icon class="detail-icon">straighten</mat-icon>
-                    <span class="detail-label">{{ getProductGarmentSize(product) }}</span>
-                  </div>
-                </div>
+
               </mat-card-content>
 
               <!-- Product Actions -->
